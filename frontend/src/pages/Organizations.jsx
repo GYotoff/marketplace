@@ -25,7 +25,7 @@ export default function Organizations() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-medium">{t('nav.organizations')}</h1>
-          <p className="text-gray-500 text-sm mt-1">{filtered.length} organizations</p>
+          <p className="text-gray-500 text-sm mt-1">{t('organizations_count', { count: filtered.length })}</p>
         </div>
         <input
           type="search"
