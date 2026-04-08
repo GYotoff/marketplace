@@ -20,6 +20,7 @@ import Events from '@/pages/Events'
 import RegisterOrganization from '@/pages/organizations/RegisterOrganization'
 import OrganizationPage from '@/pages/organizations/OrganizationPage'
 import OrgDashboard from '@/pages/organizations/OrgDashboard'
+import OrgSettings from '@/pages/organizations/OrgSettings'
 import OrgContentEditor from '@/pages/organizations/OrgContentEditor'
 
 // Admin
@@ -66,6 +67,11 @@ export default function App() {
         <Route path="/org/dashboard" element={
           <ProtectedRoute allowedRoles={['org_admin', 'super_admin']}>
             <OrgDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/org/settings" element={
+          <ProtectedRoute allowedRoles={['org_admin', 'content_creator', 'super_admin']}>
+            <OrgSettings />
           </ProtectedRoute>
         } />
         <Route path="/org/content" element={
