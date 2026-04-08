@@ -13,9 +13,13 @@ const BULGARIAN_CITIES = [
 ]
 
 const ORG_TYPES = [
-  { value: 'ngo', label: 'NGO (Non-governmental organization)' },
-  { value: 'nonprofit', label: 'Non-profit organization' },
-  { value: 'other', label: 'Other civil society entity' },
+  { value: 'ngo',        label: 'NGO (Non-governmental organization)', label_bg: 'НПО (Неправителствена организация)' },
+  { value: 'nonprofit',  label: 'Non-profit organization',             label_bg: 'Организация с нестопанска цел' },
+  { value: 'company',    label: 'Company',                             label_bg: 'Компания' },
+  { value: 'government', label: 'Government organization',             label_bg: 'Правителствена институция' },
+  { value: 'education',  label: 'Education',                           label_bg: 'Образование' },
+  { value: 'investor',   label: 'Investor',                            label_bg: 'Инвеститор' },
+  { value: 'other',      label: 'Other',                               label_bg: 'Друго' },
 ]
 
 function StepIndicator({ steps, current }) {

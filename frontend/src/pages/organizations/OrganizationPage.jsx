@@ -4,7 +4,16 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
-const TYPE_LABEL = { ngo: 'NGO', nonprofit: 'Non-profit', other: 'Civil society' }
+const TYPE_LABEL = {
+  ngo: 'NGO', nonprofit: 'Non-profit', company: 'Company',
+  government: 'Government organization', education: 'Education',
+  investor: 'Investor', other: 'Other',
+}
+const TYPE_LABEL_BG = {
+  ngo: 'НПО', nonprofit: 'Организация с нестопанска цел', company: 'Компания',
+  government: 'Правителствена институция', education: 'Образование',
+  investor: 'Инвеститор', other: 'Друго',
+}
 
 function SocialLink({ href, icon, label }) {
   if (!href) return null
@@ -146,7 +155,7 @@ export default function OrganizationPage() {
                 </svg>
               )}
               <span className="badge bg-brand-50 text-brand-700 text-xs capitalize">
-                {TYPE_LABEL[org.type] || org.type}
+                {(i18n.language === 'bg' ? TYPE_LABEL_BG[org.type] : TYPE_LABEL[org.type]) || org.type}
               </span>
             </div>
 
@@ -258,7 +267,7 @@ export default function OrganizationPage() {
             <div className="card">
               <h2 className="text-base font-medium text-gray-900 mb-3">Details</h2>
               <div>
-                <InfoRow label="Type" value={TYPE_LABEL[org.type] || org.type} />
+                <InfoRow label="Type" value={(i18n.language === 'bg' ? TYPE_LABEL_BG[org.type] : TYPE_LABEL[org.type]) || org.type} />
                 <InfoRow label="City" value={org.city} />
                 <InfoRow label="Address" value={org.address} />
                 <InfoRow label="Founded" value={org.founded_year?.toString()} />
