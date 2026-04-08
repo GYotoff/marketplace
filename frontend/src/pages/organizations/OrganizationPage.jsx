@@ -282,7 +282,7 @@ export default function OrganizationPage() {
                 <p className="text-sm text-brand-700 mb-3 font-medium">Want to volunteer?</p>
                 <p className="text-xs text-brand-600 mb-3 leading-relaxed">Create an account to apply for projects and register for events.</p>
                 <Link to="/register" className="btn-primary w-full text-center text-sm">
-                  Join GiveForward
+                  Join Dataverte
                 </Link>
               </div>
             )}
