@@ -61,11 +61,11 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
             <img
               src="/logo.png"
-              alt="GiveForward"
+              alt="Dataverte"
               className="h-9 w-9 object-contain rounded-lg"
             />
             <span className="font-medium text-gray-900 hidden sm:block">
-              Give<span className="text-brand-400">Forward</span>
+              Data<span className="text-brand-400">verte</span>
             </span>
           </Link>
 

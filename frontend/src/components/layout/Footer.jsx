@@ -9,8 +9,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <img src="/logo.png" alt="GiveForward" className="h-8 w-8 object-contain rounded-lg" />
-              <span className="font-medium">Give<span className="text-brand-400">Forward</span></span>
+              <img src="/logo.png" alt="Dataverte" className="h-8 w-8 object-contain rounded-lg" />
+              <span className="font-medium">Data<span className="text-brand-400">verte</span></span>
             </div>
             <p className="text-sm text-gray-500 leading-relaxed">{t('footer.tagline')}</p>
           </div>
