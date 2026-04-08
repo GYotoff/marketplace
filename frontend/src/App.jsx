@@ -18,6 +18,7 @@ import Events from '@/pages/Events'
 
 // Organization flows
 import RegisterOrganization from '@/pages/organizations/RegisterOrganization'
+import OrganizationPage from '@/pages/organizations/OrganizationPage'
 import OrgDashboard from '@/pages/organizations/OrgDashboard'
 import OrgContentEditor from '@/pages/organizations/OrgContentEditor'
 
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/organizations" element={<Organizations />} />
         <Route path="/organizations/register" element={<RegisterOrganization />} />
+        <Route path="/organizations/:slug" element={<OrganizationPage />} />
         <Route path="/events" element={<Events />} />
 
         {/* Protected — any authenticated user */}
