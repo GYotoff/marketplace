@@ -24,6 +24,7 @@ import OrgContentEditor from '@/pages/organizations/OrgContentEditor'
 
 // Admin
 import AdminOrganizations from '@/pages/admin/AdminOrganizations'
+import AdminEntities from '@/pages/admin/AdminEntities'
 
 function NotFound() {
   return (
