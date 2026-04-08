@@ -128,5 +128,6 @@
     "education": "Education",
     "investor": "Investor",
     "other": "Other"
-  }
+  },
+  "organizations_count": "{count} organizations"
 }
