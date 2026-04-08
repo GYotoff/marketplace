@@ -75,6 +75,11 @@ export default function App() {
         } />
 
         {/* Portal admin */}
+        <Route path="/admin/entities" element={
+          <ProtectedRoute allowedRoles={['super_admin']}>
+            <AdminEntities />
+          </ProtectedRoute>
+        } />
         <Route path="/admin/organizations" element={
           <ProtectedRoute allowedRoles={['super_admin']}>
             <AdminOrganizations />
