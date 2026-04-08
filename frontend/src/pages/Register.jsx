@@ -118,7 +118,7 @@ export default function Register() {
             </svg>
           </div>
           <h1 className="text-2xl font-medium text-gray-900">{t('auth.register_title')}</h1>
-          <p className="text-gray-500 text-sm mt-1">Join the GiveForward community</p>
+          <p className="text-gray-500 text-sm mt-1">Join the Dataverte community</p>
         </div>
 
         {/* Step indicator */}

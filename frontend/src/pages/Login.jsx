@@ -45,7 +45,7 @@ export default function Login() {
             </svg>
           </div>
           <h1 className="text-2xl font-medium text-gray-900">{t('auth.login_title')}</h1>
-          <p className="text-gray-500 text-sm mt-1">Sign in to your GiveForward account</p>
+          <p className="text-gray-500 text-sm mt-1">Sign in to your Dataverte account</p>
         </div>
 
         <div className="card">
