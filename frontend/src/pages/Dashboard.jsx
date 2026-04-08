@@ -225,6 +225,97 @@ function CorpDashboard({ profile }) {
   )
 }
 
+
+function SuperAdminDashboard({ profile }) {
+  const [counts, setCounts] = useState({ pending: 0, approved: 0, users: 0, events: 0 })
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }),
+      supabase.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    ]).then(([pending, approved, users, events]) => {
+      setCounts({
+        pending: pending.count || 0,
+        approved: approved.count || 0,
+        users: users.count || 0,
+        events: events.count || 0,
+      })
+    })
+  }, [])
+
+  const actions = [
+    {
+      label: 'Organization approvals',
+      desc: counts.pending > 0 ? `${counts.pending} pending review` : 'No pending requests',
+      to: '/admin/organizations',
+      urgent: counts.pending > 0,
+      icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+    },
+    {
+      label: 'All organizations',
+      desc: `${counts.approved} approved`,
+      to: '/organizations',
+      icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    },
+    {
+      label: 'All users',
+      desc: `${counts.users} registered`,
+      to: '/admin/users',
+      icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
+    },
+    {
+      label: 'All events',
+      desc: `${counts.events} published`,
+      to: '/events',
+      icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+    },
+  ]
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <StatCard label="Pending orgs" value={counts.pending} color="amber" />
+        <StatCard label="Approved orgs" value={counts.approved} color="brand" />
+        <StatCard label="Total users" value={counts.users} color="blue" />
+        <StatCard label="Live events" value={counts.events} color="brand" />
+      </div>
+
+      {counts.pending > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between">
+          <p className="text-sm text-amber-700 font-medium">
+            {counts.pending} organization{counts.pending > 1 ? 's' : ''} waiting for approval
+          </p>
+          <Link to="/admin/organizations" className="text-xs bg-amber-500 text-white px-3 py-1.5 rounded-lg hover:bg-amber-600">
+            Review now →
+          </Link>
+        </div>
+      )}
+
+      <div>
+        <h2 className="text-sm font-medium text-gray-700 mb-3">Quick actions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {actions.map(a => (
+            <Link key={a.to} to={a.to}
+              className={"card flex items-start gap-4 hover:border-gray-200 hover:shadow-sm transition-all " + (a.urgent ? 'border-amber-200 bg-amber-50' : '')}>
+              <div className={"w-10 h-10 rounded-xl flex items-center justify-center shrink-0 " + (a.urgent ? 'bg-amber-100 text-amber-600' : 'bg-brand-50 text-brand-600')}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={a.icon} />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">{a.label}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{a.desc}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const { profile } = useAuthStore()
 
@@ -251,11 +342,7 @@ export default function Dashboard() {
       {profile.role === 'volunteer' && <VolunteerDashboard profile={profile} />}
       {profile.role === 'org_admin' && <OrgDashboard profile={profile} />}
       {profile.role === 'corp_admin' && <CorpDashboard profile={profile} />}
-      {profile.role === 'super_admin' && (
-        <div className="card text-center py-10">
-          <p className="text-gray-500">Super admin panel coming soon.</p>
-        </div>
-      )}
+      {profile.role === 'super_admin' && <SuperAdminDashboard profile={profile} />}
     </div>
   )
 }
