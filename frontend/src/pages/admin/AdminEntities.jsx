@@ -218,11 +218,11 @@ export default function AdminEntities() {
 
       // Send email notification
       const subject = newActive
-        ? 'Your GiveForward account has been activated'
-        : 'Your GiveForward account has been deactivated'
+        ? 'Your Dataverte account has been activated'
+        : 'Your Dataverte account has been deactivated'
       const body = newActive
-        ? `Hi ${u.full_name || 'there'},\n\nYour GiveForward account has been activated. You can now log in and browse volunteer opportunities.\n\nThe GiveForward Team`
-        : `Hi ${u.full_name || 'there'},\n\nYour GiveForward account has been deactivated by a portal administrator. If you believe this is a mistake, please contact support.\n\nThe GiveForward Team`
+        ? `Hi ${u.full_name || 'there'},\n\nYour Dataverte account has been activated. You can now log in and browse volunteer opportunities.\n\nThe Dataverte Team`
+        : `Hi ${u.full_name || 'there'},\n\nYour Dataverte account has been deactivated by a portal administrator. If you believe this is a mistake, please contact support.\n\nThe Dataverte Team`
       await sendNotificationEmail(u.email, subject, body)
 
       showToast(`${u.full_name || u.email} ${newActive ? 'activated' : 'deactivated'}`)
@@ -250,11 +250,11 @@ export default function AdminEntities() {
 
       if (entity.email) {
         const subject = newActive
-          ? `Your ${kind === 'organization' ? 'organization' : 'corporation'} has been activated on GiveForward`
-          : `Your ${kind === 'organization' ? 'organization' : 'corporation'} has been deactivated on GiveForward`
+          ? `Your ${kind === 'organization' ? 'organization' : 'corporation'} has been activated on Dataverte`
+          : `Your ${kind === 'organization' ? 'organization' : 'corporation'} has been deactivated on Dataverte`
         const body = newActive
-          ? `Hi,\n\nYour ${kind} "${entity.name}" has been activated on GiveForward.\n\nThe GiveForward Team`
-          : `Hi,\n\nYour ${kind} "${entity.name}" has been deactivated by a portal administrator. Please contact support if you believe this is an error.\n\nThe GiveForward Team`
+          ? `Hi,\n\nYour ${kind} "${entity.name}" has been activated on Dataverte.\n\nThe Dataverte Team`
+          : `Hi,\n\nYour ${kind} "${entity.name}" has been deactivated by a portal administrator. Please contact support if you believe this is an error.\n\nThe Dataverte Team`
         await sendNotificationEmail(entity.email, subject, body)
       }
 

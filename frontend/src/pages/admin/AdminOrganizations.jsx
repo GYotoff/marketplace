@@ -101,7 +101,7 @@ function OrgRow({ org, onAction }) {
               Review note <span className="text-gray-400 font-normal">(optional — visible to org admin)</span>
             </label>
             <textarea rows={2} className="input resize-none text-sm"
-              placeholder="e.g. Registration approved. Welcome to GiveForward!"
+              placeholder="e.g. Registration approved. Welcome to Dataverte!"
               value={note} onChange={e => setNote(e.target.value)} />
           </div>
           <div className="flex gap-2">
