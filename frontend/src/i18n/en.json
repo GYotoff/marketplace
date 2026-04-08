@@ -119,5 +119,14 @@
     "name": "Name",
     "website": "Website",
     "phone": "Phone"
+  },
+  "org_types": {
+    "ngo": "NGO",
+    "nonprofit": "Non-profit",
+    "company": "Company",
+    "government": "Government organization",
+    "education": "Education",
+    "investor": "Investor",
+    "other": "Other"
   }
 }
