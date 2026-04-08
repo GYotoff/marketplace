@@ -129,5 +129,5 @@
     "investor": "Investor",
     "other": "Other"
   },
-  "organizations_count": "{count} organizations"
+  "organizations_count": "{{count}} organizations"
 }
