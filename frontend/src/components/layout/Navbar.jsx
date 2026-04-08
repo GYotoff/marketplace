@@ -1,0 +1,175 @@
+import { useState, useRef, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { useAuthStore } from '@/store/authStore'
+
+export default function Navbar() {
+  const { t, i18n } = useTranslation()
+  const { user, profile, logout } = useAuthStore()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+
+  const toggleLang = () => {
+    i18n.changeLanguage(i18n.language === 'en' ? 'bg' : 'en')
+  }
+
+  const handleLogout = async () => {
+    setMenuOpen(false)
+    await logout()
+    navigate('/')
+  }
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // Close dropdown on route change
+  useEffect(() => { setMenuOpen(false) }, [location.pathname])
+
+  const initials = profile?.full_name
+    ? profile.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+    : user?.email?.[0]?.toUpperCase()
+
+  const navLink = (to, label) => (
+    <Link
+      to={to}
+      className={`text-sm transition-colors ${
+        location.pathname === to
+          ? 'text-brand-400 font-medium'
+          : 'text-gray-500 hover:text-gray-900'
+      }`}
+    >
+      {label}
+    </Link>
+  )
+
+  return (
+    <nav className="sticky top-0 z-50 bg-white border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2.5 shrink-0">
+            <div className="w-8 h-8 bg-brand-400 rounded-lg flex items-center justify-center">
+              <svg viewBox="0 0 18 18" fill="none" className="w-5 h-5">
+                <circle cx="9" cy="6" r="3" fill="white" opacity="0.9"/>
+                <path d="M3 15c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <span className="font-medium text-gray-900">
+              Give<span className="text-brand-400">Forward</span>
+            </span>
+          </Link>
+
+          {/* Desktop nav links */}
+          <div className="hidden md:flex items-center gap-6">
+            {navLink('/about', t('nav.about'))}
+            {navLink('/organizations', t('nav.organizations'))}
+            {navLink('/corporations', t('nav.corporations'))}
+            {navLink('/volunteers', t('nav.volunteers'))}
+            {navLink('/events', 'Events')}
+          </div>
+
+          {/* Right side */}
+          <div className="flex items-center gap-2">
+
+            {/* Language toggle */}
+            <button
+              onClick={toggleLang}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-600"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+              </svg>
+              {i18n.language === 'en' ? 'БГ' : 'EN'}
+            </button>
+
+            {user ? (
+              <div className="relative" ref={menuRef}>
+                {/* Avatar button */}
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className={`flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-lg border transition-colors ${
+                    menuOpen ? 'border-brand-200 bg-brand-50' : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="w-7 h-7 bg-brand-400 rounded-full flex items-center justify-center text-white text-xs font-medium overflow-hidden">
+                    {profile?.avatar_url
+                      ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                      : initials
+                    }
+                  </div>
+                  <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-24 truncate">
+                    {profile?.full_name?.split(' ')[0] || 'Account'}
+                  </span>
+                  <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${menuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+
+                {/* Dropdown */}
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50">
+
+                    {/* User info header */}
+                    <div className="px-4 py-2.5 border-b border-gray-100 mb-1">
+                      <p className="text-sm font-medium text-gray-900 truncate">{profile?.full_name || 'Your account'}</p>
+                      <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                    </div>
+
+                    <Link to="/dashboard" className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                      </svg>
+                      {t('nav.dashboard')}
+                    </Link>
+
+                    <Link to="/dashboard/profile" className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                      </svg>
+                      My profile
+                    </Link>
+
+                    <Link to="/dashboard/profile/edit" className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                      Edit profile
+                    </Link>
+
+                    <div className="border-t border-gray-100 mt-1 pt-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        {t('nav.logout')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link to="/login" className="btn-secondary hidden sm:block text-sm">{t('nav.login')}</Link>
+                <Link to="/register" className="btn-primary text-sm">{t('nav.register')}</Link>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
+  )
+}
