@@ -98,7 +98,7 @@ function OrgDashboard({ profile }) {
       {!org ? (
         <div className="card text-center py-10">
           <p className="text-gray-500 mb-4">You don't have an organization yet.</p>
-          <Link to="/organizations/new" className="btn-primary">Create your organization</Link>
+          <Link to="/organizations/register" className="btn-primary">Create your organization</Link>
         </div>
       ) : (
         <>
