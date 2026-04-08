@@ -111,20 +111,22 @@ export default function RegisterOrganization() {
           password: account.password,
           options: { data: { full_name: account.full_name, role: 'org_admin' } },
         })
-        if (authError) throw authError
-        adminId = authData.user?.id
+        if (authError) throw new Error('Account creation failed: ' + authError.message)
+        if (!authData.user) throw new Error('Account creation failed: no user returned')
+        adminId = authData.user.id
         adminEmail = account.email
 
-        // Create profile
-        await supabase.from('profiles').upsert({
+        const { error: profileError } = await supabase.from('profiles').upsert({
           id: adminId,
           email: adminEmail,
           full_name: account.full_name,
           role: 'org_admin',
         }, { onConflict: 'id' })
+        if (profileError) throw new Error('Profile creation failed: ' + profileError.message)
       } else {
-        // Update existing user role to org_admin if needed
-        await supabase.from('profiles').update({ role: 'org_admin' }).eq('id', adminId)
+        const { error: roleError } = await supabase.from('profiles')
+          .update({ role: 'org_admin' }).eq('id', adminId)
+        if (roleError) throw new Error('Role update failed: ' + roleError.message)
       }
 
       // Step 2: Create organization (status: pending)
@@ -153,19 +155,21 @@ export default function RegisterOrganization() {
         .select()
         .single()
 
-      if (orgError) throw orgError
+      if (orgError) throw new Error('Organization creation failed: ' + orgError.message)
+      if (!orgData) throw new Error('Organization creation failed: no data returned')
 
       // Step 3: Add creator as org admin member
-      await supabase.from('organization_members').insert({
+      const { error: memberError } = await supabase.from('organization_members').insert({
         organization_id: orgData.id,
         profile_id: adminId,
         role: 'admin',
         request_status: 'approved',
       })
+      if (memberError) throw new Error('Member creation failed: ' + memberError.message)
 
       setDone(true)
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'An unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
