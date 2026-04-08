@@ -59,13 +59,12 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 bg-brand-400 rounded-lg flex items-center justify-center">
-              <svg viewBox="0 0 18 18" fill="none" className="w-5 h-5">
-                <circle cx="9" cy="6" r="3" fill="white" opacity="0.9"/>
-                <path d="M3 15c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <span className="font-medium text-gray-900">
+            <img
+              src="/logo.png"
+              alt="GiveForward"
+              className="h-9 w-9 object-contain rounded-lg"
+            />
+            <span className="font-medium text-gray-900 hidden sm:block">
               Give<span className="text-brand-400">Forward</span>
             </span>
           </Link>

@@ -9,12 +9,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 bg-brand-400 rounded-lg flex items-center justify-center">
-                <svg viewBox="0 0 18 18" fill="none" className="w-4 h-4">
-                  <circle cx="9" cy="6" r="3" fill="white" opacity="0.9"/>
-                  <path d="M3 15c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </div>
+              <img src="/logo.png" alt="GiveForward" className="h-8 w-8 object-contain rounded-lg" />
               <span className="font-medium">Give<span className="text-brand-400">Forward</span></span>
             </div>
             <p className="text-sm text-gray-500 leading-relaxed">{t('footer.tagline')}</p>
