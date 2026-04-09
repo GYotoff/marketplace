@@ -92,8 +92,7 @@ export default function RegisterCorporation() {
   const handleSubmit = async () => {
     setLoading(true); setError('')
     try {
-      let adminId = user?.id, adminEmail = user?.email
-
+      // Create account first if not logged in
       if (!user) {
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: account.email, password: account.password,
@@ -101,31 +100,30 @@ export default function RegisterCorporation() {
         })
         if (authError) throw new Error('Account creation failed: ' + authError.message)
         if (!authData.user) throw new Error('Account creation failed: no user returned')
-        adminId = authData.user.id; adminEmail = account.email
-        const { error: profileError } = await supabase.from('profiles').upsert({
-          id: adminId, email: adminEmail, full_name: account.full_name, role: 'corp_admin',
-        }, { onConflict: 'id' })
-        if (profileError) throw new Error('Profile creation failed: ' + profileError.message)
-      } else {
-        await supabase.from('profiles').update({ role: 'corp_admin' }).eq('id', adminId)
+        // Wait for profile trigger
+        await new Promise(r => setTimeout(r, 1000))
       }
 
-      const { data: corpData, error: corpError } = await supabase.from('corporations').insert({
-        name: corp.name, slug: slugify(corp.name), industry: corp.industry || null,
-        description: corp.description, description_bg: corp.description_bg || null,
-        tagline: corp.tagline || null, founded_year: corp.founded_year ? parseInt(corp.founded_year) : null,
-        registration_number: corp.registration_number || null, website: corp.website || null,
-        city: contact.city, address: contact.address || null, email: contact.email,
-        phone: contact.phone || null, facebook_url: contact.facebook_url || null,
-        instagram_url: contact.instagram_url || null, linkedin_url: contact.linkedin_url || null,
-        status: 'pending', created_by: adminId,
-      }).select().single()
-      if (corpError) throw new Error('Corporation creation failed: ' + corpError.message)
-
-      const { error: memberError } = await supabase.from('corporation_members').insert({
-        corporation_id: corpData.id, profile_id: adminId, role: 'admin', request_status: 'approved',
+      // Create corp + member + role update atomically via SECURITY DEFINER function
+      const { data: corpId, error: rpcError } = await supabase.rpc('register_corporation', {
+        p_name: corp.name,
+        p_slug: slugify(corp.name),
+        p_industry: corp.industry || null,
+        p_description: corp.description,
+        p_description_bg: corp.description_bg || null,
+        p_tagline: corp.tagline || null,
+        p_founded_year: corp.founded_year ? parseInt(corp.founded_year) : null,
+        p_registration_number: corp.registration_number || null,
+        p_city: contact.city,
+        p_address: contact.address || null,
+        p_website: corp.website || null,
+        p_email: contact.email,
+        p_phone: contact.phone || null,
+        p_facebook_url: contact.facebook_url || null,
+        p_instagram_url: contact.instagram_url || null,
+        p_linkedin_url: contact.linkedin_url || null,
       })
-      if (memberError) throw new Error('Member creation failed: ' + memberError.message)
+      if (rpcError) throw new Error('Corporation creation failed: ' + rpcError.message)
 
       setDone(true)
     } catch (err) {

@@ -121,7 +121,7 @@ export default function CorpDashboard() {
       <div className="card mb-6 flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 font-semibold text-xl shrink-0 overflow-hidden">
-            {corp.logo_url ? <img src={corp.logo_url} alt={corp.name} className="w-14 h-14 rounded-xl object-cover" /> : corp.name[0]}
+            {corp.logo_url ? <img src={corp.logo_url} alt={corp.name} className="w-14 h-14 rounded-xl object-cover" /> : (corp.name?.[0] || '?')}
           </div>
           <div>
             <h1 className="text-xl font-medium text-gray-900">{corp.name}</h1>
@@ -182,7 +182,7 @@ export default function CorpDashboard() {
           ) : approvedMembers.map(m => (
             <div key={m.id} className="card flex items-center gap-4 flex-wrap">
               <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 font-medium shrink-0 overflow-hidden">
-                {m.profiles?.avatar_url ? <img src={m.profiles.avatar_url} className="w-full h-full object-cover" alt="" /> : (m.profiles?.full_name?.[0] || '?').toUpperCase()}
+                {m.profiles?.avatar_url ? <img src={m.profiles.avatar_url} className="w-full h-full object-cover" alt="" /> : ((m.profiles?.full_name?.[0] || m.profiles?.email?.[0] || '?').toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900">{m.profiles?.full_name || '—'} {m.profile_id === user.id && <span className="text-xs text-gray-400">(you)</span>}</p>
@@ -214,7 +214,7 @@ export default function CorpDashboard() {
           ) : pendingMembers.map(m => (
             <div key={m.id} className="card flex items-start gap-4 flex-wrap">
               <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 font-medium shrink-0">
-                {(m.profiles?.full_name?.[0] || '?').toUpperCase()}
+                {((m.profiles?.full_name?.[0] || m.profiles?.email?.[0] || '?').toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900">{m.profiles?.full_name || '—'}</p>
