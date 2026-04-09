@@ -66,7 +66,7 @@ function VolunteerRow({ user, onToggle, loading }) {
 }
 
 function EntityRow({ entity, kind, onToggle, loading }) {
-  const initials = entity.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+  const initials = ((entity.name || '?').split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase()) || '?'
   return (
     <div className="card flex items-center gap-4 flex-wrap">
       <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 font-semibold shrink-0 overflow-hidden">
