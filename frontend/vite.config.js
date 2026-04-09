@@ -9,8 +9,18 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    proxy: {
-      '/api': { target: 'http://localhost:4000', changeOrigin: true }
-    }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-i18n': ['i18next', 'react-i18next'],
+          'vendor-state': ['zustand'],
+        }
+      }
+    },
+    chunkSizeWarningLimit: 600,
   }
 })
