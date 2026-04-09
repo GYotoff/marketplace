@@ -178,7 +178,8 @@ export default function AdminEntities() {
       let q = supabase.from('corporations').select('*').order('created_at', { ascending: false })
       if (filter === 'active') q = q.eq('is_active', true)
       if (filter === 'inactive') q = q.eq('is_active', false)
-      const { data: rows } = await q
+      const { data: rows, error: corpErr } = await q
+      if (corpErr) console.error('Corporations error:', corpErr.message)
       setData(rows || [])
     }
 
@@ -187,9 +188,9 @@ export default function AdminEntities() {
 
   const fetchCounts = useCallback(async () => {
     const [vols, orgs, corps] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).neq('role', 'super_admin'),
-      supabase.from('organizations').select('id', { count: 'exact', head: true }),
-      supabase.from('corporations').select('id', { count: 'exact', head: true }),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).neq('role', 'super_admin').then(r => r).catch(() => ({ count: 0 })),
+      supabase.from('organizations').select('id', { count: 'exact', head: true }).then(r => r).catch(() => ({ count: 0 })),
+      supabase.from('corporations').select('id', { count: 'exact', head: true }).then(r => r).catch(() => ({ count: 0 })),
     ])
     setCounts({
       volunteers: vols.count || 0,
