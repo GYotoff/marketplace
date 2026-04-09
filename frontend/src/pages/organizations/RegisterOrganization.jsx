@@ -105,9 +105,6 @@ export default function RegisterOrganization() {
     setLoading(true)
     setError('')
     try {
-      let adminId = user?.id
-      let adminEmail = user?.email
-
       // Step 1: Create account if not logged in
       if (!user) {
         const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -117,59 +114,32 @@ export default function RegisterOrganization() {
         })
         if (authError) throw new Error('Account creation failed: ' + authError.message)
         if (!authData.user) throw new Error('Account creation failed: no user returned')
-        adminId = authData.user.id
-        adminEmail = account.email
 
-        const { error: profileError } = await supabase.from('profiles').upsert({
-          id: adminId,
-          email: adminEmail,
-          full_name: account.full_name,
-          role: 'org_admin',
-        }, { onConflict: 'id' })
-        if (profileError) throw new Error('Profile creation failed: ' + profileError.message)
-      } else {
-        const { error: roleError } = await supabase.from('profiles')
-          .update({ role: 'org_admin' }).eq('id', adminId)
-        if (roleError) throw new Error('Role update failed: ' + roleError.message)
+        // Wait briefly for the trigger to create the profile
+        await new Promise(r => setTimeout(r, 1000))
       }
 
-      // Step 2: Create organization (status: pending)
-      const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
-        .insert({
-          name: org.name,
-          slug: slugify(org.name),
-          type: org.type,
-          description: org.description,
-          description_bg: org.description_bg || null,
-          tagline: org.tagline || null,
-          founded_year: org.founded_year ? parseInt(org.founded_year) : null,
-          registration_number: org.registration_number || null,
-          city: org.city,
-          address: org.address || null,
-          website: org.website || null,
-          email: org.email,
-          phone: org.phone || null,
-          facebook_url: org.facebook_url || null,
-          instagram_url: org.instagram_url || null,
-          linkedin_url: org.linkedin_url || null,
-          status: 'pending',
-          created_by: adminId,
-        })
-        .select()
-        .single()
-
-      if (orgError) throw new Error('Organization creation failed: ' + orgError.message)
-      if (!orgData) throw new Error('Organization creation failed: no data returned')
-
-      // Step 3: Add creator as org admin member
-      const { error: memberError } = await supabase.from('organization_members').insert({
-        organization_id: orgData.id,
-        profile_id: adminId,
-        role: 'admin',
-        request_status: 'approved',
+      // Step 2+3+4: Create org, add member, update role — all in one SECURITY DEFINER function
+      const { data: orgId, error: rpcError } = await supabase.rpc('register_organization', {
+        p_name: org.name,
+        p_slug: slugify(org.name),
+        p_type: org.type,
+        p_description: org.description,
+        p_description_bg: org.description_bg || null,
+        p_tagline: org.tagline || null,
+        p_founded_year: org.founded_year ? parseInt(org.founded_year) : null,
+        p_registration_number: org.registration_number || null,
+        p_city: org.city,
+        p_address: org.address || null,
+        p_website: org.website || null,
+        p_email: org.email,
+        p_phone: org.phone || null,
+        p_facebook_url: org.facebook_url || null,
+        p_instagram_url: org.instagram_url || null,
+        p_linkedin_url: org.linkedin_url || null,
       })
-      if (memberError) throw new Error('Member creation failed: ' + memberError.message)
+
+      if (rpcError) throw new Error('Organization creation failed: ' + rpcError.message)
 
       setDone(true)
     } catch (err) {
