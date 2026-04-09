@@ -25,6 +25,7 @@ import OrgContentEditor from '@/pages/organizations/OrgContentEditor'
 
 // Admin
 import AdminOrganizations from '@/pages/admin/AdminOrganizations'
+import AdminOrgDetail from '@/pages/admin/AdminOrgDetail'
 import AdminEntities from '@/pages/admin/AdminEntities'
 
 function NotFound() {
@@ -84,6 +85,11 @@ export default function App() {
         <Route path="/admin/entities" element={
           <ProtectedRoute allowedRoles={['super_admin']}>
             <AdminEntities />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/organizations/:id" element={
+          <ProtectedRoute allowedRoles={['super_admin']}>
+            <AdminOrgDetail />
           </ProtectedRoute>
         } />
         <Route path="/admin/organizations" element={
