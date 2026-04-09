@@ -27,6 +27,9 @@ import OrgContentEditor from '@/pages/organizations/OrgContentEditor'
 import AdminOrganizations from '@/pages/admin/AdminOrganizations'
 import AdminOrgDetail from '@/pages/admin/AdminOrgDetail'
 import AdminEntities from '@/pages/admin/AdminEntities'
+import RegisterCorporation from '@/pages/corporations/RegisterCorporation'
+import CorpDashboard from '@/pages/corporations/CorpDashboard'
+import CorpSettings from '@/pages/corporations/CorpSettings'
 
 function NotFound() {
   return (
@@ -78,6 +81,19 @@ export default function App() {
         <Route path="/org/content" element={
           <ProtectedRoute allowedRoles={['org_admin', 'content_creator', 'super_admin']}>
             <OrgContentEditor />
+          </ProtectedRoute>
+        } />
+
+        {/* Corporation routes */}
+        <Route path="/corporations/register" element={<RegisterCorporation />} />
+        <Route path="/corp/dashboard" element={
+          <ProtectedRoute allowedRoles={['corp_admin', 'super_admin']}>
+            <CorpDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/corp/settings" element={
+          <ProtectedRoute allowedRoles={['corp_admin', 'super_admin']}>
+            <CorpSettings />
           </ProtectedRoute>
         } />
 
