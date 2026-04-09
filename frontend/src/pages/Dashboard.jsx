@@ -13,20 +13,72 @@ function StatCard({ label, value, color = 'brand' }) {
 }
 
 function VolunteerDashboard({ profile }) {
-  const [applications, setApplications] = useState([])
-  const [registrations, setRegistrations] = useState([])
+  const [applications,   setApplications]   = useState([])
+  const [registrations,  setRegistrations]  = useState([])
+  const [corpMembership, setCorpMembership] = useState(null) // null | { corp, request_status }
 
   useEffect(() => {
     supabase.from('project_applications').select('*, projects(title, organizations(name))').eq('profile_id', profile.id)
       .then(({ data }) => setApplications(data || []))
     supabase.from('event_registrations').select('*, events(title, event_date, organizations(name))').eq('profile_id', profile.id)
       .then(({ data }) => setRegistrations(data || []))
+    // Load corp membership if volunteer has corporate affiliation
+    supabase.from('corporation_members')
+      .select('request_status, reviewed_at, corporations(id, name, slug, logo_url, city, industry)')
+      .eq('profile_id', profile.id)
+      .maybeSingle()
+      .then(({ data }) => { if (data?.corporations) setCorpMembership(data) })
   }, [profile.id])
 
   const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand-50 text-brand-700', rejected: 'bg-red-50 text-red-700', completed: 'bg-gray-100 text-gray-600' }
+  const memberBadge = {
+    approved: 'bg-brand-50 text-brand-700 border border-brand-200',
+    pending:  'bg-amber-50 text-amber-700 border border-amber-200',
+    declined: 'bg-red-50 text-red-700 border border-red-200',
+  }
 
   return (
     <div className="flex flex-col gap-6">
+
+      {/* Corporate membership card — shown only when volunteer has a corp affiliation */}
+      {corpMembership && (
+        <div className="card">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-medium text-gray-900">Corporation membership</h2>
+            <span className={`badge text-xs px-2 py-0.5 capitalize ${memberBadge[corpMembership.request_status] || 'bg-gray-100 text-gray-600'}`}>
+              {corpMembership.request_status}
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 font-semibold text-lg shrink-0 overflow-hidden">
+              {corpMembership.corporations?.logo_url
+                ? <img src={corpMembership.corporations.logo_url} alt="" className="w-full h-full object-cover" />
+                : (corpMembership.corporations?.name?.[0] || '?')}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-900">{corpMembership.corporations?.name}</p>
+              <p className="text-xs text-gray-400">
+                {corpMembership.corporations?.city}{corpMembership.corporations?.industry ? ` · ${corpMembership.corporations.industry}` : ''}
+              </p>
+              {corpMembership.request_status === 'pending' && (
+                <p className="text-xs text-amber-600 mt-0.5">Your membership request is awaiting approval from the company admin.</p>
+              )}
+              {corpMembership.request_status === 'approved' && (
+                <p className="text-xs text-brand-600 mt-0.5">You are an approved corporate volunteer for this company.</p>
+              )}
+              {corpMembership.request_status === 'declined' && (
+                <p className="text-xs text-red-600 mt-0.5">Your membership request was not approved.</p>
+              )}
+            </div>
+            {corpMembership.corporations?.slug && (
+              <Link to={`/corporations/${corpMembership.corporations.slug}`} className="btn-secondary text-xs px-3 py-1.5 shrink-0">
+                View page
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="Project applications" value={applications.length} />
         <StatCard label="Event registrations" value={registrations.length} />
