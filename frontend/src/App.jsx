@@ -30,6 +30,8 @@ import AdminEntities from '@/pages/admin/AdminEntities'
 import RegisterCorporation from '@/pages/corporations/RegisterCorporation'
 import CorpDashboard from '@/pages/corporations/CorpDashboard'
 import CorpSettings from '@/pages/corporations/CorpSettings'
+import CorpContentEditor from '@/pages/corporations/CorpContentEditor'
+import CorporationPage from '@/pages/corporations/CorporationPage'
 
 function NotFound() {
   return (
@@ -96,6 +98,12 @@ export default function App() {
             <CorpSettings />
           </ProtectedRoute>
         } />
+        <Route path="/corp/content" element={
+          <ProtectedRoute allowedRoles={['corp_admin', 'super_admin']}>
+            <CorpContentEditor />
+          </ProtectedRoute>
+        } />
+        <Route path="/corporations/:slug" element={<CorporationPage />} />
 
         {/* Portal admin */}
         <Route path="/admin/entities" element={
