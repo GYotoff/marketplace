@@ -35,7 +35,7 @@ function OrgRow({ org, onAction }) {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <h3 className="font-medium text-gray-900">{org.name}</h3>
+            <Link to={'/admin/organizations/' + org.id} className="font-medium text-gray-900 hover:text-brand-400 transition-colors">{org.name}</Link>
             <span className={`badge text-xs px-2 py-0.5 capitalize ${STATUS_BADGE[org.status]}`}>
               {org.status}
             </span>
