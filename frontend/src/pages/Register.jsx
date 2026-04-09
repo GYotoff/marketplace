@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
+import { supabase } from '@/lib/supabase'
+import { useEffect } from 'react'
 
 const ROLES = [
   {
@@ -43,6 +45,7 @@ const colorMap = {
 }
 
 const STEPS = ['role', 'details', 'confirm']
+const STEPS_WITH_CORP = ['role', 'details', 'affiliation', 'confirm']
 
 export default function Register() {
   const { t } = useTranslation()
@@ -50,13 +53,19 @@ export default function Register() {
   const navigate = useNavigate()
 
   const [step, setStep] = useState(0)
-  const [form, setForm] = useState({ email: '', password: '', confirm_password: '', full_name: '', role: '', preferred_language: 'en' })
+  const [form, setForm] = useState({ email: '', password: '', confirm_password: '', full_name: '', role: '', preferred_language: 'en', volunteer_type: 'freelancer', corporation_id: '' })
+  const [corporations, setCorporations] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  useEffect(() => {
+    supabase.from('corporations').select('id, name, city').eq('status', 'approved').eq('is_active', true).order('name')
+      .then(({ data }) => setCorporations(data || []))
+  }, [])
 
   const nextStep = () => { setError(''); setStep(s => s + 1) }
   const prevStep = () => { setError(''); setStep(s => s - 1) }
@@ -68,7 +77,20 @@ export default function Register() {
     if (form.password.length < 8) { setError('Password must be at least 8 characters.'); return }
     setLoading(true)
     try {
-      await register(form.email, form.password, form.full_name, form.role)
+      const authData = await register(form.email, form.password, form.full_name, form.role)
+      // If volunteer chose a corporation, create a pending membership request
+      if (form.role === 'volunteer' && form.volunteer_type === 'corporate' && form.corporation_id && authData?.user?.id) {
+        await supabase.from('profiles').update({
+          volunteer_type: 'corporate',
+          corporation_id: form.corporation_id,
+        }).eq('id', authData.user.id)
+        await supabase.from('corporation_members').insert({
+          corporation_id: form.corporation_id,
+          profile_id: authData.user.id,
+          role: 'employee',
+          request_status: 'pending',
+        })
+      }
       setDone(true)
     } catch (err) {
       setError(err.message)
@@ -241,7 +263,62 @@ export default function Register() {
           )}
 
           {/* STEP 2: Review & submit */}
-          {step === 2 && (
+
+          {/* STEP 2 — Volunteer affiliation (volunteers only) */}
+          {step === 2 && form.role === 'volunteer' && (
+            <div className="flex flex-col gap-5">
+              <div>
+                <h2 className="text-base font-medium text-gray-900 mb-1">Your affiliation</h2>
+                <p className="text-sm text-gray-500">Are you a freelance volunteer or part of a corporation's CSR program?</p>
+              </div>
+              <div className="flex flex-col gap-3">
+                {[
+                  { value: 'freelancer', label: 'Freelance volunteer', desc: 'I volunteer independently, not as part of a company program.', icon: '🙋' },
+                  { value: 'corporate', label: 'Corporate volunteer', desc: 'I am part of a corporation registered on Dataverte.', icon: '🏢' },
+                ].map(opt => (
+                  <button key={opt.value} type="button"
+                    onClick={() => set('volunteer_type', opt.value)}
+                    className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${form.volunteer_type === opt.value ? 'border-brand-400 bg-brand-50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}>
+                    <span className="text-2xl shrink-0">{opt.icon}</span>
+                    <div>
+                      <p className={`font-medium text-sm ${form.volunteer_type === opt.value ? 'text-brand-700' : 'text-gray-900'}`}>{opt.label}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{opt.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {form.volunteer_type === 'corporate' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Select your corporation <span className="text-red-400">*</span></label>
+                  {corporations.length === 0 ? (
+                    <p className="text-sm text-gray-400 italic">No active corporations found.</p>
+                  ) : (
+                    <select className="input" value={form.corporation_id} onChange={e => set('corporation_id', e.target.value)}>
+                      <option value="">Select a corporation...</option>
+                      {corporations.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}{c.city ? ` — ${c.city}` : ''}</option>
+                      ))}
+                    </select>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1.5">Your membership request will be sent to the company admin for approval.</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 mt-1">
+                <button type="button" onClick={prevStep} className="btn-secondary flex-1">Back</button>
+                <button type="button" onClick={() => {
+                  if (form.volunteer_type === 'corporate' && !form.corporation_id) {
+                    setError('Please select your corporation.'); return
+                  }
+                  nextStep()
+                }} className="btn-primary flex-1">Continue</button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2 for non-volunteers / STEP 3 for volunteers */}
+          {((step === 2 && form.role !== 'volunteer') || (step === 3 && form.role === 'volunteer')) && (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
                 <h2 className="text-base font-medium text-gray-900 mb-1">Review your details</h2>
@@ -253,6 +330,7 @@ export default function Register() {
                   { label: 'Name', value: form.full_name },
                   { label: 'Email', value: form.email },
                   { label: 'Language', value: form.preferred_language === 'en' ? 'English' : 'Български' },
+                  ...(form.role === 'volunteer' ? [{ label: 'Affiliation', value: form.volunteer_type === 'corporate' ? `Corporate (${corporations.find(c => c.id === form.corporation_id)?.name || 'pending selection'})` : 'Freelance' }] : []),
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between text-sm">
                     <span className="text-gray-500">{label}</span>

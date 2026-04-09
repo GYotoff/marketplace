@@ -163,16 +163,25 @@ function OrgDashboard({ profile }) {
 
 function CorpDashboard({ profile }) {
   const [corp, setCorp] = useState(null)
-  const [members, setMembers] = useState([])
+  const [pendingCount, setPendingCount] = useState(0)
+  const [memberCount, setMemberCount] = useState(0)
 
   useEffect(() => {
-    supabase.from('corporation_members').select('corporations(*)').eq('profile_id', profile.id).limit(1).single()
+    supabase.from('corporation_members')
+      .select('corporation_id, role, corporations(*)')
+      .eq('profile_id', profile.id)
+      .eq('role', 'admin')
+      .eq('request_status', 'approved')
+      .single()
       .then(({ data }) => {
         if (data?.corporations) {
           setCorp(data.corporations)
-          supabase.from('corporation_members').select('*, profiles(full_name, email, role)')
+          supabase.from('corporation_members').select('id, request_status')
             .eq('corporation_id', data.corporations.id)
-            .then(({ data: m }) => setMembers(m || []))
+            .then(({ data: m }) => {
+              setMemberCount((m || []).filter(x => x.request_status === 'approved').length)
+              setPendingCount((m || []).filter(x => x.request_status === 'pending').length)
+            })
         }
       })
   }, [profile.id])
@@ -182,21 +191,32 @@ function CorpDashboard({ profile }) {
       {!corp ? (
         <div className="card text-center py-10">
           <p className="text-gray-500 mb-4">You don't have a corporation registered yet.</p>
-          <Link to="/corporations/new" className="btn-primary">Register your corporation</Link>
+          <Link to="/corporations/register" className="btn-primary">Register your corporation</Link>
         </div>
       ) : (
         <>
           <div className="card flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-amber-50 flex items-center justify-center text-2xl font-medium text-amber-600">{corp.name[0]}</div>
+            <div className="w-14 h-14 rounded-xl bg-amber-50 flex items-center justify-center text-2xl font-medium text-amber-600 overflow-hidden">
+              {corp.logo_url ? <img src={corp.logo_url} alt={corp.name} className="w-full h-full object-cover" /> : corp.name[0]}
+            </div>
             <div>
               <h2 className="font-medium">{corp.name}</h2>
-              <p className="text-sm text-gray-400">{corp.city} · {corp.industry}</p>
+              <p className="text-sm text-gray-400">{corp.city}{corp.industry ? ` · ${corp.industry}` : ''}</p>
             </div>
-            <Link to={`/corporations/${corp.slug}`} className="btn-secondary ml-auto text-xs px-3 py-1.5">View page</Link>
+            <div className="flex gap-2 ml-auto">
+              <Link to="/corp/dashboard" className="btn-secondary text-xs px-3 py-1.5">Dashboard</Link>
+              <Link to="/corp/settings" className="btn-primary text-xs px-3 py-1.5">Settings</Link>
+            </div>
           </div>
+          {pendingCount > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between">
+              <p className="text-sm text-amber-700 font-medium">{pendingCount} membership request{pendingCount > 1 ? 's' : ''} waiting</p>
+              <Link to="/corp/dashboard" className="text-xs text-amber-700 font-medium underline">Review →</Link>
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <StatCard label="Enrolled employees" value={members.length} color="amber" />
-            <StatCard label="Total volunteer hours" value={0} color="amber" />
+            <StatCard label="Approved members" value={memberCount} color="amber" />
+            <StatCard label="Pending requests" value={pendingCount} color="amber" />
           </div>
           <div>
             <div className="flex items-center justify-between mb-3">
