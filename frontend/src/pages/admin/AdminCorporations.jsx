@@ -205,7 +205,7 @@ export default function AdminCorporations() {
         </div>
         <input
           type="search"
-          placeholder=t('admin.search_placeholder')
+          placeholder={t('admin.search_placeholder')}
           className="input sm:w-64"
           value={search}
           onChange={e => setSearch(e.target.value)}
