@@ -75,6 +75,7 @@ export default function Navbar() {
             {navLink('/organizations', t('nav.organizations'))}
             {navLink('/corporations', t('nav.corporations'))}
             {navLink('/volunteers', t('nav.volunteers'))}
+            {navLink('/projects', i18n.language === 'bg' ? 'Проекти' : 'Projects')}
             {navLink('/events', 'Events')}
           </div>
 
