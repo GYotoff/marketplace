@@ -12,11 +12,15 @@ export default function Volunteers() {
   useEffect(() => {
     supabase
       .from('profiles')
-      .select('id, full_name, city, bio, avatar_url, skills, role')
+      .select('id, full_name, city, bio, avatar_url, role')
       .eq('role', 'volunteer')
       .eq('is_active', true)
       .order('full_name')
-      .then(({ data }) => { setVolunteers(data || []); setLoading(false) })
+      .then(({ data, error }) => {
+        if (error) console.error('Volunteers query error:', error)
+        setVolunteers(data || [])
+        setLoading(false)
+      })
   }, [])
 
   const filtered = volunteers.filter(v =>
