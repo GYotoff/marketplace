@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 
@@ -13,6 +14,7 @@ function StatCard({ label, value, color = 'brand' }) {
 }
 
 function VolunteerDashboard({ profile }) {
+  const { t } = useTranslation()
   const [applications,   setApplications]   = useState([])
   const [registrations,  setRegistrations]  = useState([])
   const [corpMembership, setCorpMembership] = useState(null) // null | { corp, request_status }
@@ -299,6 +301,7 @@ function CorpDashboard({ profile }) {
 
 
 function SuperAdminDashboard({ profile }) {
+  const { t } = useTranslation()
   const [counts, setCounts] = useState({ orgPending: 0, orgApproved: 0, corpPending: 0, users: 0, events: 0 })
 
   useEffect(() => {
@@ -323,27 +326,27 @@ function SuperAdminDashboard({ profile }) {
 
   const actions = [
     {
-      label: 'Organization approvals',
+      label: t('dashboard.org_approvals'),
       desc: counts.orgPending > 0 ? counts.orgPending + ' pending review' : 'No pending requests',
       to: '/admin/organizations',
       urgent: counts.orgPending > 0,
       icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
     },
     {
-      label: 'Corporation approvals',
+      label: t('dashboard.corp_approvals'),
       desc: counts.corpPending > 0 ? counts.corpPending + ' pending review' : 'No pending requests',
       to: '/admin/corporations',
       urgent: counts.corpPending > 0,
       icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
     },
     {
-      label: 'Entity management',
+      label: t('dashboard.entity_management'),
       desc: counts.users + ' registered',
       to: '/admin/entities',
       icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
     },
     {
-      label: 'All events',
+      label: t('dashboard.all_events'),
       desc: counts.events + ' published',
       to: '/events',
       icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
@@ -407,14 +410,22 @@ function SuperAdminDashboard({ profile }) {
 
 export default function Dashboard() {
   const { profile } = useAuthStore()
+  const { t } = useTranslation()
 
   if (!profile) return null
 
+  const ROLE_LABELS = {
+    volunteer: t('role_labels.volunteer'),
+    org_admin: t('role_labels.org_admin'),
+    corp_admin: t('role_labels.corp_admin'),
+    super_admin: t('role_labels.super_admin'),
+  }
+
   const greeting = () => {
     const h = new Date().getHours()
-    if (h < 12) return 'Good morning'
-    if (h < 17) return 'Good afternoon'
-    return 'Good evening'
+    if (h < 12) return t('dashboard.greeting_morning')
+    if (h < 17) return t('dashboard.greeting_afternoon')
+    return t('dashboard.greeting_evening')
   }
 
   return (
@@ -423,8 +434,8 @@ export default function Dashboard() {
         <h1 className="text-2xl font-medium text-gray-900">
           {greeting()}, {profile.full_name?.split(' ')[0] || 'there'} 👋
         </h1>
-        <p className="text-gray-500 text-sm mt-1 capitalize">
-          Signed in as <span className="font-medium text-gray-700">{profile.role?.replace('_', ' ')}</span>
+        <p className="text-gray-500 text-sm mt-1">
+          {t('dashboard.signed_in_as')} <span className="font-medium text-gray-700">{ROLE_LABELS[profile.role] || profile.role}</span>
         </p>
       </div>
 
