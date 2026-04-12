@@ -211,14 +211,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Banner */}
-      <section className="bg-brand-400 py-14 px-4 text-center">
-        <h2 className="text-2xl font-medium text-white mb-3">{t('roles.title')}</h2>
-        <p className="text-brand-100 mb-6 max-w-md mx-auto">Join hundreds of organizations and thousands of volunteers already creating impact.</p>
-        <Link to="/register" className="inline-block bg-white text-brand-600 font-medium px-6 py-3 rounded-lg hover:bg-brand-50 transition-colors">
-          {t('auth.register_btn')}
-        </Link>
-      </section>
     </div>
   )
 }
