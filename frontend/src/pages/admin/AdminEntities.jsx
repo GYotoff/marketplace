@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -196,9 +195,9 @@ export default function AdminEntities() {
   })
 
   const TABS = [
-    { key: 'volunteers', label: t('admin.volunteers_tab'), count: counts.volunteers },
-    { key: 'organizations', label: t('admin.orgs_tab'), count: counts.organizations },
-    { key: 'corporations', label: t('admin.corps_tab'), count: counts.corporations },
+    { key: 'volunteers', label: 'Volunteers', count: counts.volunteers },
+    { key: 'organizations', label: 'Organizations', count: counts.organizations },
+    { key: 'corporations', label: 'Corporations', count: counts.corporations },
   ]
 
   return (
@@ -214,7 +213,7 @@ export default function AdminEntities() {
           <h1 className="text-2xl font-medium text-gray-900">Entity management</h1>
           <p className="text-sm text-gray-500 mt-0.5">Manage access for all platform entities</p>
         </div>
-        <input type="search" placeholder=t('admin.search_placeholder') className="input sm:w-64"
+        <input type="search" placeholder="Search..." className="input sm:w-64"
           value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
