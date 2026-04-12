@@ -272,26 +272,9 @@ function CorpDashboard({ profile }) {
             <StatCard label="Approved members" value={memberCount} color="amber" />
             <StatCard label="Pending requests" value={pendingCount} color="amber" />
           </div>
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-medium">Employee volunteers</h2>
-            </div>
-            {members.length === 0
-              ? <div className="card text-center text-sm text-gray-400 py-8">No employee volunteers yet.</div>
-              : <div className="flex flex-col gap-2">
-                  {members.map(m => (
-                    <div key={m.id} className="card flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-sm font-medium text-amber-600">
-                        {m.profiles?.full_name?.[0] || '?'}
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">{m.profiles?.full_name}</p>
-                        <p className="text-xs text-gray-400">{m.profiles?.email}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-            }
+          <div className="flex gap-3">
+            <Link to="/corp/dashboard" className="btn-secondary flex-1 text-center text-sm">View all members</Link>
+            <Link to="/corp/dashboard" className="btn-primary flex-1 text-center text-sm">Manage corp</Link>
           </div>
         </>
       )}
