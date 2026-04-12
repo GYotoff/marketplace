@@ -33,7 +33,7 @@ export default function CorpDashboard() {
     const [{ data: c }, { data: m }] = await Promise.all([
       supabase.from('corporations').select('*').eq('id', row.corporation_id).single(),
       supabase.from('corporation_members')
-        .select('*, profiles(full_name, email, avatar_url, city)')
+        .select('*, profiles!corporation_members_profile_id_fkey(full_name, email, avatar_url, city)')
         .eq('corporation_id', row.corporation_id)
         .order('requested_at', { ascending: false }),
     ])
