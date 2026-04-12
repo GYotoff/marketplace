@@ -27,6 +27,7 @@ import OrgContentEditor from '@/pages/organizations/OrgContentEditor'
 import AdminOrganizations from '@/pages/admin/AdminOrganizations'
 import AdminOrgDetail from '@/pages/admin/AdminOrgDetail'
 import AdminEntities from '@/pages/admin/AdminEntities'
+import AdminCorporations from '@/pages/admin/AdminCorporations'
 import RegisterCorporation from '@/pages/corporations/RegisterCorporation'
 import CorpDashboard from '@/pages/corporations/CorpDashboard'
 import CorpSettings from '@/pages/corporations/CorpSettings'
@@ -109,6 +110,11 @@ export default function App() {
         <Route path="/admin/entities" element={
           <ProtectedRoute allowedRoles={['super_admin']}>
             <AdminEntities />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/corporations" element={
+          <ProtectedRoute allowedRoles={['super_admin']}>
+            <AdminCorporations />
           </ProtectedRoute>
         } />
         <Route path="/admin/organizations/:id" element={
