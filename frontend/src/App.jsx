@@ -18,6 +18,11 @@ import Corporations from '@/pages/Corporations'
 import Volunteers from '@/pages/Volunteers'
 import Projects from '@/pages/Projects'
 import About from '@/pages/About'
+import Blog from '@/pages/Blog'
+import Contact from '@/pages/Contact'
+import Privacy from '@/pages/Privacy'
+import Terms from '@/pages/Terms'
+import Cookies from '@/pages/Cookies'
 import Events from '@/pages/Events'
 
 // Organization flows
@@ -69,6 +74,11 @@ export default function App() {
         <Route path="/volunteers" element={<Volunteers />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/about" element={<About />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/cookies" element={<Cookies />} />
         <Route path="/organizations/register" element={<RegisterOrganization />} />
         <Route path="/organizations/:slug" element={<OrganizationPage />} />
         <Route path="/events" element={<Events />} />
