@@ -16,6 +16,7 @@ import EditProfile from '@/pages/EditProfile'
 import Organizations from '@/pages/Organizations'
 import Corporations from '@/pages/Corporations'
 import Volunteers from '@/pages/Volunteers'
+import Projects from '@/pages/Projects'
 import About from '@/pages/About'
 import Events from '@/pages/Events'
 
@@ -66,6 +67,7 @@ export default function App() {
         <Route path="/organizations" element={<Organizations />} />
         <Route path="/corporations" element={<Corporations />} />
         <Route path="/volunteers" element={<Volunteers />} />
+        <Route path="/projects" element={<Projects />} />
         <Route path="/about" element={<About />} />
         <Route path="/organizations/register" element={<RegisterOrganization />} />
         <Route path="/organizations/:slug" element={<OrganizationPage />} />
