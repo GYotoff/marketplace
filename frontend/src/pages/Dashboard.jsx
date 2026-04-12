@@ -299,47 +299,52 @@ function CorpDashboard({ profile }) {
 
 
 function SuperAdminDashboard({ profile }) {
-  const [counts, setCounts] = useState({ pending: 0, approved: 0, users: 0, events: 0 })
+  const [counts, setCounts] = useState({ orgPending: 0, orgApproved: 0, corpPending: 0, users: 0, events: 0 })
 
   useEffect(() => {
     Promise.all([
       supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+      supabase.from('corporations').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-    ]).then(([pending, approved, users, events]) => {
+    ]).then(([orgPending, orgApproved, corpPending, users, events]) => {
       setCounts({
-        pending: pending.count || 0,
-        approved: approved.count || 0,
+        orgPending: orgPending.count || 0,
+        orgApproved: orgApproved.count || 0,
+        corpPending: corpPending.count || 0,
         users: users.count || 0,
         events: events.count || 0,
       })
     })
   }, [])
 
+  const totalPending = counts.orgPending + counts.corpPending
+
   const actions = [
     {
       label: 'Organization approvals',
-      desc: counts.pending > 0 ? `${counts.pending} pending review` : 'No pending requests',
+      desc: counts.orgPending > 0 ? counts.orgPending + ' pending review' : 'No pending requests',
       to: '/admin/organizations',
-      urgent: counts.pending > 0,
+      urgent: counts.orgPending > 0,
       icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
     },
     {
-      label: 'All organizations',
-      desc: `${counts.approved} approved`,
-      to: '/organizations',
-      icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+      label: 'Corporation approvals',
+      desc: counts.corpPending > 0 ? counts.corpPending + ' pending review' : 'No pending requests',
+      to: '/admin/corporations',
+      urgent: counts.corpPending > 0,
+      icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
     },
     {
       label: 'Entity management',
-      desc: `${counts.users} registered`,
+      desc: counts.users + ' registered',
       to: '/admin/entities',
       icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
     },
     {
       label: 'All events',
-      desc: `${counts.events} published`,
+      desc: counts.events + ' published',
       to: '/events',
       icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
     },
@@ -348,20 +353,32 @@ function SuperAdminDashboard({ profile }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="Pending orgs" value={counts.pending} color="amber" />
-        <StatCard label="Approved orgs" value={counts.approved} color="brand" />
+        <StatCard label="Pending orgs" value={counts.orgPending} color="amber" />
+        <StatCard label="Pending corps" value={counts.corpPending} color="amber" />
         <StatCard label="Total users" value={counts.users} color="blue" />
         <StatCard label="Live events" value={counts.events} color="brand" />
       </div>
 
-      {counts.pending > 0 && (
+      {totalPending > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between">
           <p className="text-sm text-amber-700 font-medium">
-            {counts.pending} organization{counts.pending > 1 ? 's' : ''} waiting for approval
+            {counts.orgPending > 0 && counts.orgPending + ' org' + (counts.orgPending > 1 ? 's' : '')}
+            {counts.orgPending > 0 && counts.corpPending > 0 && ' and '}
+            {counts.corpPending > 0 && counts.corpPending + ' corporation' + (counts.corpPending > 1 ? 's' : '')}
+            {' waiting for approval'}
           </p>
-          <Link to="/admin/organizations" className="text-xs bg-amber-500 text-white px-3 py-1.5 rounded-lg hover:bg-amber-600">
-            Review now →
-          </Link>
+          <div className="flex gap-2">
+            {counts.orgPending > 0 && (
+              <Link to="/admin/organizations" className="text-xs bg-amber-500 text-white px-3 py-1.5 rounded-lg hover:bg-amber-600">
+                Orgs
+              </Link>
+            )}
+            {counts.corpPending > 0 && (
+              <Link to="/admin/corporations" className="text-xs bg-amber-500 text-white px-3 py-1.5 rounded-lg hover:bg-amber-600">
+                Corps
+              </Link>
+            )}
+          </div>
         </div>
       )}
 
