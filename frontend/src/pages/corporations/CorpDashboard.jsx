@@ -20,7 +20,7 @@ export default function CorpDashboard() {
   useEffect(() => { load() }, [user])
 
   const load = async () => {
-    if (!user) return
+    if (!user) return []
     setLoading(true)
     const { data: row } = await supabase
       .from('corporation_members')
@@ -29,7 +29,7 @@ export default function CorpDashboard() {
       .eq('role', 'admin')
       .eq('request_status', 'approved')
       .single()
-    if (!row) { setLoading(false); return }
+    if (!row) { setLoading(false); return [] }
     const [{ data: c }, { data: m }] = await Promise.all([
       supabase.from('corporations').select('*').eq('id', row.corporation_id).single(),
       supabase.from('corporation_members')
@@ -38,8 +38,10 @@ export default function CorpDashboard() {
         .order('requested_at', { ascending: false }),
     ])
     setCorp(c)
-    setMembers(m || [])
+    const fresh = m || []
+    setMembers(fresh)
     setLoading(false)
+    return fresh
   }
 
   const approve = async (id) => {
@@ -48,7 +50,9 @@ export default function CorpDashboard() {
       .update({ request_status: 'approved', reviewed_by: user.id, reviewed_at: new Date().toISOString() })
       .eq('id', id)
     flash('Member approved')
-    load()
+    const fresh = await load()
+    const stillPending = fresh.filter(m => m.request_status === 'pending')
+    if (stillPending.length === 0) setTab('members')
     setActing(null)
   }
 
@@ -58,7 +62,7 @@ export default function CorpDashboard() {
       .update({ request_status: 'declined', reviewed_by: user.id, reviewed_at: new Date().toISOString() })
       .eq('id', id)
     flash('Request declined')
-    load()
+    await load()
     setActing(null)
   }
 
