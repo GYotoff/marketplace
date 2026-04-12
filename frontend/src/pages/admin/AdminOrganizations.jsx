@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { Link } from 'react-router-dom'
@@ -123,6 +124,7 @@ function OrgRow({ org, onAction }) {
 
 export default function AdminOrganizations() {
   const { user, profile } = useAuthStore()
+  const { t } = useTranslation()
   const [orgs, setOrgs] = useState([])
   const [filter, setFilter] = useState('pending')
   const [loading, setLoading] = useState(true)
@@ -218,7 +220,7 @@ export default function AdminOrganizations() {
         </div>
         <input
           type="search"
-          placeholder="Search by name, city or email..."
+          placeholder=t('admin.search_placeholder')
           className="input sm:w-64"
           value={search}
           onChange={e => setSearch(e.target.value)}

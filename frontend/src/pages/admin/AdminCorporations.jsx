@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -121,6 +122,7 @@ function CorpRow({ corp, onAction }) {
 
 export default function AdminCorporations() {
   const { user } = useAuthStore()
+  const { t } = useTranslation()
   const [corps, setCorps] = useState([])
   const [filter, setFilter] = useState('pending')
   const [loading, setLoading] = useState(true)
@@ -203,7 +205,7 @@ export default function AdminCorporations() {
         </div>
         <input
           type="search"
-          placeholder="Search by name, city or email..."
+          placeholder=t('admin.search_placeholder')
           className="input sm:w-64"
           value={search}
           onChange={e => setSearch(e.target.value)}
