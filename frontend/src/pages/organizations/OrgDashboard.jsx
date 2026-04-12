@@ -44,10 +44,10 @@ export default function OrgDashboard() {
     const [orgRes, membersRes, requestsRes] = await Promise.all([
       supabase.from('organizations').select('*').eq('id', memberRow.organization_id).single(),
       supabase.from('organization_members')
-        .select('*, profiles(full_name, email, avatar_url)')
+        .select('*, profiles!organization_members_profile_id_fkey(full_name, email, avatar_url)')
         .eq('organization_id', memberRow.organization_id),
       supabase.from('org_creator_requests')
-        .select('*, profiles(full_name, email, avatar_url)')
+        .select('*, profiles!organization_members_profile_id_fkey(full_name, email, avatar_url)')
         .eq('organization_id', memberRow.organization_id)
         .eq('status', 'pending'),
     ])
