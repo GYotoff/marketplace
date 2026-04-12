@@ -14,6 +14,7 @@ import Dashboard from '@/pages/Dashboard'
 import ViewProfile from '@/pages/ViewProfile'
 import EditProfile from '@/pages/EditProfile'
 import Organizations from '@/pages/Organizations'
+import Corporations from '@/pages/Corporations'
 import Events from '@/pages/Events'
 
 // Organization flows
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/organizations" element={<Organizations />} />
+        <Route path="/corporations" element={<Corporations />} />
         <Route path="/organizations/register" element={<RegisterOrganization />} />
         <Route path="/organizations/:slug" element={<OrganizationPage />} />
         <Route path="/events" element={<Events />} />
