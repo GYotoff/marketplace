@@ -71,10 +71,10 @@ export default function AdminOrgDetail() {
     const [orgRes, membersRes, auditRes] = await Promise.all([
       supabase.from('organizations').select('*').eq('id', id).single(),
       supabase.from('organization_members')
-        .select('*, profiles(full_name, email, avatar_url, role)')
+        .select('*, profiles!organization_members_profile_id_fkey(full_name, email, avatar_url, role)')
         .eq('organization_id', id),
       supabase.from('admin_audit_log')
-        .select('*, profiles(full_name, email)')
+        .select('*, profiles!organization_members_profile_id_fkey(full_name, email)')
         .eq('entity_id', id)
         .order('created_at', { ascending: false })
         .limit(20),
