@@ -17,6 +17,7 @@ import Organizations from '@/pages/Organizations'
 import Corporations from '@/pages/Corporations'
 import Volunteers from '@/pages/Volunteers'
 import Projects from '@/pages/Projects'
+import ProjectPage from '@/pages/ProjectPage'
 import About from '@/pages/About'
 import Blog from '@/pages/Blog'
 import Contact from '@/pages/Contact'
@@ -77,6 +78,7 @@ export default function App() {
         <Route path="/corporations" element={<Corporations />} />
         <Route path="/volunteers" element={<Volunteers />} />
         <Route path="/projects" element={<Projects />} />
+        <Route path="/projects/:id" element={<ProjectPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
