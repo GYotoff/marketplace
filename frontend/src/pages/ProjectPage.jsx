@@ -143,7 +143,7 @@ export default function ProjectPage() {
                 </span>
               )}
               <span className={'badge text-xs px-2 py-0.5 capitalize ' + (project.status === 'published' ? 'bg-brand-50 text-brand-700' : 'bg-blue-50 text-blue-700')}>
-                {project.status === 'in_progress' ? 'In progress' : project.status}
+                {project.status === 'in_progress' ? 'Active' : project.status}
               </span>
             </div>
             <h1 className="text-2xl font-medium text-gray-900 mb-2">{title}</h1>
