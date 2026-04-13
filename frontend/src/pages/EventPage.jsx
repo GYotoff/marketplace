@@ -1,0 +1,236 @@
+import { useEffect, useState } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/store/authStore'
+
+const EDGE_FN = 'https://yxqqxjyuqjoraxjjwcdp.supabase.co/functions/v1/event-registration-notify'
+
+export default function EventPage() {
+  const { id } = useParams()
+  const { i18n } = useTranslation()
+  const { user, profile } = useAuthStore()
+  const navigate = useNavigate()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
+
+  const [event, setEvent] = useState(null)
+  const [registration, setRegistration] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+  const [registering, setRegistering] = useState(false)
+  const [unregistering, setUnregistering] = useState(false)
+  const [toast, setToast] = useState(null)
+
+  const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500) }
+
+  useEffect(() => { load() }, [id, user])
+
+  const load = async () => {
+    setLoading(true)
+    const { data: ev, error } = await supabase
+      .from('events')
+      .select('*, organizations(id, name, slug, logo_url), projects(id, title)')
+      .eq('id', id)
+      .single()
+    if (error || !ev) { setNotFound(true); setLoading(false); return }
+    setEvent(ev)
+    if (user) {
+      const { data: reg } = await supabase
+        .from('event_registrations')
+        .select('id, status, registered_at')
+        .eq('event_id', id)
+        .eq('profile_id', user.id)
+        .maybeSingle()
+      setRegistration(reg)
+    }
+    setLoading(false)
+  }
+
+  const register = async () => {
+    if (!user) { navigate('/register'); return }
+    setRegistering(true)
+    const { error } = await supabase.from('event_registrations').insert({
+      event_id: id, profile_id: user.id, status: 'pending',
+    })
+    if (error) { flash(error.message, 'error'); setRegistering(false); return }
+    try {
+      await fetch(EDGE_FN, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'register', event_id: id, volunteer_id: user.id }),
+      })
+    } catch (e) { console.error('notify error', e) }
+    flash(lang === 'bg' ? 'Регистрирахте се успешно!' : 'Successfully registered!')
+    load()
+    setRegistering(false)
+  }
+
+  const unregister = async () => {
+    const title = event?.title || 'this event'
+    const confirmed = window.confirm(
+      lang === 'bg'
+        ? `Сигурни ли сте, че искате да се отпишете от "${title}"?`
+        : `Cancel your registration for "${title}"?`
+    )
+    if (!confirmed) return
+    setUnregistering(true)
+    const { error } = await supabase.from('event_registrations').delete().eq('id', registration.id)
+    if (error) { flash(error.message, 'error'); setUnregistering(false); return }
+    try {
+      await fetch(EDGE_FN, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'unregister', event_id: id, volunteer_id: user.id }),
+      })
+    } catch (e) { console.error('notify error', e) }
+    flash(lang === 'bg' ? 'Отписахте се от събитието' : 'Registration cancelled')
+    load()
+    setUnregistering(false)
+  }
+
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+
+  if (notFound) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+      <p className="text-4xl mb-4">📅</p>
+      <h1 className="text-xl font-medium text-gray-900 mb-2">{lang === 'bg' ? 'Събитието не е намерено' : 'Event not found'}</h1>
+      <p className="text-gray-500 text-sm mb-6">{lang === 'bg' ? 'Това събитие не съществува или не е публично.' : "This event doesn't exist or isn't publicly visible."}</p>
+      <Link to="/events" className="btn-primary">{lang === 'bg' ? 'Разгледай събития' : 'Browse events'}</Link>
+    </div>
+  )
+
+  const title = (lang === 'bg' && event.title_bg) ? event.title_bg : event.title
+  const desc  = (lang === 'bg' && event.description_bg) ? event.description_bg : event.description
+  const spotsLeft = Math.max(0, (event.volunteers_needed || 0) - (event.volunteers_enrolled || 0))
+  const isFull = event.volunteers_needed > 0 && spotsLeft === 0
+  const isFuture = event.event_date && new Date(event.event_date) > new Date()
+
+  const eventDate = event.event_date
+    ? new Date(event.event_date).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : null
+
+  const endDate = event.end_date
+    ? new Date(event.end_date).toLocaleTimeString(lang === 'bg' ? 'bg-BG' : 'en-GB', { hour: '2-digit', minute: '2-digit' })
+    : null
+
+  const RegisterBtn = () => {
+    if (!user) return <Link to="/register" className="btn-primary w-full text-center">{lang === 'bg' ? 'Регистрирай се за участие' : 'Sign up to register'}</Link>
+    if (profile?.role !== 'volunteer') return null
+    if (!isFuture) return <span className="block text-center text-sm text-gray-400 py-2">{lang === 'bg' ? 'Събитието е приключило' : 'This event has passed'}</span>
+    if (registration?.status === 'pending') return (
+      <div className="flex flex-col gap-2">
+        <span className="block text-center text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl py-2.5 px-4">
+          ⏳ {lang === 'bg' ? 'Регистрацията ви е изпратена' : 'Registration pending'}
+        </span>
+        <button onClick={unregister} disabled={unregistering} className="text-xs text-center text-red-500 hover:text-red-700">
+          {unregistering ? '...' : (lang === 'bg' ? 'Отпиши се' : 'Cancel registration')}
+        </button>
+      </div>
+    )
+    if (registration?.status === 'approved') return (
+      <div className="flex flex-col gap-2">
+        <span className="block text-center text-sm text-brand-600 font-medium py-2">✓ {lang === 'bg' ? 'Одобрен доброволец' : "You're an approved volunteer"}</span>
+        <button onClick={unregister} disabled={unregistering} className="text-xs text-center text-red-500 hover:text-red-700">
+          {unregistering ? '...' : (lang === 'bg' ? 'Отпиши се' : 'Cancel registration')}
+        </button>
+      </div>
+    )
+    if (isFull) return <span className="block text-center text-sm text-gray-500 bg-gray-100 rounded-xl py-2.5 px-4">{lang === 'bg' ? 'Събитието е пълно' : 'Event is full'}</span>
+    return (
+      <button onClick={register} disabled={registering} className="btn-primary w-full flex items-center justify-center gap-2">
+        {registering && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+        {registering ? '...' : (lang === 'bg' ? 'Регистрирай се' : 'Register for this event')}
+      </button>
+    )
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-10">
+      {toast && (
+        <div className={'fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white ' + (toast.type === 'error' ? 'bg-red-500' : 'bg-brand-400')}>
+          {toast.msg}
+        </div>
+      )}
+
+      <Link to="/events" className="text-sm text-gray-400 hover:text-gray-600 mb-6 block">
+        ← {lang === 'bg' ? 'Всички събития' : 'All events'}
+      </Link>
+
+      {event.cover_url && (
+        <div className="w-full h-48 sm:h-64 rounded-2xl overflow-hidden mb-6 bg-gray-100">
+          <img src={event.cover_url} alt={title} className="w-full h-full object-cover" />
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 flex flex-col gap-6">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              {event.is_online && <span className="badge bg-blue-50 text-blue-700 text-xs px-2 py-0.5">{lang === 'bg' ? 'Онлайн' : 'Online'}</span>}
+              <span className="badge bg-brand-50 text-brand-700 border border-brand-200 text-xs px-2 py-0.5 capitalize">{event.status}</span>
+            </div>
+            <h1 className="text-2xl font-medium text-gray-900 mb-2">{title}</h1>
+            {event.organizations && (
+              <Link to={'/organizations/' + event.organizations.slug} className="flex items-center gap-2 text-sm text-brand-500 hover:text-brand-600 mb-4">
+                {event.organizations.logo_url && <img src={event.organizations.logo_url} alt="" className="w-5 h-5 rounded object-cover" />}
+                {event.organizations.name}
+              </Link>
+            )}
+            {event.projects && (
+              <Link to={'/projects/' + event.projects.id} className="text-xs text-gray-400 hover:text-gray-600 mb-4 block">
+                📋 {lang === 'bg' ? 'Проект' : 'Project'}: {event.projects.title}
+              </Link>
+            )}
+            {desc && <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{desc}</p>}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <div className="card flex flex-col gap-4">
+            {event.volunteers_needed > 0 && (
+              <div className="text-center py-2">
+                <p className="text-3xl font-semibold text-brand-400">{spotsLeft}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{lang === 'bg' ? 'свободни места' : 'spots remaining'}</p>
+              </div>
+            )}
+            <RegisterBtn />
+          </div>
+
+          <div className="card flex flex-col gap-3">
+            <h2 className="text-sm font-medium text-gray-700">{lang === 'bg' ? 'Детайли' : 'Details'}</h2>
+            {eventDate && (
+              <div className="flex items-start gap-2 text-sm text-gray-600">
+                <svg className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>{eventDate}{endDate ? ` – ${endDate}` : ''}</span>
+              </div>
+            )}
+            {event.is_online ? (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                {event.online_url
+                  ? <a href={event.online_url} target="_blank" rel="noreferrer" className="text-brand-500 hover:underline truncate">{event.online_url}</a>
+                  : <span>{lang === 'bg' ? 'Онлайн' : 'Online'}</span>}
+              </div>
+            ) : event.city && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                {event.city}{event.address ? ', ' + event.address : ''}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
