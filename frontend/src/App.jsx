@@ -31,6 +31,10 @@ import OrganizationPage from '@/pages/organizations/OrganizationPage'
 import OrgDashboard from '@/pages/organizations/OrgDashboard'
 import OrgSettings from '@/pages/organizations/OrgSettings'
 import OrgContentEditor from '@/pages/organizations/OrgContentEditor'
+import OrgProjects from '@/pages/organizations/OrgProjects'
+import OrgProjectEdit from '@/pages/organizations/OrgProjectEdit'
+import OrgProjectEvents from '@/pages/organizations/OrgProjectEvents'
+import OrgEventEdit from '@/pages/organizations/OrgEventEdit'
 
 // Admin
 import AdminOrganizations from '@/pages/admin/AdminOrganizations'
@@ -102,6 +106,36 @@ export default function App() {
         <Route path="/org/content" element={
           <ProtectedRoute allowedRoles={['org_admin', 'content_creator', 'super_admin']}>
             <OrgContentEditor />
+          </ProtectedRoute>
+        } />
+        <Route path="/org/projects" element={
+          <ProtectedRoute allowedRoles={['org_admin', 'super_admin']}>
+            <OrgProjects />
+          </ProtectedRoute>
+        } />
+        <Route path="/org/projects/new" element={
+          <ProtectedRoute allowedRoles={['org_admin', 'super_admin']}>
+            <OrgProjectEdit />
+          </ProtectedRoute>
+        } />
+        <Route path="/org/projects/:id/edit" element={
+          <ProtectedRoute allowedRoles={['org_admin', 'super_admin']}>
+            <OrgProjectEdit />
+          </ProtectedRoute>
+        } />
+        <Route path="/org/projects/:projectId/events" element={
+          <ProtectedRoute allowedRoles={['org_admin', 'super_admin']}>
+            <OrgProjectEvents />
+          </ProtectedRoute>
+        } />
+        <Route path="/org/projects/:projectId/events/new" element={
+          <ProtectedRoute allowedRoles={['org_admin', 'super_admin']}>
+            <OrgEventEdit />
+          </ProtectedRoute>
+        } />
+        <Route path="/org/projects/:projectId/events/:eventId/edit" element={
+          <ProtectedRoute allowedRoles={['org_admin', 'super_admin']}>
+            <OrgEventEdit />
           </ProtectedRoute>
         } />
 
