@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
+const EDGE_FN = 'https://yxqqxjyuqjoraxjjwcdp.supabase.co/functions/v1/event-registration-notify'
+
 export default function ProjectPage() {
   const { id } = useParams()
   const { i18n } = useTranslation()
@@ -63,8 +65,9 @@ export default function ProjectPage() {
     const { error } = await supabase.from('project_applications').insert({
       project_id: id, profile_id: user.id, status: 'pending',
     })
-    if (error) flash(error.message, 'error')
-    else { flash('Application submitted!'); load() }
+    if (error) { flash(error.message, 'error'); setApplying(false); return }
+    flash('Application submitted!')
+    load()
     setApplying(false)
   }
 
