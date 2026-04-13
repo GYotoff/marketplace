@@ -12,7 +12,7 @@ const STATUS_BADGE = {
 }
 
 const STATUS_LABEL = {
-  draft: 'Draft', published: 'Published', in_progress: 'In Progress', completed: 'Completed', cancelled: 'Cancelled',
+  draft: 'Draft', published: 'Published', in_progress: 'Active', completed: 'Completed', cancelled: 'Cancelled',
 }
 
 export default function OrgProjects() {
@@ -122,13 +122,12 @@ export default function OrgProjects() {
                   {p.status === 'draft' && (
                     <button onClick={() => setStatus(p, 'published')} className="btn-primary text-xs py-1.5">Publish</button>
                   )}
-                  {p.status === 'published' && (
+                  {(p.status === 'published' || p.status === 'in_progress') && (
                     <>
                       <button onClick={() => togglePublic(p)}
                         className={'text-xs border rounded-lg px-2.5 py-1.5 ' + (p.show_in_public ? 'border-green-200 text-green-700 hover:bg-green-50' : 'border-gray-200 text-gray-500 hover:bg-gray-50')}>
                         {p.show_in_public ? 'Visible' : 'Hidden'}
                       </button>
-                      <button onClick={() => setStatus(p, 'in_progress')} className="text-xs border border-blue-200 text-blue-600 hover:bg-blue-50 rounded-lg px-2.5 py-1.5">Start</button>
                     </>
                   )}
                   {p.status === 'draft' && (
