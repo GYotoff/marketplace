@@ -19,6 +19,7 @@ export default function OrgDashboard() {
   const [org, setOrg] = useState(null)
   const [members, setMembers] = useState([])
   const [requests, setRequests] = useState([])
+  const [projectCount, setProjectCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState('overview')
   const [actionLoading, setActionLoading] = useState(null)
@@ -41,7 +42,7 @@ export default function OrgDashboard() {
 
     if (!memberRow) { setLoading(false); return }
 
-    const [orgRes, membersRes, requestsRes] = await Promise.all([
+    const [orgRes, membersRes, requestsRes, projectsRes] = await Promise.all([
       supabase.from('organizations').select('*').eq('id', memberRow.organization_id).single(),
       supabase.from('organization_members')
         .select('*, profiles!organization_members_profile_id_fkey(full_name, email, avatar_url)')
@@ -50,11 +51,13 @@ export default function OrgDashboard() {
         .select('*, profiles!organization_members_profile_id_fkey(full_name, email, avatar_url)')
         .eq('organization_id', memberRow.organization_id)
         .eq('status', 'pending'),
+      supabase.from('projects').select('id').eq('organization_id', memberRow.organization_id),
     ])
 
     setOrg(orgRes.data)
     setMembers(membersRes.data || [])
     setRequests(requestsRes.data || [])
+    setProjectCount((projectsRes.data || []).length)
     setLoading(false)
   }
 
@@ -165,7 +168,7 @@ export default function OrgDashboard() {
           {[
             { label: 'Members', value: members.length },
             { label: 'Pending requests', value: requests.length },
-            { label: 'Projects', value: 0 },
+            { label: 'Projects', value: projectCount },
             { label: 'Events', value: 0 },
           ].map(s => (
             <div key={s.label} className="card text-center py-5">
