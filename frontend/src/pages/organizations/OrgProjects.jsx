@@ -1,29 +1,30 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
 const STATUS_BADGE = {
-  draft:       'bg-gray-100 text-gray-600',
-  published:   'bg-brand-50 text-brand-700 border border-brand-200',
-  in_progress: 'bg-blue-50 text-blue-700 border border-blue-200',
-  completed:   'bg-green-50 text-green-700 border border-green-200',
-  cancelled:   'bg-red-50 text-red-600 border border-red-200',
+  draft:     'bg-gray-100 text-gray-600',
+  published: 'bg-brand-50 text-brand-700 border border-brand-200',
+  completed: 'bg-green-50 text-green-700 border border-green-200',
+  cancelled: 'bg-red-50 text-red-600 border border-red-200',
 }
 
 const STATUS_LABEL = {
-  draft: 'Draft', published: 'Published', in_progress: 'Active', completed: 'Completed', cancelled: 'Cancelled',
+  draft: 'Draft', published: 'Published', completed: 'Completed', cancelled: 'Cancelled',
 }
 
 export default function OrgProjects() {
   const { user } = useAuthStore()
-  const navigate = useNavigate()
   const [org, setOrg] = useState(null)
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState(null)
 
-  const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3000) }
+  const flash = (msg, type = 'success') => {
+    setToast({ msg, type })
+    setTimeout(() => setToast(null), 3000)
+  }
 
   useEffect(() => { load() }, [user])
 
@@ -33,7 +34,9 @@ export default function OrgProjects() {
     const { data: om } = await supabase
       .from('organization_members')
       .select('organization_id, organizations(id, name, slug, status, is_active)')
-      .eq('profile_id', user.id).eq('role', 'admin').eq('request_status', 'approved')
+      .eq('profile_id', user.id)
+      .eq('role', 'admin')
+      .eq('request_status', 'approved')
       .single()
     if (!om) { setLoading(false); return }
     setOrg(om.organizations)
@@ -47,27 +50,52 @@ export default function OrgProjects() {
   }
 
   const togglePublic = async (project) => {
-    const { error } = await supabase.from('projects')
-      .update({ show_in_public: !project.show_in_public, updated_at: new Date().toISOString() })
+    const next = !project.show_in_public
+    const { error } = await supabase
+      .from('projects')
+      .update({ show_in_public: next, updated_at: new Date().toISOString() })
       .eq('id', project.id)
-    if (!error) { flash('Updated'); load() } else flash(error.message, 'error')
+    if (error) flash(error.message, 'error')
+    else { flash(next ? 'Project is now visible publicly' : 'Project hidden from public'); load() }
   }
 
-  const setStatus = async (project, status) => {
-    const { error } = await supabase.from('projects')
-      .update({ status, updated_at: new Date().toISOString() })
+  const publish = async (project) => {
+    const { error } = await supabase
+      .from('projects')
+      .update({ status: 'published', updated_at: new Date().toISOString() })
       .eq('id', project.id)
-    if (!error) { flash('Status updated'); load() } else flash(error.message, 'error')
+    if (error) flash(error.message, 'error')
+    else { flash('Project published'); load() }
+  }
+
+  const complete = async (project) => {
+    if (!confirm('Mark "' + project.title + '" as completed?')) return
+    const { error } = await supabase
+      .from('projects')
+      .update({ status: 'completed', show_in_public: false, updated_at: new Date().toISOString() })
+      .eq('id', project.id)
+    if (error) flash(error.message, 'error')
+    else { flash('Project marked as completed'); load() }
   }
 
   const deleteProject = async (project) => {
     if (!confirm('Delete "' + project.title + '"? This cannot be undone.')) return
     const { error } = await supabase.from('projects').delete().eq('id', project.id)
-    if (!error) { flash('Project deleted'); load() } else flash(error.message, 'error')
+    if (error) flash(error.message, 'error')
+    else { flash('Project deleted'); load() }
   }
 
-  if (loading) return <div className="flex items-center justify-center min-h-[40vh]"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>
-  if (!org) return <div className="max-w-lg mx-auto px-4 py-16 text-center"><p className="text-gray-500 mb-4">You are not an admin of any organization.</p></div>
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[40vh]">
+      <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+
+  if (!org) return (
+    <div className="max-w-lg mx-auto px-4 py-16 text-center">
+      <p className="text-gray-500">You are not an admin of any organization.</p>
+    </div>
+  )
 
   const canCreate = org.status === 'approved' && org.is_active
 
@@ -86,7 +114,8 @@ export default function OrgProjects() {
         </div>
         {canCreate
           ? <Link to="/org/projects/new" className="btn-primary">+ New project</Link>
-          : <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Organization must be approved to create projects</span>}
+          : <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Organization must be approved to create projects</span>
+        }
       </div>
 
       {projects.length === 0 ? (
@@ -105,8 +134,10 @@ export default function OrgProjects() {
                     <span className={'badge text-xs px-2 py-0.5 ' + (STATUS_BADGE[p.status] || 'bg-gray-100 text-gray-600')}>
                       {STATUS_LABEL[p.status] || p.status}
                     </span>
-                    {p.show_in_public && p.status === 'published' && (
-                      <span className="badge bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5">Public</span>
+                    {p.status === 'published' && (
+                      <span className={'badge text-xs px-2 py-0.5 ' + (p.show_in_public ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500')}>
+                        {p.show_in_public ? 'Visible' : 'Hidden'}
+                      </span>
                     )}
                   </div>
                   {p.city && <p className="text-xs text-gray-400">{p.city}</p>}
@@ -116,22 +147,36 @@ export default function OrgProjects() {
                     {p.start_date && <span>From {new Date(p.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
                   </div>
                 </div>
-                <div className="flex gap-2 shrink-0 flex-wrap">
+
+                <div className="flex gap-2 shrink-0 flex-wrap items-center">
                   <Link to={'/org/projects/' + p.id + '/edit'} className="btn-secondary text-xs py-1.5">Edit</Link>
-                  <Link to={'/org/projects/' + p.id + '/events'} className="btn-secondary text-xs py-1.5">Events</Link>
-                  {p.status === 'draft' && (
-                    <button onClick={() => setStatus(p, 'published')} className="btn-primary text-xs py-1.5">Publish</button>
+
+                  {p.status !== 'completed' && p.status !== 'cancelled' && (
+                    <Link to={'/org/projects/' + p.id + '/events'} className="btn-secondary text-xs py-1.5">Events</Link>
                   )}
-                  {(p.status === 'published' || p.status === 'in_progress') && (
+
+                  {/* Draft: can publish or delete */}
+                  {p.status === 'draft' && (
                     <>
-                      <button onClick={() => togglePublic(p)}
-                        className={'text-xs border rounded-lg px-2.5 py-1.5 ' + (p.show_in_public ? 'border-green-200 text-green-700 hover:bg-green-50' : 'border-gray-200 text-gray-500 hover:bg-gray-50')}>
-                        {p.show_in_public ? 'Visible' : 'Hidden'}
-                      </button>
+                      <button onClick={() => publish(p)} className="btn-primary text-xs py-1.5">Publish</button>
+                      <button onClick={() => deleteProject(p)} className="text-xs border border-red-200 text-red-500 hover:bg-red-50 rounded-lg px-2.5 py-1.5">Delete</button>
                     </>
                   )}
-                  {p.status === 'draft' && (
-                    <button onClick={() => deleteProject(p)} className="text-xs border border-red-200 text-red-500 hover:bg-red-50 rounded-lg px-2.5 py-1.5">Delete</button>
+
+                  {/* Published: toggle visibility + complete */}
+                  {p.status === 'published' && (
+                    <>
+                      <button
+                        onClick={() => togglePublic(p)}
+                        className={'text-xs border rounded-lg px-2.5 py-1.5 font-medium transition-colors ' + (p.show_in_public
+                          ? 'border-green-200 text-green-700 bg-green-50 hover:bg-green-100'
+                          : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        )}
+                      >
+                        {p.show_in_public ? '● Visible' : '○ Hidden'}
+                      </button>
+                      <button onClick={() => complete(p)} className="text-xs border border-gray-200 text-gray-500 hover:bg-gray-50 rounded-lg px-2.5 py-1.5">Complete</button>
+                    </>
                   )}
                 </div>
               </div>
