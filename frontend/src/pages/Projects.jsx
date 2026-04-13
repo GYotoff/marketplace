@@ -70,7 +70,11 @@ export default function Projects() {
           const desc  = (i18n.language === 'bg' && p.description_bg) ? p.description_bg : p.description
           const spots = spotsLeft(p)
           return (
-            <div key={p.id} className="card flex flex-col gap-3 hover:border-gray-200 hover:shadow-sm transition-all">
+            <Link
+              key={p.id}
+              to={'/projects/' + p.id}
+              className="card hover:border-gray-200 hover:shadow-sm transition-all flex flex-col gap-3"
+            >
               {p.cover_url && (
                 <div className="w-full h-36 rounded-lg overflow-hidden bg-gray-100 -mx-0">
                   <img src={p.cover_url} alt={title} className="w-full h-full object-cover" />
@@ -118,7 +122,7 @@ export default function Projects() {
                   )}
                 </div>
               </div>
-            </div>
+            </Link>
           )
         })}
       </div>
