@@ -38,6 +38,7 @@ import OrgProjects from '@/pages/organizations/OrgProjects'
 import OrgProjectEdit from '@/pages/organizations/OrgProjectEdit'
 import OrgProjectEvents from '@/pages/organizations/OrgProjectEvents'
 import OrgEventEdit from '@/pages/organizations/OrgEventEdit'
+import OrgCalendar from '@/pages/organizations/OrgCalendar'
 
 // Admin
 import AdminOrganizations from '@/pages/admin/AdminOrganizations'
@@ -116,6 +117,11 @@ export default function App() {
         <Route path="/org/content" element={
           <ProtectedRoute allowedRoles={['org_admin', 'content_creator', 'super_admin']}>
             <OrgContentEditor />
+          </ProtectedRoute>
+        } />
+        <Route path="/org/calendar" element={
+          <ProtectedRoute allowedRoles={['org_admin', 'super_admin']}>
+            <OrgCalendar />
           </ProtectedRoute>
         } />
         <Route path="/org/projects" element={
