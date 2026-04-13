@@ -13,11 +13,13 @@ import AuthCallback from '@/pages/AuthCallback'
 import Dashboard from '@/pages/Dashboard'
 import ViewProfile from '@/pages/ViewProfile'
 import EditProfile from '@/pages/EditProfile'
+import VolunteerCalendar from '@/pages/VolunteerCalendar'
 import Organizations from '@/pages/Organizations'
 import Corporations from '@/pages/Corporations'
 import Volunteers from '@/pages/Volunteers'
 import Projects from '@/pages/Projects'
 import ProjectPage from '@/pages/ProjectPage'
+import EventPage from '@/pages/EventPage'
 import About from '@/pages/About'
 import Blog from '@/pages/Blog'
 import Contact from '@/pages/Contact'
@@ -79,6 +81,12 @@ export default function App() {
         <Route path="/volunteers" element={<Volunteers />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/:id" element={<ProjectPage />} />
+        <Route path="/events/:id" element={<EventPage />} />
+        <Route path="/dashboard/calendar" element={
+          <ProtectedRoute allowedRoles={['volunteer']}>
+            <VolunteerCalendar />
+          </ProtectedRoute>
+        } />
         <Route path="/about" element={<About />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
