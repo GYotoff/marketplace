@@ -121,7 +121,9 @@ export default function VolunteerAttendance() {
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h3 className="font-medium text-gray-900">{title}</h3>
+                        <Link to={'/events/' + ev?.id} className="font-medium text-gray-900 hover:text-brand-600 hover:underline">
+                          {title}
+                        </Link>
                         <span className={'badge text-xs px-2 py-0.5 ' + cfg.badge}>{statusLabel}</span>
                       </div>
                       {ev?.event_date && <p className="text-xs text-gray-400">{fmtDate(ev.event_date)}</p>}
