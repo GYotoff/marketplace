@@ -181,7 +181,7 @@ export default function ProjectPage() {
                 {events.map(ev => {
                   const evTitle = (i18n.language === 'bg' && ev.title_bg) ? ev.title_bg : ev.title
                   const evDesc  = (i18n.language === 'bg' && ev.description_bg) ? ev.description_bg : ev.description
-                  const evDate  = ev.event_date ? new Date(ev.event_date).toLocaleDateString(i18n.language === 'bg' ? 'bg-BG' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''
+                  const evDate  = ev.event_date ? new Date(ev.event_date).toLocaleDateString(i18n.language === 'bg' ? 'bg-BG' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''
                   return (
                     <div key={ev.id} className="card flex flex-col gap-2">
                       <div className="flex items-start justify-between gap-3">
