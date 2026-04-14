@@ -60,7 +60,7 @@ export default function VolunteerAttendance() {
   const L = {
     title:    lang === 'bg' ? 'Участие в събития' : 'Event Participation',
     subtitle: lang === 'bg' ? 'Минали и предстоящи събития, за които сте регистрирани.' : 'Past and upcoming events you are registered for.',
-    past:     lang === 'bg' ? 'Минали' : 'Past events',
+    past:     lang === 'bg' ? 'Минали' : 'Past',
     upcoming: lang === 'bg' ? 'Предстоящи' : 'Upcoming',
     mark:     lang === 'bg' ? 'Потвърди участие' : 'I attended this event',
     marking:  lang === 'bg' ? 'Изпращане...' : 'Submitting...',
