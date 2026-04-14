@@ -112,7 +112,7 @@ export default function VolunteerCalendar() {
   const selectedRegs = selected ? (eventsByDay[selected] || []) : []
 
   const fmtDate = (ts, opts = {}) => new Date(ts).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', ...opts })
-  const fmtShort = (ts) => new Date(ts).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { day: 'numeric', month: 'short' })
+  const fmtShort = (ts) => new Date(ts).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 
   const L = {
     title: lang === 'bg' ? 'Моят календар' : 'My Calendar',
@@ -205,7 +205,7 @@ export default function VolunteerCalendar() {
             {selected && (
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <p className="text-xs font-medium text-gray-500 mb-2">
-                  {new Date(selected + 'T12:00:00').toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  {new Date(selected + 'T12:00:00').toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
                 {selectedRegs.length === 0
                   ? <p className="text-sm text-gray-400">{lang === 'bg' ? 'Няма събития за тази дата' : 'No events on this day'}</p>
