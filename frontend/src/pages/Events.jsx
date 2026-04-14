@@ -46,6 +46,7 @@ export default function Events() {
               <div className="min-w-14 text-center bg-brand-50 rounded-xl py-3">
                 <p className="text-2xl font-semibold text-brand-400 leading-none">{dt.getDate()}</p>
                 <p className="text-xs text-brand-600 uppercase mt-0.5">{dt.toLocaleString('en', { month: 'short' })}</p>
+                <p className="text-xs text-brand-500 mt-0.5">{dt.getFullYear()}</p>
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-gray-900">{title}</h3>
