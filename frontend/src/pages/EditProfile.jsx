@@ -236,7 +236,7 @@ export default function EditProfile() {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">New password</label>
             <div className="relative">
               <input type={showPw ? 'text' : 'password'} required className="input pr-10"
-                placeholder=lang === 'bg' ? 'Мин. 8 символа' : 'Min. 8 characters'
+                placeholder={lang === 'bg' ? 'Мин. 8 символа' : 'Min. 8 characters'}
                 value={pwForm.password} onChange={e => setPw('password', e.target.value)} />
               <button type="button" onClick={() => setShowPw(!showPw)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -265,7 +265,7 @@ export default function EditProfile() {
             <input type={showPw ? 'text' : 'password'} required className={`input ${
               pwForm.confirm && pwForm.password !== pwForm.confirm ? 'border-red-300 focus:ring-red-400' : ''
             }`}
-              placeholder=lang === 'bg' ? 'Повторете новата парола' : 'Repeat your new password'
+              placeholder={lang === 'bg' ? 'Повторете новата парола' : 'Repeat your new password'}
               value={pwForm.confirm} onChange={e => setPw('confirm', e.target.value)} />
             {pwForm.confirm && pwForm.password !== pwForm.confirm && (
               <p className="text-xs text-red-500 mt-1">Passwords don't match</p>
