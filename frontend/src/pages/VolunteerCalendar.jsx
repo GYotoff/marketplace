@@ -74,6 +74,19 @@ export default function VolunteerCalendar() {
     load()
   }
 
+  const markAttended = async (reg) => {
+    setRemoving(reg.id) // reuse removing state as loading indicator
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'attended', updated_at: new Date().toISOString() })
+      .eq('id', reg.id)
+    if (error) flash(error.message, 'error')
+    else flash(lang === 'bg' ? 'Отбелязахте участие! Изчаква потвърждение.' : 'Attendance marked! Awaiting organizer confirmation.')
+    setDetail(null)
+    setRemoving(null)
+    load()
+  }
+
   // ── Calendar logic ────────────────────────────────────────────────────────
 
   const eventsByDay = {}
@@ -312,17 +325,46 @@ export default function VolunteerCalendar() {
               )}
             </div>
 
-            {/* Only allow cancellation for future events */}
-            {detail.events?.event_date && new Date(detail.events.event_date) > today && (
-              <button
-                onClick={() => unregister(detail)}
-                disabled={removing === detail.id}
-                className="w-full text-sm border border-red-200 text-red-600 hover:bg-red-50 rounded-xl py-2.5 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-              >
-                {removing === detail.id && <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />}
-                {removing === detail.id ? L.cancelling : L.cancel}
-              </button>
-            )}
+            {detail.events?.event_date && (() => {
+              const isPast = new Date(detail.events.event_date) <= today
+              if (!isPast) return (
+                <button
+                  onClick={() => unregister(detail)}
+                  disabled={removing === detail.id}
+                  className="w-full text-sm border border-red-200 text-red-600 hover:bg-red-50 rounded-xl py-2.5 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  {removing === detail.id && <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />}
+                  {removing === detail.id ? L.cancelling : L.cancel}
+                </button>
+              )
+              // Past event actions
+              if (detail.status === 'approved') return (
+                <button
+                  onClick={() => markAttended(detail)}
+                  disabled={removing === detail.id}
+                  className="w-full text-sm border border-brand-200 text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl py-2.5 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  {removing === detail.id && <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />}
+                  {removing === detail.id ? (lang === 'bg' ? 'Изпращане...' : 'Submitting...') : '✓ ' + (lang === 'bg' ? 'Потвърди участие' : 'I attended this event')}
+                </button>
+              )
+              if (detail.status === 'attended') return (
+                <p className="text-xs text-center text-amber-600 bg-amber-50 border border-amber-200 rounded-xl py-2.5 px-4">
+                  ⏳ {lang === 'bg' ? 'Изчаква потвърждение от организатора' : 'Awaiting confirmation from organizer'}
+                </p>
+              )
+              if (detail.status === 'confirmed') return (
+                <p className="text-xs text-center text-green-700 bg-green-50 border border-green-200 rounded-xl py-2.5 px-4">
+                  ✓ {lang === 'bg' ? 'Участието е потвърдено' : 'Attendance confirmed'}
+                </p>
+              )
+              if (detail.status === 'rejected') return (
+                <p className="text-xs text-center text-red-600 bg-red-50 border border-red-200 rounded-xl py-2.5 px-4">
+                  ✗ {lang === 'bg' ? 'Участието не беше потвърдено' : 'Attendance not confirmed'}
+                </p>
+              )
+              return null
+            })()}
           </div>
         </div>
       )}
