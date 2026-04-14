@@ -79,7 +79,7 @@ export default function Home() {
 
   const formatDate = (d) => {
     const dt = new Date(d)
-    return { day: dt.getDate(), month: dt.toLocaleString('en', { month: 'short' }) }
+    return { day: dt.getDate(), month: dt.toLocaleString('en', { month: 'short' }), year: dt.getFullYear() }
   }
 
   const spotlightConfigs = {
@@ -190,13 +190,14 @@ export default function Home() {
         <div className="flex flex-col gap-3">
           {events.length === 0 && <p className="text-gray-400 text-sm">{t('events.no_events')}</p>}
           {events.map(ev => {
-            const { day, month } = formatDate(ev.event_date)
+            const { day, month, year } = formatDate(ev.event_date)
             const spots = ev.volunteers_needed - ev.volunteers_enrolled
             return (
               <Link key={ev.id} to={`/events/${ev.id}`} className="flex items-center gap-4 card hover:border-gray-200 hover:shadow-sm transition-all">
                 <div className="min-w-12 text-center bg-brand-50 rounded-lg py-2 px-1">
                   <p className="text-xl font-semibold text-brand-400 leading-none">{day}</p>
                   <p className="text-xs text-brand-600 uppercase">{month}</p>
+                  <p className="text-xs text-brand-500">{year}</p>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 truncate">{ev.title}</p>
