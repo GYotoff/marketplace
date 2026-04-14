@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 
@@ -14,6 +15,8 @@ const FIELD = ({ label, value, placeholder = '—' }) => (
 
 export default function ViewProfile() {
   const { user, profile } = useAuthStore()
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [stats, setStats] = useState({ applications: 0, events: 0, hours: 0 })
   const [loading, setLoading] = useState(true)
 
@@ -48,7 +51,12 @@ export default function ViewProfile() {
     ? profile.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
     : profile.email[0].toUpperCase()
 
-  const roleLabel = {
+  const roleLabel = lang === 'bg' ? {
+    volunteer: 'Доброволец',
+    org_admin: 'Администратор на организация',
+    corp_admin: 'Администратор на корпорация',
+    super_admin: 'Администратор на платформата',
+  }[profile.role] || profile.role : {
     volunteer: 'Volunteer',
     org_admin: 'Organization admin',
     corp_admin: 'Corporation admin',
@@ -98,7 +106,7 @@ export default function ViewProfile() {
               </p>
             )}
             <p className="text-xs text-gray-400 mt-1">
-              Member since {new Date(profile.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
+              {lang === 'bg' ? 'Член от ' : 'Member since '}{new Date(profile.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
             </p>
           </div>
 
@@ -133,9 +141,9 @@ export default function ViewProfile() {
       {!loading && (
         <div className="grid grid-cols-3 gap-4 mb-5">
           {[
-            { label: 'Project applications', value: stats.applications },
-            { label: 'Events registered', value: stats.events },
-            { label: 'Volunteer hours', value: stats.hours },
+            { label: lang === 'bg' ? 'Заявки за проекти' : 'Project applications', value: stats.applications },
+            { label: lang === 'bg' ? 'Регистрации за събития' : 'Events registered', value: stats.events },
+            { label: lang === 'bg' ? 'Доброволчески часове' : 'Volunteer hours', value: stats.hours },
           ].map(s => (
             <div key={s.label} className="card text-center py-4">
               <p className="text-2xl font-medium text-brand-400">{s.value}</p>
@@ -157,14 +165,14 @@ export default function ViewProfile() {
       <div className="card">
         <h2 className="text-sm font-medium text-gray-700 mb-4">Profile details</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <FIELD label="Full name" value={profile.full_name} />
-          <FIELD label="Email" value={profile.email} />
-          <FIELD label="Phone" value={profile.phone} />
-          <FIELD label="City" value={profile.city} />
-          <FIELD label="Country" value={profile.country} />
-          <FIELD label="Preferred language" value={profile.preferred_language === 'bg' ? 'Български' : 'English'} />
-          <FIELD label="Role" value={roleLabel} />
-          <FIELD label="Account status" value={profile.is_active ? 'Active' : 'Inactive'} />
+          <FIELD label={lang === 'bg' ? 'Пълно име' : 'Full name'} value={profile.full_name} />
+          <FIELD label={lang === 'bg' ? 'Имейл' : 'Email'} value={profile.email} />
+          <FIELD label={lang === 'bg' ? 'Телефон' : 'Phone'} value={profile.phone} />
+          <FIELD label={lang === 'bg' ? 'Град' : 'City'} value={profile.city} />
+          <FIELD label={lang === 'bg' ? 'Държава' : 'Country'} value={profile.country} />
+          <FIELD label={lang === 'bg' ? 'Предпочитан език' : 'Preferred language'} value={profile.preferred_language === 'bg' ? 'Български' : 'English'} />
+          <FIELD label={lang === 'bg' ? 'Роля' : 'Role'} value={roleLabel} />
+          <FIELD label={lang === 'bg' ? 'Статус на акаунта' : 'Account status'} value={profile.is_active ? lang === 'bg' ? (profile.is_active ? 'Активен' : 'Неактивен') : (profile.is_active ? 'Active' : 'Inactive')} />
         </div>
       </div>
     </div>
