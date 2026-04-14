@@ -50,7 +50,7 @@ export default function EventPage() {
     if (!user) { navigate('/register'); return }
     setRegistering(true)
     const { error } = await supabase.from('event_registrations').insert({
-      event_id: id, profile_id: user.id, status: 'pending',
+      event_id: id, profile_id: user.id, status: 'approved',
     })
     if (error) { flash(error.message, 'error'); setRegistering(false); return }
     try {
@@ -118,28 +118,32 @@ export default function EventPage() {
     : null
 
   const RegisterBtn = () => {
-    if (!user) return <Link to="/register" className="btn-primary w-full text-center">{lang === 'bg' ? 'Регистрирай се за участие' : 'Sign up to register'}</Link>
+    if (!user) return (
+      <Link to="/register" className="btn-primary w-full text-center">
+        {lang === 'bg' ? 'Регистрирай се за участие' : 'Sign up to register'}
+      </Link>
+    )
     if (profile?.role !== 'volunteer') return null
-    if (!isFuture) return <span className="block text-center text-sm text-gray-400 py-2">{lang === 'bg' ? 'Събитието е приключило' : 'This event has passed'}</span>
-    if (registration?.status === 'pending') return (
+    if (!isFuture) return (
+      <span className="block text-center text-sm text-gray-400 py-2">
+        {lang === 'bg' ? 'Събитието е приключило' : 'This event has passed'}
+      </span>
+    )
+    if (registration) return (
       <div className="flex flex-col gap-2">
-        <span className="block text-center text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl py-2.5 px-4">
-          ⏳ {lang === 'bg' ? 'Регистрацията ви е изпратена' : 'Registration pending'}
+        <span className="block text-center text-sm text-brand-600 font-medium bg-brand-50 border border-brand-200 rounded-xl py-2.5 px-4">
+          ✓ {lang === 'bg' ? 'Регистриран' : "You're registered"}
         </span>
-        <button onClick={unregister} disabled={unregistering} className="text-xs text-center text-red-500 hover:text-red-700">
+        <button onClick={unregister} disabled={unregistering} className="text-xs text-center text-red-500 hover:text-red-700 mt-1">
           {unregistering ? '...' : (lang === 'bg' ? 'Отпиши се' : 'Cancel registration')}
         </button>
       </div>
     )
-    if (registration?.status === 'approved') return (
-      <div className="flex flex-col gap-2">
-        <span className="block text-center text-sm text-brand-600 font-medium py-2">✓ {lang === 'bg' ? 'Одобрен доброволец' : "You're an approved volunteer"}</span>
-        <button onClick={unregister} disabled={unregistering} className="text-xs text-center text-red-500 hover:text-red-700">
-          {unregistering ? '...' : (lang === 'bg' ? 'Отпиши се' : 'Cancel registration')}
-        </button>
-      </div>
+    if (isFull) return (
+      <span className="block text-center text-sm text-gray-500 bg-gray-100 rounded-xl py-2.5 px-4">
+        {lang === 'bg' ? 'Събитието е пълно' : 'Event is full'}
+      </span>
     )
-    if (isFull) return <span className="block text-center text-sm text-gray-500 bg-gray-100 rounded-xl py-2.5 px-4">{lang === 'bg' ? 'Събитието е пълно' : 'Event is full'}</span>
     return (
       <button onClick={register} disabled={registering} className="btn-primary w-full flex items-center justify-center gap-2">
         {registering && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
