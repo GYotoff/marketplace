@@ -22,6 +22,8 @@ export default function VolunteerAttendance() {
   const [regs, setRegs] = useState([])
   const [loading, setLoading] = useState(true)
   const [marking, setMarking] = useState(null)
+  const [hoursInput, setHoursInput] = useState({})
+  const [showHours, setShowHours] = useState(null) // reg_id
   const [toast, setToast] = useState(null)
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500) }
@@ -39,12 +41,13 @@ export default function VolunteerAttendance() {
 
   const markAttended = async (regId) => {
     setMarking(regId)
+    const hours = hoursInput[regId] ? parseFloat(hoursInput[regId]) : 0
     const { error } = await supabase
       .from('event_registrations')
-      .update({ status: 'attended', updated_at: new Date().toISOString() })
+      .update({ status: 'attended', hours_logged: hours, updated_at: new Date().toISOString() })
       .eq('id', regId)
     if (error) flash(error.message, 'error')
-    else flash(lang === 'bg' ? 'Отбелязахте участие!' : 'Attendance marked!')
+    else { flash(lang === 'bg' ? 'Отбелязахте участие!' : 'Attendance marked!'); setShowHours(null) }
     await load()
     setMarking(null)
   }
@@ -146,14 +149,37 @@ export default function VolunteerAttendance() {
                   </div>
 
                   {canMarkAttended && (
-                    <button
-                      onClick={() => markAttended(reg.reg_id)}
-                      disabled={marking === reg.reg_id}
-                      className="w-full flex items-center justify-center gap-2 text-sm border border-brand-200 text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl py-2.5 transition-colors disabled:opacity-50"
-                    >
-                      {marking === reg.reg_id && <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />}
-                      {marking === reg.reg_id ? L.marking : '✓ ' + L.mark}
-                    </button>
+                    showHours !== reg.reg_id ? (
+                      <button
+                        onClick={() => setShowHours(reg.reg_id)}
+                        className="w-full flex items-center justify-center gap-2 text-sm border border-brand-200 text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl py-2.5 transition-colors"
+                      >
+                        ✓ {L.mark}
+                      </button>
+                    ) : (
+                      <div className="flex flex-col gap-2 bg-brand-50 border border-brand-200 rounded-xl p-3">
+                        <p className="text-xs font-medium text-brand-700">{lang === 'bg' ? 'Колко часа участвахте?' : 'How many hours did you volunteer?'}</p>
+                        <div className="flex gap-2">
+                          <input
+                            type="number" min="0" max="24" step="0.5"
+                            className="input flex-1 py-1.5 text-sm"
+                            placeholder={lang === 'bg' ? 'напр. 3' : 'e.g. 3'}
+                            value={hoursInput[reg.reg_id] || ''}
+                            onChange={e => setHoursInput(h => ({ ...h, [reg.reg_id]: e.target.value }))}
+                          />
+                          <button
+                            onClick={() => markAttended(reg.reg_id)}
+                            disabled={marking === reg.reg_id}
+                            className="btn-primary text-sm px-4 flex items-center gap-1.5 disabled:opacity-50"
+                          >
+                            {marking === reg.reg_id && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                            {lang === 'bg' ? 'Потвърди' : 'Confirm'}
+                          </button>
+                          <button onClick={() => setShowHours(null)} className="text-xs text-gray-400 hover:text-gray-600 px-2">✕</button>
+                        </div>
+                        <p className="text-xs text-brand-600">{lang === 'bg' ? 'Часовете ще бъдат потвърдени от организатора.' : 'Hours will be confirmed by the organizer.'}</p>
+                      </div>
+                    )
                   )}
                   {isAttended && (
                     <p className="text-xs text-center text-amber-600 bg-amber-50 border border-amber-200 rounded-xl py-2.5 px-4">
