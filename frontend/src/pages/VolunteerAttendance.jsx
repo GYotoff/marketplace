@@ -5,12 +5,12 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
 const STATUS_CONFIG = {
-  approved:  { label: 'Registered',  labelBg: 'Регистриран',  badge: 'bg-brand-50 text-brand-700 border border-brand-200' },
-  attended:  { label: 'Attended',    labelBg: 'Присъствал',   badge: 'bg-amber-50 text-amber-700 border border-amber-200' },
-  confirmed: { label: 'Confirmed',   labelBg: 'Потвърден',    badge: 'bg-green-50 text-green-700 border border-green-200' },
-  rejected:  { label: 'Not confirmed', labelBg: 'Непотвърден', badge: 'bg-red-50 text-red-600 border border-red-200' },
-  pending:   { label: 'Pending',     labelBg: 'Изчакващ',     badge: 'bg-gray-100 text-gray-600' },
-  completed: { label: 'Completed',   labelBg: 'Завършен',     badge: 'bg-green-50 text-green-700' },
+  approved:  { label: 'Registered',       labelBg: 'Регистриран',              badge: 'bg-brand-50 text-brand-700 border border-brand-200' },
+  attended:  { label: 'Awaiting confirmation', labelBg: 'Изчаква потвърждение', badge: 'bg-amber-50 text-amber-700 border border-amber-200' },
+  confirmed: { label: 'Confirmed',         labelBg: 'Потвърден',                badge: 'bg-green-50 text-green-700 border border-green-200' },
+  rejected:  { label: 'Not confirmed',     labelBg: 'Непотвърден',              badge: 'bg-red-50 text-red-600 border border-red-200' },
+  pending:   { label: 'Pending',           labelBg: 'Изчакващ',                 badge: 'bg-gray-100 text-gray-600' },
+  completed: { label: 'Completed',         labelBg: 'Завършен',                 badge: 'bg-green-50 text-green-700' },
 }
 
 export default function VolunteerAttendance() {
@@ -30,11 +30,8 @@ export default function VolunteerAttendance() {
 
   const load = async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('event_registrations')
-      .select('id, status, registered_at, updated_at, events(id, title, title_bg, event_date, end_date, city, address, is_online, organizations(name, slug), projects(id, title))')
-      .eq('profile_id', user.id)
-      .order('registered_at', { ascending: false })
+    // Use RPC to bypass RLS — fetches all registered events regardless of status
+    const { data, error } = await supabase.rpc('get_volunteer_registered_events')
     if (error) console.error(error)
     setRegs(data || [])
     setLoading(false)
@@ -56,13 +53,12 @@ export default function VolunteerAttendance() {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
   })
 
-  // Split into upcoming vs past
-  const past     = regs.filter(r => r.events?.event_date && new Date(r.events.event_date) < now)
-  const upcoming = regs.filter(r => r.events?.event_date && new Date(r.events.event_date) >= now)
+  const past     = regs.filter(r => r.event_date && new Date(r.event_date) < now)
+  const upcoming = regs.filter(r => r.event_date && new Date(r.event_date) >= now)
 
   const L = {
     title:    lang === 'bg' ? 'Участие в събития' : 'Event Participation',
-    subtitle: lang === 'bg' ? 'Минали събития, в които сте участвали или сте регистрирани.' : 'Past events you registered or attended.',
+    subtitle: lang === 'bg' ? 'Минали и предстоящи събития, за които сте регистрирани.' : 'Past and upcoming events you are registered for.',
     past:     lang === 'bg' ? 'Минали' : 'Past events',
     upcoming: lang === 'bg' ? 'Предстоящи' : 'Upcoming',
     mark:     lang === 'bg' ? 'Потвърди участие' : 'I attended this event',
@@ -109,46 +105,46 @@ export default function VolunteerAttendance() {
         ) : (
           <div className="flex flex-col gap-3">
             {past.map(reg => {
-              const ev = reg.events
-              const title = (lang === 'bg' && ev?.title_bg) ? ev.title_bg : ev?.title
-              const cfg = STATUS_CONFIG[reg.status] || STATUS_CONFIG.approved
+              const title = (lang === 'bg' && reg.event_title_bg) ? reg.event_title_bg : reg.event_title
+              const cfg = STATUS_CONFIG[reg.reg_status] || STATUS_CONFIG.approved
               const statusLabel = lang === 'bg' ? cfg.labelBg : cfg.label
-              const canMarkAttended = reg.status === 'approved'
-              const isAttended = reg.status === 'attended'
+              const canMarkAttended = reg.reg_status === 'approved'
+              const isAttended = reg.reg_status === 'attended'
 
               return (
-                <div key={reg.id} className={'card flex flex-col gap-3 ' + (reg.status === 'confirmed' ? 'border-green-200 bg-green-50/30' : reg.status === 'rejected' ? 'border-red-100 bg-red-50/20' : '')}>
+                <div key={reg.reg_id} className={
+                  'card flex flex-col gap-3 ' +
+                  (reg.reg_status === 'confirmed' ? 'border-green-200 bg-green-50/30' :
+                   reg.reg_status === 'rejected'  ? 'border-red-100 bg-red-50/20' : '')
+                }>
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <Link to={'/events/' + ev?.id} className="font-medium text-gray-900 hover:text-brand-600 hover:underline">
+                        <Link to={'/events/' + reg.event_id} className="font-medium text-gray-900 hover:text-brand-600 hover:underline">
                           {title}
                         </Link>
                         <span className={'badge text-xs px-2 py-0.5 ' + cfg.badge}>{statusLabel}</span>
                       </div>
-                      {ev?.event_date && <p className="text-xs text-gray-400">{fmtDate(ev.event_date)}</p>}
-                      {ev?.organizations && (
+                      {reg.event_date && <p className="text-xs text-gray-400">{fmtDate(reg.event_date)}</p>}
+                      {reg.org_name && (
                         <p className="text-xs text-gray-400 mt-0.5">
-                          {L.org}: <Link to={'/organizations/' + ev.organizations.slug} className="text-brand-500 hover:underline">{ev.organizations.name}</Link>
+                          {L.org}: <Link to={'/organizations/' + reg.org_slug} className="text-brand-500 hover:underline">{reg.org_name}</Link>
                         </p>
                       )}
-                      {ev?.projects && (
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {L.project}: {ev.projects.title}
-                        </p>
+                      {reg.project_title && (
+                        <p className="text-xs text-gray-400 mt-0.5">{L.project}: {reg.project_title}</p>
                       )}
                     </div>
                   </div>
 
-                  {/* Action / status messages */}
                   {canMarkAttended && (
                     <button
-                      onClick={() => markAttended(reg.id)}
-                      disabled={marking === reg.id}
+                      onClick={() => markAttended(reg.reg_id)}
+                      disabled={marking === reg.reg_id}
                       className="w-full flex items-center justify-center gap-2 text-sm border border-brand-200 text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl py-2.5 transition-colors disabled:opacity-50"
                     >
-                      {marking === reg.id && <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />}
-                      {marking === reg.id ? L.marking : '✓ ' + L.mark}
+                      {marking === reg.reg_id && <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />}
+                      {marking === reg.reg_id ? L.marking : '✓ ' + L.mark}
                     </button>
                   )}
                   {isAttended && (
@@ -156,12 +152,12 @@ export default function VolunteerAttendance() {
                       ⏳ {L.pending_confirm}
                     </p>
                   )}
-                  {reg.status === 'confirmed' && (
+                  {reg.reg_status === 'confirmed' && (
                     <p className="text-xs text-center text-green-700 bg-green-50 border border-green-200 rounded-xl py-2.5 px-4">
                       ✓ {lang === 'bg' ? 'Участието ви е потвърдено от организатора' : 'Your attendance has been confirmed by the organizer'}
                     </p>
                   )}
-                  {reg.status === 'rejected' && (
+                  {reg.reg_status === 'rejected' && (
                     <p className="text-xs text-center text-red-600 bg-red-50 border border-red-200 rounded-xl py-2.5 px-4">
                       ✗ {lang === 'bg' ? 'Участието не беше потвърдено' : 'Your attendance was not confirmed'}
                     </p>
@@ -173,20 +169,21 @@ export default function VolunteerAttendance() {
         )}
       </div>
 
-      {/* ── Upcoming (read-only summary) ── */}
+      {/* ── Upcoming ── */}
       {upcoming.length > 0 && (
         <div>
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">{L.upcoming}</p>
           <div className="flex flex-col gap-3">
             {upcoming.map(reg => {
-              const ev = reg.events
-              const title = (lang === 'bg' && ev?.title_bg) ? ev.title_bg : ev?.title
-              const cfg = STATUS_CONFIG[reg.status] || STATUS_CONFIG.approved
+              const title = (lang === 'bg' && reg.event_title_bg) ? reg.event_title_bg : reg.event_title
+              const cfg = STATUS_CONFIG[reg.reg_status] || STATUS_CONFIG.approved
               return (
-                <div key={reg.id} className="card flex items-center gap-3 opacity-75">
+                <div key={reg.reg_id} className="card flex items-center gap-3 opacity-75">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-gray-900 truncate">{title}</p>
-                    {ev?.event_date && <p className="text-xs text-gray-400">{fmtDate(ev.event_date)}</p>}
+                    <Link to={'/events/' + reg.event_id} className="font-medium text-sm text-gray-900 truncate hover:text-brand-600 hover:underline block">
+                      {title}
+                    </Link>
+                    {reg.event_date && <p className="text-xs text-gray-400">{fmtDate(reg.event_date)}</p>}
                   </div>
                   <span className={'badge text-xs px-2 py-0.5 ' + cfg.badge}>
                     {lang === 'bg' ? cfg.labelBg : cfg.label}
