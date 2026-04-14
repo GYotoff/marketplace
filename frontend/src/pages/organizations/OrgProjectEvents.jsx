@@ -272,32 +272,38 @@ export default function OrgProjectEvents() {
                               {/* Registration meta */}
                               <div className="shrink-0 text-right">
                                 <div className="flex flex-col items-end gap-1.5">
-                                <span className={'badge text-xs px-2 py-0.5 capitalize ' + (REG_STATUS_BADGE[reg.status] || 'bg-gray-100 text-gray-600')}>
-                                  {{ approved: 'Registered', attended: 'Attended ⏳', confirmed: 'Confirmed', rejected: 'Rejected', pending: 'Registered' }[reg.status] || reg.status}
-                                </span>
-                                {reg.status === 'attended' && (
-                                  <div className="flex gap-1.5">
-                                    <button
-                                      onClick={() => confirmAttendance(reg.id, ev.id)}
-                                      className="text-xs bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 rounded-lg px-2 py-1 transition-colors"
-                                    >
-                                      Confirm
-                                    </button>
-                                    <button
-                                      onClick={() => rejectAttendance(reg.id, ev.id)}
-                                      className="text-xs bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 rounded-lg px-2 py-1 transition-colors"
-                                    >
-                                      Reject
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
+                                  <span className={'badge text-xs px-2 py-0.5 capitalize ' + (REG_STATUS_BADGE[reg.status] || 'bg-gray-100 text-gray-600')}>
+                                    {{ approved: 'Registered', attended: 'Attended', confirmed: 'Confirmed', rejected: 'Rejected', pending: 'Registered' }[reg.status] || reg.status}
+                                  </span>
+                                  {reg.status === 'attended' && (
+                                    <div className="flex flex-col items-end gap-1.5">
+                                      {/* Hours logged — shown prominently so admin sees before confirming */}
+                                      <div className={'text-xs px-2.5 py-1 rounded-lg font-medium ' + (reg.hours_logged > 0 ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'bg-gray-100 text-gray-500')}>
+                                        ⏱ {reg.hours_logged > 0 ? `${reg.hours_logged}h logged` : 'No hours logged'}
+                                      </div>
+                                      <div className="flex gap-1.5">
+                                        <button
+                                          onClick={() => confirmAttendance(reg.id, ev.id)}
+                                          className="text-xs bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 rounded-lg px-2 py-1 transition-colors"
+                                        >
+                                          Confirm
+                                        </button>
+                                        <button
+                                          onClick={() => rejectAttendance(reg.id, ev.id)}
+                                          className="text-xs bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 rounded-lg px-2 py-1 transition-colors"
+                                        >
+                                          Reject
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {reg.status === 'confirmed' && reg.hours_logged > 0 && (
+                                    <p className="text-xs text-brand-600">⏱ {reg.hours_logged}h</p>
+                                  )}
+                                </div>
                                 <p className="text-xs text-gray-400 mt-1">
                                   {new Date(reg.registered_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                                 </p>
-                                {reg.hours_logged > 0 && (
-                                  <p className="text-xs text-brand-600 mt-0.5">⏱ {reg.hours_logged}h</p>
-                                )}
                               </div>
                             </div>
                           )
