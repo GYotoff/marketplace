@@ -36,13 +36,31 @@ export default function VolunteerCalendar() {
 
   const load = async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('event_registrations')
-      .select('id, status, registered_at, events(id, title, title_bg, description, description_bg, event_date, end_date, city, address, is_online, online_url, volunteers_needed, volunteers_enrolled, organizations(name, slug), projects(title))')
-      .eq('profile_id', user.id)
-      .order('registered_at', { ascending: false })
+    // Use RPC to bypass RLS — fetches all registered events regardless of status
+    const { data, error } = await supabase.rpc('get_volunteer_registered_events')
     if (error) console.error(error)
-    setRegistrations(data || [])
+    // Remap RPC flat rows → shape the calendar expects: { id, status, registered_at, events: {...} }
+    const mapped = (data || []).map(r => ({
+      id: r.reg_id,
+      status: r.reg_status,
+      registered_at: r.registered_at,
+      events: {
+        id: r.event_id,
+        title: r.event_title,
+        title_bg: r.event_title_bg,
+        description: null,
+        description_bg: null,
+        event_date: r.event_date,
+        end_date: r.end_date,
+        city: r.city,
+        address: r.address,
+        is_online: r.is_online,
+        online_url: r.online_url,
+        organizations: r.org_name ? { name: r.org_name, slug: r.org_slug } : null,
+        projects: r.project_title ? { title: r.project_title } : null,
+      }
+    }))
+    setRegistrations(mapped)
     setLoading(false)
   }
 
