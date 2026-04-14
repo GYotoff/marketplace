@@ -20,6 +20,8 @@ export default function EventPage() {
   const [registering, setRegistering] = useState(false)
   const [unregistering, setUnregistering] = useState(false)
   const [acting, setActing] = useState(null)
+  const [hoursInput, setHoursInput] = useState('')
+  const [showHoursForm, setShowHoursForm] = useState(false)
   const [toast, setToast] = useState(null)
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500) }
@@ -100,12 +102,13 @@ export default function EventPage() {
 
   const markAttended = async () => {
     setActing('attend')
+    const hours = hoursInput ? parseFloat(hoursInput) : 0
     const { error } = await supabase
       .from('event_registrations')
-      .update({ status: 'attended', updated_at: new Date().toISOString() })
+      .update({ status: 'attended', hours_logged: hours, updated_at: new Date().toISOString() })
       .eq('id', registration.id)
     if (error) flash(error.message, 'error')
-    else flash(lang === 'bg' ? 'Отбелязахте участие!' : 'Attendance marked!')
+    else { flash(lang === 'bg' ? 'Отбелязахте участие!' : 'Attendance marked!'); setShowHoursForm(false) }
     await load()
     setActing(null)
   }
@@ -166,18 +169,39 @@ export default function EventPage() {
             {label}
           </span>
 
-          {/* Past event, approved → can mark attended */}
+          {/* Past event, approved → hours form + mark attended */}
           {!isFuture && registration.status === 'approved' && (
-            <button
-              onClick={markAttended}
-              disabled={acting === 'attend'}
-              className="w-full flex items-center justify-center gap-2 text-sm border border-brand-200 text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl py-2.5 transition-colors disabled:opacity-50"
-            >
-              {acting === 'attend' && <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />}
-              {acting === 'attend'
-                ? (lang === 'bg' ? 'Изпращане...' : 'Submitting...')
-                : '✓ ' + (lang === 'bg' ? 'Потвърди участие' : 'I attended this event')}
-            </button>
+            !showHoursForm ? (
+              <button
+                onClick={() => setShowHoursForm(true)}
+                className="w-full flex items-center justify-center gap-2 text-sm border border-brand-200 text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl py-2.5 transition-colors"
+              >
+                ✓ {lang === 'bg' ? 'Потвърди участие' : 'I attended this event'}
+              </button>
+            ) : (
+              <div className="flex flex-col gap-2 bg-brand-50 border border-brand-200 rounded-xl p-3">
+                <p className="text-xs font-medium text-brand-700">{lang === 'bg' ? 'Колко часа участвахте?' : 'How many hours did you volunteer?'}</p>
+                <div className="flex gap-2">
+                  <input
+                    type="number" min="0" max="24" step="0.5"
+                    className="input flex-1 py-1.5 text-sm"
+                    placeholder={lang === 'bg' ? 'напр. 3' : 'e.g. 3'}
+                    value={hoursInput}
+                    onChange={e => setHoursInput(e.target.value)}
+                  />
+                  <button
+                    onClick={markAttended}
+                    disabled={acting === 'attend'}
+                    className="btn-primary text-sm px-4 flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    {acting === 'attend' && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                    {lang === 'bg' ? 'Потвърди' : 'Confirm'}
+                  </button>
+                  <button onClick={() => setShowHoursForm(false)} className="text-xs text-gray-400 hover:text-gray-600 px-2">✕</button>
+                </div>
+                <p className="text-xs text-brand-600">{lang === 'bg' ? 'Часовете ще бъдат потвърдени от организатора.' : 'Hours will be confirmed by the organizer.'}</p>
+              </div>
+            )
           )}
 
           {/* Past event, attended → awaiting org confirmation */}
