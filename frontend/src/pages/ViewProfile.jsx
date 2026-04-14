@@ -172,7 +172,7 @@ export default function ViewProfile() {
           <FIELD label={lang === 'bg' ? 'Държава' : 'Country'} value={profile.country} />
           <FIELD label={lang === 'bg' ? 'Предпочитан език' : 'Preferred language'} value={profile.preferred_language === 'bg' ? 'Български' : 'English'} />
           <FIELD label={lang === 'bg' ? 'Роля' : 'Role'} value={roleLabel} />
-          <FIELD label={lang === 'bg' ? 'Статус на акаунта' : 'Account status'} value={profile.is_active ? lang === 'bg' ? (profile.is_active ? 'Активен' : 'Неактивен') : (profile.is_active ? 'Active' : 'Inactive')} />
+          <FIELD label={lang === 'bg' ? 'Статус на акаунта' : 'Account status'} value={lang === 'bg' ? (profile.is_active ? 'Активен' : 'Неактивен') : (profile.is_active ? 'Active' : 'Inactive')} />
         </div>
       </div>
     </div>
