@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
@@ -128,6 +129,8 @@ const TABS = [
 
 export default function OrgSettings() {
   const { user } = useAuthStore()
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const navigate = useNavigate()
   const [org, setOrg] = useState(null)
   const [form, setForm] = useState({})
