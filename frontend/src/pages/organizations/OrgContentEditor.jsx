@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 const VISIBILITY_OPTIONS = [
   { value: 'public', label: 'Public', desc: 'Visible to everyone including non-registered users', icon: '🌐' },
@@ -134,6 +135,8 @@ function ContentField({ field, value, visibility, isPublished, onSave }) {
 
 export default function OrgContentEditor() {
   const { user } = useAuthStore()
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [org, setOrg] = useState(null)
   const [contentMap, setContentMap] = useState({})
   const [loading, setLoading] = useState(true)
