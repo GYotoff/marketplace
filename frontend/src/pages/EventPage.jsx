@@ -27,13 +27,22 @@ export default function EventPage() {
 
   const load = async () => {
     setLoading(true)
-    const { data: ev, error } = await supabase
-      .from('events')
-      .select('*, organizations(id, name, slug, logo_url), projects(id, title)')
-      .eq('id', id)
-      .single()
+
+    // Use RPC to bypass RLS — returns event if public, registered, or org admin
+    const { data: rows, error } = await supabase
+      .rpc('get_event_for_viewer', { p_event_id: id })
+    const ev = rows?.[0]
     if (error || !ev) { setNotFound(true); setLoading(false); return }
-    setEvent(ev)
+
+    // Fetch related org + project data
+    const [{ data: org }, { data: project }] = await Promise.all([
+      supabase.from('organizations').select('id, name, slug, logo_url').eq('id', ev.organization_id).single(),
+      ev.project_id
+        ? supabase.from('projects').select('id, title').eq('id', ev.project_id).single()
+        : Promise.resolve({ data: null }),
+    ])
+    setEvent({ ...ev, organizations: org, projects: project })
+
     if (user) {
       const { data: reg } = await supabase
         .from('event_registrations')
