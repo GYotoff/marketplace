@@ -279,7 +279,10 @@ export default function VolunteerCalendar() {
           <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10" onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h2 className="text-lg font-medium text-gray-900 pr-4">{detail.events?.title}</h2>
+                <Link to={'/events/' + detail.events?.id} onClick={() => setDetail(null)}
+                  className="text-lg font-medium text-gray-900 hover:text-brand-600 hover:underline pr-4 block">
+                  {detail.events?.title}
+                </Link>
                 {detail.events?.projects?.title && (
                   <p className="text-xs text-gray-400 mt-0.5">{L.project}: {detail.events.projects.title}</p>
                 )}
