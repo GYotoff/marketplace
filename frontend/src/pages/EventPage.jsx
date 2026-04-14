@@ -117,6 +117,13 @@ export default function EventPage() {
     ? new Date(event.end_date).toLocaleTimeString(lang === 'bg' ? 'bg-BG' : 'en-GB', { hour: '2-digit', minute: '2-digit' })
     : null
 
+  const STATUS_CONFIG = {
+    approved:  { label: "You're registered",           labelBg: 'Регистриран',              badge: 'bg-brand-50 text-brand-700 border border-brand-200' },
+    attended:  { label: 'Awaiting confirmation',        labelBg: 'Изчаква потвърждение',      badge: 'bg-amber-50 text-amber-700 border border-amber-200' },
+    confirmed: { label: 'Attendance confirmed',         labelBg: 'Участието е потвърдено',    badge: 'bg-green-50 text-green-700 border border-green-200' },
+    rejected:  { label: 'Attendance not confirmed',     labelBg: 'Участието не е потвърдено', badge: 'bg-red-50 text-red-600 border border-red-200' },
+  }
+
   const RegisterBtn = () => {
     if (!user) return (
       <Link to="/register" className="btn-primary w-full text-center">
@@ -124,20 +131,38 @@ export default function EventPage() {
       </Link>
     )
     if (profile?.role !== 'volunteer') return null
-    if (!isFuture) return (
+
+    // Registered — show status + actions
+    if (registration) {
+      const cfg = STATUS_CONFIG[registration.status]
+      const label = lang === 'bg' ? (cfg?.labelBg || registration.status) : (cfg?.label || registration.status)
+      return (
+        <div className="flex flex-col gap-2">
+          <span className={'block text-center text-sm font-medium rounded-xl py-2.5 px-4 ' + (cfg?.badge || 'bg-gray-100 text-gray-600')}>
+            {registration.status === 'approved' || registration.status === 'confirmed' ? '✓ ' : ''}
+            {label}
+          </span>
+          {/* Can mark attended only for past events with approved status */}
+          {!isFuture && registration.status === 'approved' && (
+            <Link to="/dashboard/attendance" className="text-xs text-center text-brand-600 hover:underline">
+              {lang === 'bg' ? '→ Потвърди участие' : '→ Mark your attendance'}
+            </Link>
+          )}
+          {/* Can cancel only for future events */}
+          {isFuture && (
+            <button onClick={unregister} disabled={unregistering} className="text-xs text-center text-red-500 hover:text-red-700 mt-1">
+              {unregistering ? '...' : (lang === 'bg' ? 'Отпиши се' : 'Cancel registration')}
+            </button>
+          )}
+        </div>
+      )
+    }
+
+    // Not registered
+    if (!isFuture || event.status === 'completed') return (
       <span className="block text-center text-sm text-gray-400 py-2">
         {lang === 'bg' ? 'Събитието е приключило' : 'This event has passed'}
       </span>
-    )
-    if (registration) return (
-      <div className="flex flex-col gap-2">
-        <span className="block text-center text-sm text-brand-600 font-medium bg-brand-50 border border-brand-200 rounded-xl py-2.5 px-4">
-          ✓ {lang === 'bg' ? 'Регистриран' : "You're registered"}
-        </span>
-        <button onClick={unregister} disabled={unregistering} className="text-xs text-center text-red-500 hover:text-red-700 mt-1">
-          {unregistering ? '...' : (lang === 'bg' ? 'Отпиши се' : 'Cancel registration')}
-        </button>
-      </div>
     )
     if (isFull) return (
       <span className="block text-center text-sm text-gray-500 bg-gray-100 rounded-xl py-2.5 px-4">
