@@ -14,6 +14,7 @@ import Dashboard from '@/pages/Dashboard'
 import ViewProfile from '@/pages/ViewProfile'
 import EditProfile from '@/pages/EditProfile'
 import VolunteerCalendar from '@/pages/VolunteerCalendar'
+import VolunteerAttendance from '@/pages/VolunteerAttendance'
 import Organizations from '@/pages/Organizations'
 import Corporations from '@/pages/Corporations'
 import Volunteers from '@/pages/Volunteers'
@@ -86,6 +87,11 @@ export default function App() {
         <Route path="/dashboard/calendar" element={
           <ProtectedRoute allowedRoles={['volunteer']}>
             <VolunteerCalendar />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard/attendance" element={
+          <ProtectedRoute allowedRoles={['volunteer']}>
+            <VolunteerAttendance />
           </ProtectedRoute>
         } />
         <Route path="/about" element={<About />} />
