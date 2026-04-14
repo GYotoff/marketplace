@@ -222,9 +222,10 @@ export default function VolunteerCalendar() {
                     <span>{d}</span>
                     {evs.length > 0 && (
                       <span className={'mt-0.5 flex gap-0.5 flex-wrap justify-center'}>
-                        {evs.slice(0, 3).map((_, j) => (
-                          <span key={j} className={'inline-block w-1.5 h-1.5 rounded-full ' + (isSelected ? 'bg-white' : 'bg-brand-400')} />
-                        ))}
+                        {evs.slice(0, 3).map((ev, j) => {
+                            const isPastEv = ev.events?.event_date && new Date(ev.events.event_date) < today
+                            return <span key={j} className={'inline-block w-1.5 h-1.5 rounded-full ' + (isSelected ? 'bg-white' : isPastEv ? 'bg-gray-300' : 'bg-brand-400')} />
+                          })}
                       </span>
                     )}
                   </button>
@@ -272,6 +273,14 @@ export default function VolunteerCalendar() {
                   {reg.events?.organizations?.name && (
                     <p className="text-xs text-brand-500 mt-0.5 truncate">{reg.events.organizations.name}</p>
                   )}
+                  {(reg.events?.city || reg.events?.address) && (
+                    <p className="text-xs text-gray-400 mt-0.5 truncate">
+                      📍 {[reg.events.city, reg.events.address].filter(Boolean).join(', ')}
+                    </p>
+                  )}
+                  {reg.events?.is_online && (
+                    <p className="text-xs text-blue-500 mt-0.5">{lang === 'bg' ? '💻 Онлайн' : '💻 Online'}</p>
+                  )}
                 </button>
               ))
             }
@@ -283,6 +292,9 @@ export default function VolunteerCalendar() {
                 <div key={reg.id} className="card mb-2 opacity-60">
                   <p className="text-sm text-gray-600 truncate">{reg.events?.title}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{reg.events?.event_date ? fmtShort(reg.events.event_date) : ''}</p>
+                  {(reg.events?.city || reg.events?.address) && (
+                    <p className="text-xs text-gray-400 mt-0.5 truncate">📍 {[reg.events.city, reg.events.address].filter(Boolean).join(', ')}</p>
+                  )}
                 </div>
               ))}
             </div>
