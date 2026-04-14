@@ -9,8 +9,8 @@ const STATUS_CONFIG = {
   attended:  { label: 'Awaiting confirmation', labelBg: 'Изчаква потвърждение', badge: 'bg-amber-50 text-amber-700 border border-amber-200' },
   confirmed: { label: 'Confirmed',         labelBg: 'Потвърден',                badge: 'bg-green-50 text-green-700 border border-green-200' },
   rejected:  { label: 'Not confirmed',     labelBg: 'Непотвърден',              badge: 'bg-red-50 text-red-600 border border-red-200' },
-  pending:   { label: 'Pending',           labelBg: 'Изчакващ',                 badge: 'bg-gray-100 text-gray-600' },
-  completed: { label: 'Completed',         labelBg: 'Завършен',                 badge: 'bg-green-50 text-green-700' },
+  pending:   { label: 'Registered',           labelBg: 'Регистриран',                 badge: 'bg-gray-100 text-gray-600' },
+  completed: { label: 'Confirmed',         labelBg: 'Потвърден',                 badge: 'bg-green-50 text-green-700' },
 }
 
 export default function VolunteerAttendance() {
