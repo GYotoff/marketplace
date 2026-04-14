@@ -28,6 +28,8 @@ export default function VolunteerCalendar() {
   const [detail, setDetail] = useState(null) // event clicked for full details
   const [loading, setLoading] = useState(true)
   const [removing, setRemoving] = useState(null)
+  const [calHours, setCalHours] = useState('')
+  const [showCalHours, setShowCalHours] = useState(false)
   const [toast, setToast] = useState(null)
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500) }
@@ -93,13 +95,14 @@ export default function VolunteerCalendar() {
   }
 
   const markAttended = async (reg) => {
-    setRemoving(reg.id) // reuse removing state as loading indicator
+    setRemoving(reg.id)
+    const hours = calHours ? parseFloat(calHours) : 0
     const { error } = await supabase
       .from('event_registrations')
-      .update({ status: 'attended', updated_at: new Date().toISOString() })
+      .update({ status: 'attended', hours_logged: hours, updated_at: new Date().toISOString() })
       .eq('id', reg.id)
     if (error) flash(error.message, 'error')
-    else flash(lang === 'bg' ? 'Отбелязахте участие! Изчаква потвърждение.' : 'Attendance marked! Awaiting organizer confirmation.')
+    else { flash(lang === 'bg' ? 'Отбелязахте участие!' : 'Attendance marked!'); setShowCalHours(false); setCalHours('') }
     setDetail(null)
     setRemoving(null)
     load()
@@ -372,14 +375,37 @@ export default function VolunteerCalendar() {
               )
               // Past event actions
               if (detail.status === 'approved') return (
-                <button
-                  onClick={() => markAttended(detail)}
-                  disabled={removing === detail.id}
-                  className="w-full text-sm border border-brand-200 text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl py-2.5 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-                >
-                  {removing === detail.id && <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />}
-                  {removing === detail.id ? (lang === 'bg' ? 'Изпращане...' : 'Submitting...') : '✓ ' + (lang === 'bg' ? 'Потвърди участие' : 'I attended this event')}
-                </button>
+                !showCalHours ? (
+                  <button
+                    onClick={() => setShowCalHours(true)}
+                    className="w-full text-sm border border-brand-200 text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl py-2.5 flex items-center justify-center gap-2 transition-colors"
+                  >
+                    ✓ {lang === 'bg' ? 'Потвърди участие' : 'I attended this event'}
+                  </button>
+                ) : (
+                  <div className="flex flex-col gap-2 bg-brand-50 border border-brand-200 rounded-xl p-3">
+                    <p className="text-xs font-medium text-brand-700">{lang === 'bg' ? 'Колко часа участвахте?' : 'How many hours did you volunteer?'}</p>
+                    <div className="flex gap-2">
+                      <input
+                        type="number" min="0" max="24" step="0.5"
+                        className="input flex-1 py-1.5 text-sm"
+                        placeholder={lang === 'bg' ? 'напр. 3' : 'e.g. 3'}
+                        value={calHours}
+                        onChange={e => setCalHours(e.target.value)}
+                      />
+                      <button
+                        onClick={() => markAttended(detail)}
+                        disabled={removing === detail.id}
+                        className="btn-primary text-sm px-4 flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        {removing === detail.id && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                        {lang === 'bg' ? 'Потвърди' : 'Confirm'}
+                      </button>
+                      <button onClick={() => { setShowCalHours(false); setCalHours('') }} className="text-xs text-gray-400 hover:text-gray-600 px-2">✕</button>
+                    </div>
+                    <p className="text-xs text-brand-600">{lang === 'bg' ? 'Часовете ще бъдат потвърдени от организатора.' : 'Hours will be confirmed by the organizer.'}</p>
+                  </div>
+                )
               )
               if (detail.status === 'attended') return (
                 <p className="text-xs text-center text-amber-600 bg-amber-50 border border-amber-200 rounded-xl py-2.5 px-4">
