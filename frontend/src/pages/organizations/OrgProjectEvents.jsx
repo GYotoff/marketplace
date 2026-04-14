@@ -295,6 +295,9 @@ export default function OrgProjectEvents() {
                                 <p className="text-xs text-gray-400 mt-1">
                                   {new Date(reg.registered_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                                 </p>
+                                {reg.hours_logged > 0 && (
+                                  <p className="text-xs text-brand-600 mt-0.5">⏱ {reg.hours_logged}h</p>
+                                )}
                               </div>
                             </div>
                           )
