@@ -10,6 +10,13 @@ const STATUS_BADGE = {
   completed: 'bg-green-50 text-green-700 border border-green-200',
 }
 
+const REG_STATUS_BADGE = {
+  approved:  'bg-brand-50 text-brand-700 border border-brand-200',
+  pending:   'bg-amber-50 text-amber-700 border border-amber-200',
+  rejected:  'bg-red-50 text-red-600',
+  completed: 'bg-green-50 text-green-700',
+}
+
 export default function OrgProjectEvents() {
   const { projectId } = useParams()
   const { user } = useAuthStore()
@@ -17,6 +24,11 @@ export default function OrgProjectEvents() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState(null)
+  // expandedId → null means collapsed, eventId means expanded
+  const [expandedId, setExpandedId] = useState(null)
+  // registrations cache: { [eventId]: [] }
+  const [registrations, setRegistrations] = useState({})
+  const [regLoading, setRegLoading] = useState(null)
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3000) }
 
@@ -25,21 +37,56 @@ export default function OrgProjectEvents() {
   const load = async () => {
     if (!user) return
     setLoading(true)
-    const { data: p } = await supabase.from('projects').select('id, title, status, organization_id').eq('id', projectId).single()
+    const { data: p } = await supabase
+      .from('projects')
+      .select('id, title, status, organization_id')
+      .eq('id', projectId)
+      .single()
     if (!p) { setLoading(false); return }
     setProject(p)
-    const { data } = await supabase.from('events').select('*').eq('project_id', projectId).order('event_date', { ascending: true })
+    const { data } = await supabase
+      .from('events')
+      .select('*')
+      .eq('project_id', projectId)
+      .order('event_date', { ascending: true })
     setEvents(data || [])
     setLoading(false)
   }
 
+  const loadRegistrations = async (eventId) => {
+    if (registrations[eventId]) return // already cached
+    setRegLoading(eventId)
+    const { data } = await supabase
+      .from('event_registrations')
+      .select('id, status, registered_at, profiles!event_registrations_profile_id_fkey(id, full_name, email, avatar_url, city, phone)')
+      .eq('event_id', eventId)
+      .order('registered_at', { ascending: true })
+    setRegistrations(prev => ({ ...prev, [eventId]: data || [] }))
+    setRegLoading(null)
+  }
+
+  const toggleExpand = async (eventId) => {
+    if (expandedId === eventId) {
+      setExpandedId(null)
+    } else {
+      setExpandedId(eventId)
+      await loadRegistrations(eventId)
+    }
+  }
+
   const togglePublic = async (ev) => {
-    const { error } = await supabase.from('events').update({ show_in_public: !ev.show_in_public, updated_at: new Date().toISOString() }).eq('id', ev.id)
+    const { error } = await supabase
+      .from('events')
+      .update({ show_in_public: !ev.show_in_public, updated_at: new Date().toISOString() })
+      .eq('id', ev.id)
     if (!error) { flash('Updated'); load() } else flash(error.message, 'error')
   }
 
   const setStatus = async (ev, status) => {
-    const { error } = await supabase.from('events').update({ status, updated_at: new Date().toISOString() }).eq('id', ev.id)
+    const { error } = await supabase
+      .from('events')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', ev.id)
     if (!error) { flash('Status updated'); load() } else flash(error.message, 'error')
   }
 
@@ -49,8 +96,16 @@ export default function OrgProjectEvents() {
     if (!error) { flash('Event deleted'); load() } else flash(error.message, 'error')
   }
 
-  if (loading) return <div className="flex items-center justify-center min-h-[40vh]"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>
-  if (!project) return <div className="max-w-lg mx-auto px-4 py-16 text-center"><p className="text-gray-500">Project not found.</p></div>
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[40vh]">
+      <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+  if (!project) return (
+    <div className="max-w-lg mx-auto px-4 py-16 text-center">
+      <p className="text-gray-500">Project not found.</p>
+    </div>
+  )
 
   const canAddEvent = project.status === 'published'
 
@@ -70,7 +125,8 @@ export default function OrgProjectEvents() {
         </div>
         {canAddEvent
           ? <Link to={'/org/projects/' + projectId + '/events/new'} className="btn-primary">+ New event</Link>
-          : <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Publish project first to add events</span>}
+          : <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Publish project first to add events</span>
+        }
       </div>
 
       {events.length === 0 ? (
@@ -80,41 +136,128 @@ export default function OrgProjectEvents() {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {events.map(ev => (
-            <div key={ev.id} className="card flex items-start justify-between gap-4 flex-wrap">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h3 className="font-medium text-gray-900">{ev.title}</h3>
-                  <span className={'badge text-xs px-2 py-0.5 capitalize ' + (STATUS_BADGE[ev.status] || 'bg-gray-100 text-gray-600')}>{ev.status}</span>
-                  {ev.show_in_public && ev.status === 'published' && (
-                    <span className="badge bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5">Public</span>
-                  )}
+          {events.map(ev => {
+            const isExpanded = expandedId === ev.id
+            const regs = registrations[ev.id] || []
+            const isLoadingRegs = regLoading === ev.id
+
+            return (
+              <div key={ev.id} className="card flex flex-col gap-0">
+                {/* ── Event row ── */}
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <h3 className="font-medium text-gray-900">{ev.title}</h3>
+                      <span className={'badge text-xs px-2 py-0.5 capitalize ' + (STATUS_BADGE[ev.status] || 'bg-gray-100 text-gray-600')}>
+                        {ev.status}
+                      </span>
+                      {ev.show_in_public && ev.status === 'published' && (
+                        <span className="badge bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5">Public</span>
+                      )}
+                    </div>
+                    {ev.city && (
+                      <p className="text-xs text-gray-400">{ev.city}{ev.is_online ? ' · Online' : ''}</p>
+                    )}
+                    {ev.event_date && (
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {new Date(ev.event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {' '}
+                        {new Date(ev.event_date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {ev.volunteers_enrolled || 0} / {ev.volunteers_needed || 0} volunteers
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2 shrink-0 flex-wrap items-center">
+                    {/* Registrations toggle */}
+                    <button
+                      onClick={() => toggleExpand(ev.id)}
+                      className={'text-xs border rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 transition-colors ' + (isExpanded ? 'border-brand-200 bg-brand-50 text-brand-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                      {ev.volunteers_enrolled || 0} registered
+                    </button>
+
+                    <Link to={'/org/projects/' + projectId + '/events/' + ev.id + '/edit'} className="btn-secondary text-xs py-1.5">Edit</Link>
+
+                    {ev.status === 'draft' && (
+                      <button onClick={() => setStatus(ev, 'published')} className="btn-primary text-xs py-1.5">Publish</button>
+                    )}
+                    {ev.status === 'published' && (
+                      <button
+                        onClick={() => togglePublic(ev)}
+                        className={'text-xs border rounded-lg px-2.5 py-1.5 ' + (ev.show_in_public ? 'border-green-200 text-green-700 hover:bg-green-50' : 'border-gray-200 text-gray-500 hover:bg-gray-50')}
+                      >
+                        {ev.show_in_public ? 'Visible' : 'Hidden'}
+                      </button>
+                    )}
+                    {ev.status === 'draft' && (
+                      <button onClick={() => deleteEvent(ev)} className="text-xs border border-red-200 text-red-500 hover:bg-red-50 rounded-lg px-2.5 py-1.5">Delete</button>
+                    )}
+                  </div>
                 </div>
-                {ev.city && <p className="text-xs text-gray-400">{ev.city}{ev.is_online ? ' · Online' : ''}</p>}
-                {ev.event_date && (
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {new Date(ev.event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  </p>
+
+                {/* ── Registrations panel ── */}
+                {isExpanded && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+                      Registered volunteers
+                    </p>
+
+                    {isLoadingRegs ? (
+                      <div className="flex items-center gap-2 py-4">
+                        <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm text-gray-400">Loading...</span>
+                      </div>
+                    ) : regs.length === 0 ? (
+                      <p className="text-sm text-gray-400 py-4 text-center">No volunteers registered yet.</p>
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        {regs.map(reg => {
+                          const p = reg.profiles
+                          const initials = (p?.full_name || '?').split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase()
+                          return (
+                            <div key={reg.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                              {/* Avatar */}
+                              <div className="w-9 h-9 rounded-full bg-brand-50 flex items-center justify-center text-sm font-medium text-brand-600 shrink-0 overflow-hidden">
+                                {p?.avatar_url
+                                  ? <img src={p.avatar_url} alt={p.full_name} className="w-full h-full object-cover" />
+                                  : initials}
+                              </div>
+
+                              {/* Info */}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">{p?.full_name || '—'}</p>
+                                <div className="flex items-center gap-3 flex-wrap">
+                                  <p className="text-xs text-gray-400 truncate">{p?.email}</p>
+                                  {p?.city && <p className="text-xs text-gray-400">📍 {p.city}</p>}
+                                  {p?.phone && <p className="text-xs text-gray-400">📞 {p.phone}</p>}
+                                </div>
+                              </div>
+
+                              {/* Registration meta */}
+                              <div className="shrink-0 text-right">
+                                <span className={'badge text-xs px-2 py-0.5 ' + (REG_STATUS_BADGE[reg.status] || 'bg-gray-100 text-gray-600')}>
+                                  {reg.status}
+                                </span>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {new Date(reg.registered_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </p>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
                 )}
-                <p className="text-xs text-gray-400 mt-0.5">{ev.volunteers_enrolled || 0} / {ev.volunteers_needed || 0} volunteers</p>
               </div>
-              <div className="flex gap-2 shrink-0 flex-wrap">
-                <Link to={'/org/projects/' + projectId + '/events/' + ev.id + '/edit'} className="btn-secondary text-xs py-1.5">Edit</Link>
-                {ev.status === 'draft' && (
-                  <button onClick={() => setStatus(ev, 'published')} className="btn-primary text-xs py-1.5">Publish</button>
-                )}
-                {ev.status === 'published' && (
-                  <button onClick={() => togglePublic(ev)}
-                    className={'text-xs border rounded-lg px-2.5 py-1.5 ' + (ev.show_in_public ? 'border-green-200 text-green-700 hover:bg-green-50' : 'border-gray-200 text-gray-500 hover:bg-gray-50')}>
-                    {ev.show_in_public ? 'Visible' : 'Hidden'}
-                  </button>
-                )}
-                {ev.status === 'draft' && (
-                  <button onClick={() => deleteEvent(ev)} className="text-xs border border-red-200 text-red-500 hover:bg-red-50 rounded-lg px-2.5 py-1.5">Delete</button>
-                )}
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
