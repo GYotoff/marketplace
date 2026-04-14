@@ -74,6 +74,33 @@ export default function OrgProjectEvents() {
     }
   }
 
+  const confirmAttendance = async (regId, eventId) => {
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'confirmed', updated_at: new Date().toISOString() })
+      .eq('id', regId)
+    if (error) flash(error.message, 'error')
+    else {
+      flash('Attendance confirmed')
+      // Refresh registrations cache for this event
+      setRegistrations(prev => ({ ...prev, [eventId]: undefined }))
+      await loadRegistrations(eventId)
+    }
+  }
+
+  const rejectAttendance = async (regId, eventId) => {
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'rejected', updated_at: new Date().toISOString() })
+      .eq('id', regId)
+    if (error) flash(error.message, 'error')
+    else {
+      flash('Attendance rejected')
+      setRegistrations(prev => ({ ...prev, [eventId]: undefined }))
+      await loadRegistrations(eventId)
+    }
+  }
+
   const togglePublic = async (ev) => {
     const { error } = await supabase
       .from('events')
@@ -241,9 +268,27 @@ export default function OrgProjectEvents() {
 
                               {/* Registration meta */}
                               <div className="shrink-0 text-right">
-                                <span className={'badge text-xs px-2 py-0.5 ' + (REG_STATUS_BADGE[reg.status] || 'bg-gray-100 text-gray-600')}>
-                                  {reg.status}
+                                <div className="flex flex-col items-end gap-1.5">
+                                <span className={'badge text-xs px-2 py-0.5 capitalize ' + (REG_STATUS_BADGE[reg.status] || 'bg-gray-100 text-gray-600')}>
+                                  {reg.status === 'attended' ? 'attended ⏳' : reg.status}
                                 </span>
+                                {reg.status === 'attended' && (
+                                  <div className="flex gap-1.5">
+                                    <button
+                                      onClick={() => confirmAttendance(reg.id, ev.id)}
+                                      className="text-xs bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 rounded-lg px-2 py-1 transition-colors"
+                                    >
+                                      Confirm
+                                    </button>
+                                    <button
+                                      onClick={() => rejectAttendance(reg.id, ev.id)}
+                                      className="text-xs bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 rounded-lg px-2 py-1 transition-colors"
+                                    >
+                                      Reject
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                                 <p className="text-xs text-gray-400 mt-1">
                                   {new Date(reg.registered_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                                 </p>
