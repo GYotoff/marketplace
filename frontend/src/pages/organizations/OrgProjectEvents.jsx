@@ -12,9 +12,9 @@ const STATUS_BADGE = {
 
 const REG_STATUS_BADGE = {
   approved:  'bg-brand-50 text-brand-700 border border-brand-200',
-  pending:   'bg-amber-50 text-amber-700 border border-amber-200',
+  approved:  'bg-brand-50 text-brand-700 border border-brand-200',
   rejected:  'bg-red-50 text-red-600',
-  completed: 'bg-green-50 text-green-700',
+  confirmed: 'bg-green-50 text-green-700 border border-green-200',
 }
 
 export default function OrgProjectEvents() {
@@ -273,7 +273,7 @@ export default function OrgProjectEvents() {
                               <div className="shrink-0 text-right">
                                 <div className="flex flex-col items-end gap-1.5">
                                 <span className={'badge text-xs px-2 py-0.5 capitalize ' + (REG_STATUS_BADGE[reg.status] || 'bg-gray-100 text-gray-600')}>
-                                  {reg.status === 'attended' ? 'attended ⏳' : reg.status}
+                                  {{ approved: 'Registered', attended: 'Attended ⏳', confirmed: 'Confirmed', rejected: 'Rejected', pending: 'Registered' }[reg.status] || reg.status}
                                 </span>
                                 {reg.status === 'attended' && (
                                   <div className="flex gap-1.5">
