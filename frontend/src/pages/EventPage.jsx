@@ -98,6 +98,18 @@ export default function EventPage() {
     setUnregistering(false)
   }
 
+  const markAttended = async () => {
+    setActing('attend')
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'attended', updated_at: new Date().toISOString() })
+      .eq('id', registration.id)
+    if (error) flash(error.message, 'error')
+    else flash(lang === 'bg' ? 'Отбелязахте участие!' : 'Attendance marked!')
+    await load()
+    setActing(null)
+  }
+
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
@@ -126,20 +138,6 @@ export default function EventPage() {
   const endDate = event.end_date
     ? new Date(event.end_date).toLocaleTimeString(lang === 'bg' ? 'bg-BG' : 'en-GB', { hour: '2-digit', minute: '2-digit' })
     : null
-
-  const [acting, setActing] = useState(null)
-
-  const markAttended = async () => {
-    setActing('attend')
-    const { error } = await supabase
-      .from('event_registrations')
-      .update({ status: 'attended', updated_at: new Date().toISOString() })
-      .eq('id', registration.id)
-    if (error) flash(error.message, 'error')
-    else flash(lang === 'bg' ? 'Отбелязахте участие!' : 'Attendance marked!')
-    await load()
-    setActing(null)
-  }
 
   const STATUS_CONFIG = {
     approved:  { label: "You're registered",         labelBg: 'Регистриран',              badge: 'bg-brand-50 text-brand-700 border border-brand-200' },
