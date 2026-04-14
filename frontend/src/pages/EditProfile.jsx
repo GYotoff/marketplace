@@ -185,11 +185,11 @@ export default function EditProfile() {
               {lang === 'bg' ? 'Биография' : 'Bio'} <span className="text-gray-400 font-normal">{lang === 'bg' ? '— видима за организациите' : '— visible to organizations'}</span>
             </label>
             <textarea rows={4} className="input resize-none"
-              placeholder=lang === 'bg' ? 'Опишете уменията, интересите и каузите, които ви вълнуват...' : 'Describe your skills, interests and the causes you care about...'
+              placeholder={lang === 'bg' ? 'Опишете уменията, интересите и каузите, които ви вълнуват...' : 'Describe your skills, interests and the causes you care about...'}
               maxLength={500}
               value={form.bio} onChange={e => set('bio', e.target.value)} />
             <div className="flex justify-between mt-1">
-              <p className="text-xs text-gray-400">This appears on your public profile</p>
+              <p className="text-xs text-gray-400">{lang === 'bg' ? 'Показва се в публичния ви профил' : 'This appears on your public profile'}</p>
               <p className="text-xs text-gray-400">{form.bio.length}/500</p>
             </div>
           </div>
