@@ -14,17 +14,17 @@ function StatCard({ label, value, color = 'brand' }) {
 }
 
 function VolunteerDashboard({ profile }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [applications,   setApplications]   = useState([])
   const [registrations,  setRegistrations]  = useState([])
-  const [corpMembership, setCorpMembership] = useState(null) // null | { corp, request_status }
+  const [corpMembership, setCorpMembership] = useState(null)
 
   useEffect(() => {
     supabase.from('project_applications').select('*, projects(title, organizations(name))').eq('profile_id', profile.id)
       .then(({ data }) => setApplications(data || []))
     supabase.from('event_registrations').select('*, events(title, event_date, organizations(name))').eq('profile_id', profile.id)
       .then(({ data }) => setRegistrations(data || []))
-    // Load corp membership if volunteer has corporate affiliation
     supabase.from('corporation_members')
       .select('request_status, reviewed_at, corporations(id, name, slug, logo_url, city, industry)')
       .eq('profile_id', profile.id)
@@ -39,14 +39,30 @@ function VolunteerDashboard({ profile }) {
     declined: 'bg-red-50 text-red-700 border border-red-200',
   }
 
+  const L = {
+    corp_membership:      lang === 'bg' ? 'Членство в корпорация'          : 'Corporation membership',
+    project_applications: lang === 'bg' ? 'Заявки за проекти'              : 'Project applications',
+    event_registrations:  lang === 'bg' ? 'Регистрации за събития'         : 'Event registrations',
+    hours_logged:         lang === 'bg' ? 'Отработени часове'              : 'Hours logged',
+    my_applications:      lang === 'bg' ? 'Моите заявки за проекти'        : 'My project applications',
+    my_registrations:     lang === 'bg' ? 'Моите регистрации за събития'   : 'My event registrations',
+    no_applications:      lang === 'bg' ? 'Няма заявки. '                  : 'No applications yet. ',
+    no_registrations:     lang === 'bg' ? 'Няма регистрации. '             : 'No registrations yet. ',
+    browse_projects:      lang === 'bg' ? 'Разгледай проекти →'            : 'Browse projects →',
+    browse_events:        lang === 'bg' ? 'Разгледай събития →'            : 'Browse events →',
+    view_page:            lang === 'bg' ? 'Виж страницата'                 : 'View page',
+    pending_msg:          lang === 'bg' ? 'Заявката ви за членство очаква одобрение от администратора.' : 'Your membership request is awaiting approval from the company admin.',
+    approved_msg:         lang === 'bg' ? 'Вие сте одобрен корпоративен доброволец за тази компания.'  : 'You are an approved corporate volunteer for this company.',
+    declined_msg:         lang === 'bg' ? 'Заявката ви за членство не беше одобрена.'                  : 'Your membership request was not approved.',
+  }
+
   return (
     <div className="flex flex-col gap-6">
 
-      {/* Corporate membership card — shown only when volunteer has a corp affiliation */}
       {corpMembership && (
         <div className="card">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-medium text-gray-900">Corporation membership</h2>
+            <h2 className="text-base font-medium text-gray-900">{L.corp_membership}</h2>
             <span className={`badge text-xs px-2 py-0.5 capitalize ${memberBadge[corpMembership.request_status] || 'bg-gray-100 text-gray-600'}`}>
               {corpMembership.request_status}
             </span>
@@ -62,19 +78,13 @@ function VolunteerDashboard({ profile }) {
               <p className="text-xs text-gray-400">
                 {corpMembership.corporations?.city}{corpMembership.corporations?.industry ? ` · ${corpMembership.corporations.industry}` : ''}
               </p>
-              {corpMembership.request_status === 'pending' && (
-                <p className="text-xs text-amber-600 mt-0.5">Your membership request is awaiting approval from the company admin.</p>
-              )}
-              {corpMembership.request_status === 'approved' && (
-                <p className="text-xs text-brand-600 mt-0.5">You are an approved corporate volunteer for this company.</p>
-              )}
-              {corpMembership.request_status === 'declined' && (
-                <p className="text-xs text-red-600 mt-0.5">Your membership request was not approved.</p>
-              )}
+              {corpMembership.request_status === 'pending'  && <p className="text-xs text-amber-600 mt-0.5">{L.pending_msg}</p>}
+              {corpMembership.request_status === 'approved' && <p className="text-xs text-brand-600 mt-0.5">{L.approved_msg}</p>}
+              {corpMembership.request_status === 'declined' && <p className="text-xs text-red-600 mt-0.5">{L.declined_msg}</p>}
             </div>
             {corpMembership.corporations?.slug && (
               <Link to={`/corporations/${corpMembership.corporations.slug}`} className="btn-secondary text-xs px-3 py-1.5 shrink-0">
-                View page
+                {L.view_page}
               </Link>
             )}
           </div>
@@ -82,15 +92,15 @@ function VolunteerDashboard({ profile }) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard label="Project applications" value={applications.length} />
-        <StatCard label="Event registrations" value={registrations.length} />
-        <StatCard label="Hours logged" value={applications.reduce((s, a) => s + (a.hours_logged || 0), 0)} />
+        <StatCard label={L.project_applications} value={applications.length} />
+        <StatCard label={L.event_registrations}  value={registrations.length} />
+        <StatCard label={L.hours_logged}          value={applications.reduce((s, a) => s + (a.hours_logged || 0), 0)} />
       </div>
 
       <div>
-        <h2 className="text-base font-medium mb-3">My project applications</h2>
+        <h2 className="text-base font-medium mb-3">{L.my_applications}</h2>
         {applications.length === 0
-          ? <div className="card text-center text-sm text-gray-400 py-8">No applications yet. <Link to="/projects" className="text-brand-400">Browse projects →</Link></div>
+          ? <div className="card text-center text-sm text-gray-400 py-8">{L.no_applications}<Link to="/projects" className="text-brand-400">{L.browse_projects}</Link></div>
           : <div className="flex flex-col gap-2">
               {applications.map(a => (
                 <div key={a.id} className="card flex items-center justify-between gap-3">
@@ -106,9 +116,9 @@ function VolunteerDashboard({ profile }) {
       </div>
 
       <div>
-        <h2 className="text-base font-medium mb-3">My event registrations</h2>
+        <h2 className="text-base font-medium mb-3">{L.my_registrations}</h2>
         {registrations.length === 0
-          ? <div className="card text-center text-sm text-gray-400 py-8">No registrations yet. <Link to="/events" className="text-brand-400">Browse events →</Link></div>
+          ? <div className="card text-center text-sm text-gray-400 py-8">{L.no_registrations}<Link to="/events" className="text-brand-400">{L.browse_events}</Link></div>
           : <div className="flex flex-col gap-2">
               {registrations.map(r => (
                 <div key={r.id} className="card flex items-center justify-between gap-3">
