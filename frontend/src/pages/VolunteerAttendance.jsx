@@ -53,8 +53,9 @@ export default function VolunteerAttendance() {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
   })
 
-  const past     = regs.filter(r => r.event_date && new Date(r.event_date) < now)
-  const upcoming = regs.filter(r => r.event_date && new Date(r.event_date) >= now)
+  // Past = event already happened OR event status is completed
+  const past     = regs.filter(r => r.event_status === 'completed' || (r.event_date && new Date(r.event_date) < now))
+  const upcoming = regs.filter(r => r.event_status !== 'completed' && r.event_date && new Date(r.event_date) >= now)
 
   const L = {
     title:    lang === 'bg' ? 'Участие в събития' : 'Event Participation',
@@ -110,12 +111,14 @@ export default function VolunteerAttendance() {
               const statusLabel = lang === 'bg' ? cfg.labelBg : cfg.label
               const canMarkAttended = reg.reg_status === 'approved'
               const isAttended = reg.reg_status === 'attended'
+              const isCompleted = reg.event_status === 'completed'
 
               return (
                 <div key={reg.reg_id} className={
                   'card flex flex-col gap-3 ' +
                   (reg.reg_status === 'confirmed' ? 'border-green-200 bg-green-50/30' :
-                   reg.reg_status === 'rejected'  ? 'border-red-100 bg-red-50/20' : '')
+                   reg.reg_status === 'rejected'  ? 'border-red-100 bg-red-50/20'    :
+                   isCompleted && canMarkAttended  ? 'border-brand-100'               : '')
                 }>
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="min-w-0 flex-1">
@@ -124,6 +127,11 @@ export default function VolunteerAttendance() {
                           {title}
                         </Link>
                         <span className={'badge text-xs px-2 py-0.5 ' + cfg.badge}>{statusLabel}</span>
+                        {isCompleted && (
+                          <span className="badge text-xs px-2 py-0.5 bg-gray-100 text-gray-500">
+                            {lang === 'bg' ? 'Приключило' : 'Completed'}
+                          </span>
+                        )}
                       </div>
                       {reg.event_date && <p className="text-xs text-gray-400">{fmtDate(reg.event_date)}</p>}
                       {reg.org_name && (
