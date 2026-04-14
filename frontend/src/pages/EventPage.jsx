@@ -19,6 +19,7 @@ export default function EventPage() {
   const [notFound, setNotFound] = useState(false)
   const [registering, setRegistering] = useState(false)
   const [unregistering, setUnregistering] = useState(false)
+  const [acting, setActing] = useState(null)
   const [toast, setToast] = useState(null)
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500) }
@@ -126,11 +127,25 @@ export default function EventPage() {
     ? new Date(event.end_date).toLocaleTimeString(lang === 'bg' ? 'bg-BG' : 'en-GB', { hour: '2-digit', minute: '2-digit' })
     : null
 
+  const [acting, setActing] = useState(null)
+
+  const markAttended = async () => {
+    setActing('attend')
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'attended', updated_at: new Date().toISOString() })
+      .eq('id', registration.id)
+    if (error) flash(error.message, 'error')
+    else flash(lang === 'bg' ? 'Отбелязахте участие!' : 'Attendance marked!')
+    await load()
+    setActing(null)
+  }
+
   const STATUS_CONFIG = {
-    approved:  { label: "You're registered",           labelBg: 'Регистриран',              badge: 'bg-brand-50 text-brand-700 border border-brand-200' },
-    attended:  { label: 'Awaiting confirmation',        labelBg: 'Изчаква потвърждение',      badge: 'bg-amber-50 text-amber-700 border border-amber-200' },
-    confirmed: { label: 'Attendance confirmed',         labelBg: 'Участието е потвърдено',    badge: 'bg-green-50 text-green-700 border border-green-200' },
-    rejected:  { label: 'Attendance not confirmed',     labelBg: 'Участието не е потвърдено', badge: 'bg-red-50 text-red-600 border border-red-200' },
+    approved:  { label: "You're registered",         labelBg: 'Регистриран',              badge: 'bg-brand-50 text-brand-700 border border-brand-200' },
+    attended:  { label: 'Awaiting confirmation',      labelBg: 'Изчаква потвърждение',      badge: 'bg-amber-50 text-amber-700 border border-amber-200' },
+    confirmed: { label: 'Attendance confirmed',       labelBg: 'Участието е потвърдено',    badge: 'bg-green-50 text-green-700 border border-green-200' },
+    rejected:  { label: 'Attendance not confirmed',   labelBg: 'Участието не е потвърдено', badge: 'bg-red-50 text-red-600 border border-red-200' },
   }
 
   const RegisterBtn = () => {
@@ -141,24 +156,55 @@ export default function EventPage() {
     )
     if (profile?.role !== 'volunteer') return null
 
-    // Registered — show status + actions
+    // Registered — show status + context-appropriate actions
     if (registration) {
       const cfg = STATUS_CONFIG[registration.status]
       const label = lang === 'bg' ? (cfg?.labelBg || registration.status) : (cfg?.label || registration.status)
       return (
         <div className="flex flex-col gap-2">
+          {/* Status badge */}
           <span className={'block text-center text-sm font-medium rounded-xl py-2.5 px-4 ' + (cfg?.badge || 'bg-gray-100 text-gray-600')}>
-            {registration.status === 'approved' || registration.status === 'confirmed' ? '✓ ' : ''}
+            {(registration.status === 'approved' || registration.status === 'confirmed') ? '✓ ' : ''}
             {label}
           </span>
-          {/* Can mark attended only for past events with approved status */}
+
+          {/* Past event, approved → can mark attended */}
           {!isFuture && registration.status === 'approved' && (
-            <Link to="/dashboard/attendance" className="text-xs text-center text-brand-600 hover:underline">
-              {lang === 'bg' ? '→ Потвърди участие' : '→ Mark your attendance'}
-            </Link>
+            <button
+              onClick={markAttended}
+              disabled={acting === 'attend'}
+              className="w-full flex items-center justify-center gap-2 text-sm border border-brand-200 text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl py-2.5 transition-colors disabled:opacity-50"
+            >
+              {acting === 'attend' && <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />}
+              {acting === 'attend'
+                ? (lang === 'bg' ? 'Изпращане...' : 'Submitting...')
+                : '✓ ' + (lang === 'bg' ? 'Потвърди участие' : 'I attended this event')}
+            </button>
           )}
-          {/* Can cancel only for future events */}
-          {isFuture && (
+
+          {/* Past event, attended → awaiting org confirmation */}
+          {!isFuture && registration.status === 'attended' && (
+            <p className="text-xs text-center text-amber-600 bg-amber-50 border border-amber-200 rounded-xl py-2.5 px-4">
+              ⏳ {lang === 'bg' ? 'Изчаква потвърждение от организатора' : 'Awaiting confirmation from organizer'}
+            </p>
+          )}
+
+          {/* Confirmed */}
+          {registration.status === 'confirmed' && (
+            <p className="text-xs text-center text-green-700 bg-green-50 border border-green-200 rounded-xl py-2 px-4">
+              {lang === 'bg' ? 'Участието ви е потвърдено' : 'Your attendance has been confirmed'}
+            </p>
+          )}
+
+          {/* Rejected */}
+          {registration.status === 'rejected' && (
+            <p className="text-xs text-center text-red-600 bg-red-50 border border-red-200 rounded-xl py-2 px-4">
+              {lang === 'bg' ? 'Участието не беше потвърдено' : 'Attendance was not confirmed'}
+            </p>
+          )}
+
+          {/* Cancel — only for future events with approved status */}
+          {isFuture && registration.status === 'approved' && (
             <button onClick={unregister} disabled={unregistering} className="text-xs text-center text-red-500 hover:text-red-700 mt-1">
               {unregistering ? '...' : (lang === 'bg' ? 'Отпиши се' : 'Cancel registration')}
             </button>
