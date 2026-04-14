@@ -12,9 +12,13 @@ const BULGARIAN_CITIES = [
   'Gabrovo', 'Vidin', 'Montana', 'Other',
 ]
 
-const TABS = [
+const TABS_EN = [
   { id: 'personal', label: 'Personal info' },
   { id: 'security', label: 'Password & security' },
+]
+const TABS_BG = [
+  { id: 'personal', label: 'Лична информация' },
+  { id: 'security', label: 'Парола и сигурност' },
 ]
 
 function Toast({ message, type = 'success', onClose }) {
@@ -36,7 +40,8 @@ function Toast({ message, type = 'success', onClose }) {
 }
 
 export default function EditProfile() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const { user, profile, updateProfile } = useAuthStore()
   const navigate = useNavigate()
   const [tab, setTab] = useState('personal')
@@ -126,7 +131,7 @@ export default function EditProfile() {
       <div className="card mb-6 flex flex-col sm:flex-row items-center gap-6">
         <AvatarUpload size="lg" />
         <div className="min-w-0 text-center sm:text-left">
-          <p className="font-medium text-gray-900 truncate">{profile?.full_name || 'No name set'}</p>
+          <p className="font-medium text-gray-900 truncate">{profile?.full_name || lang === 'bg' ? 'Не е зададено' : 'No name set'}</p>
           <p className="text-sm text-gray-500 truncate">{profile?.email}</p>
           <span className="text-xs text-brand-400 font-medium capitalize">
             {profile?.role?.replace('_', ' ')}
@@ -136,7 +141,7 @@ export default function EditProfile() {
 
       {/* Tabs */}
       <div className="flex border-b border-gray-100 mb-6 gap-1">
-        {TABS.map(t => (
+        {(lang === 'bg' ? TABS_BG : TABS_EN).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
               tab === t.id
@@ -177,10 +182,10 @@ export default function EditProfile() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Bio <span className="text-gray-400 font-normal">— visible to organizations</span>
+              {lang === 'bg' ? 'Биография' : 'Bio'} <span className="text-gray-400 font-normal">{lang === 'bg' ? '— видима за организациите' : '— visible to organizations'}</span>
             </label>
             <textarea rows={4} className="input resize-none"
-              placeholder="Describe your skills, interests and the causes you care about..."
+              placeholder=lang === 'bg' ? 'Опишете уменията, интересите и каузите, които ви вълнуват...' : 'Describe your skills, interests and the causes you care about...'
               maxLength={500}
               value={form.bio} onChange={e => set('bio', e.target.value)} />
             <div className="flex justify-between mt-1">
@@ -231,7 +236,7 @@ export default function EditProfile() {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">New password</label>
             <div className="relative">
               <input type={showPw ? 'text' : 'password'} required className="input pr-10"
-                placeholder="Min. 8 characters"
+                placeholder=lang === 'bg' ? 'Мин. 8 символа' : 'Min. 8 characters'
                 value={pwForm.password} onChange={e => setPw('password', e.target.value)} />
               <button type="button" onClick={() => setShowPw(!showPw)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -260,7 +265,7 @@ export default function EditProfile() {
             <input type={showPw ? 'text' : 'password'} required className={`input ${
               pwForm.confirm && pwForm.password !== pwForm.confirm ? 'border-red-300 focus:ring-red-400' : ''
             }`}
-              placeholder="Repeat your new password"
+              placeholder=lang === 'bg' ? 'Повторете новата парола' : 'Repeat your new password'
               value={pwForm.confirm} onChange={e => setPw('confirm', e.target.value)} />
             {pwForm.confirm && pwForm.password !== pwForm.confirm && (
               <p className="text-xs text-red-500 mt-1">Passwords don't match</p>
