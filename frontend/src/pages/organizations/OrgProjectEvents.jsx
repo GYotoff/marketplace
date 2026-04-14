@@ -222,6 +222,9 @@ export default function OrgProjectEvents() {
                         {ev.show_in_public ? 'Visible' : 'Hidden'}
                       </button>
                     )}
+                    {ev.status === 'published' && (
+                      <button onClick={() => setStatus(ev, 'completed')} className="text-xs border border-gray-200 text-gray-500 hover:bg-gray-50 rounded-lg px-2.5 py-1.5">Complete</button>
+                    )}
                     {ev.status === 'draft' && (
                       <button onClick={() => deleteEvent(ev)} className="text-xs border border-red-200 text-red-500 hover:bg-red-50 rounded-lg px-2.5 py-1.5">Delete</button>
                     )}
