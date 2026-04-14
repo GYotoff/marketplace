@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
@@ -16,6 +17,8 @@ const STATUS_BADGE = {
 
 export default function OrgDashboard() {
   const { user, profile } = useAuthStore()
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [org, setOrg] = useState(null)
   const [members, setMembers] = useState([])
   const [requests, setRequests] = useState([])
@@ -110,8 +113,8 @@ export default function OrgDashboard() {
 
   if (!org) return (
     <div className="max-w-lg mx-auto px-4 py-16 text-center">
-      <p className="text-gray-500 mb-4">You are not an admin of any organization.</p>
-      <Link to="/organizations/register" className="btn-primary">Register an organization</Link>
+      <p className="text-gray-500 mb-4">{lang === 'bg' ? 'Не сте администратор на организация.' : 'You are not an admin of any organization.'}</p>
+      <Link to="/organizations/register" className="btn-primary">{lang === 'bg' ? 'Регистрирайте организация' : 'Register an organization'}</Link>
     </div>
   )
 
@@ -138,17 +141,17 @@ export default function OrgDashboard() {
           </div>
         </div>
         <div className="flex gap-2 shrink-0">
-          <Link to={`/organizations/${org.slug}`} className="btn-secondary text-sm">View page</Link>
-          <Link to="/org/settings" className="btn-primary text-sm">Edit org</Link>
+          <Link to={`/organizations/${org.slug}`} className="btn-secondary text-sm">{lang === 'bg' ? 'Виж страницата' : 'View page'}</Link>
+          <Link to="/org/settings" className="btn-primary text-sm">{lang === 'bg' ? 'Редактирай' : 'Edit org'}</Link>
         </div>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-100 mb-6">
         {[
-          { key: 'overview', label: 'Overview' },
-          { key: 'members', label: `Members (${members.length})` },
-          { key: 'requests', label: `Creator requests${requests.length > 0 ? ` (${requests.length})` : ''}` },
+          { key: 'overview', label: lang === 'bg' ? 'Обзор' : 'Overview' },
+          { key: 'members', label: (lang === 'bg' ? 'Членове' : 'Members') + ` (${members.length})` },
+          { key: 'requests', label: (lang === 'bg' ? 'Заявки за достъп' : 'Creator requests') + (requests.length > 0 ? ` (${requests.length})` : '') },
         ].map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
@@ -166,10 +169,10 @@ export default function OrgDashboard() {
       {tab === 'overview' && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: 'Members', value: members.length },
-            { label: 'Pending requests', value: requests.length },
-            { label: 'Projects', value: projectCount },
-            { label: 'Events', value: 0 },
+            { label: lang === 'bg' ? 'Членове' : 'Members', value: members.length },
+            { label: lang === 'bg' ? 'Заявки' : 'Pending requests', value: requests.length },
+            { label: lang === 'bg' ? 'Проекти' : 'Projects', value: projectCount },
+            { label: lang === 'bg' ? 'Събития' : 'Events', value: 0 },
           ].map(s => (
             <div key={s.label} className="card text-center py-5">
               <p className="text-2xl font-medium text-brand-400">{s.value}</p>
@@ -194,7 +197,7 @@ export default function OrgDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900">
-                    {m.profiles?.full_name || 'Unknown'} {isMe && <span className="text-xs text-gray-400">(you)</span>}
+                    {m.profiles?.full_name || 'Unknown'} {isMe && <span className="text-xs text-gray-400">{lang === 'bg' ? '(вие)' : '(you)'}</span>}
                   </p>
                   <p className="text-xs text-gray-400 truncate">{m.profiles?.email}</p>
                 </div>
@@ -210,7 +213,7 @@ export default function OrgDashboard() {
                       disabled={actionLoading === m.id}
                     >
                       <option value="admin">Admin</option>
-                      <option value="content_creator">Content creator</option>
+                      <option value="content_creator">{lang === 'bg' ? 'Редактор' : 'Content creator'}</option>
                     </select>
                     <button
                       onClick={() => handleRevokeMember(m.id, m.profile_id)}
@@ -231,7 +234,7 @@ export default function OrgDashboard() {
       {tab === 'requests' && (
         <div className="flex flex-col gap-3">
           {requests.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 text-sm">No pending requests</div>
+            <div className="text-center py-12 text-gray-400 text-sm">{lang === 'bg' ? 'Няма заявки' : 'No pending requests'}</div>
           ) : requests.map(req => (
             <div key={req.id} className="card flex items-start gap-4">
               <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-medium shrink-0 overflow-hidden">
@@ -245,7 +248,7 @@ export default function OrgDashboard() {
                 <p className="text-xs text-gray-400">{req.profiles?.email}</p>
                 {req.message && <p className="text-sm text-gray-500 mt-1 italic">"{req.message}"</p>}
                 <p className="text-xs text-gray-400 mt-1">
-                  Requested {new Date(req.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                  {lang === 'bg' ? 'Заявено ' : 'Requested '}{new Date(req.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                 </p>
               </div>
               <div className="flex gap-2 shrink-0">
@@ -253,7 +256,7 @@ export default function OrgDashboard() {
                   onClick={() => handleCreatorRequest(req.id, req.profile_id, 'approve')}
                   disabled={actionLoading === req.id}
                   className="btn-primary text-xs py-1.5">
-                  {actionLoading === req.id ? '...' : 'Approve'}
+                  {actionLoading === req.id ? '...' : (lang === 'bg' ? 'Одобри' : 'Approve')}
                 </button>
                 <button
                   onClick={() => handleCreatorRequest(req.id, req.profile_id, 'decline')}
