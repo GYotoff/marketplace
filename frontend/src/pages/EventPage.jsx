@@ -22,6 +22,11 @@ export default function EventPage() {
   const [acting, setActing] = useState(null)
   const [hoursInput, setHoursInput] = useState('')
   const [showHoursForm, setShowHoursForm] = useState(false)
+  const [feedback, setFeedback] = useState(null)       // existing feedback row
+  const [fbRating, setFbRating] = useState(0)
+  const [fbText, setFbText] = useState('')
+  const [fbSaving, setFbSaving] = useState(false)
+  const [showFbForm, setShowFbForm] = useState(false)
   const [toast, setToast] = useState(null)
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500) }
@@ -54,6 +59,15 @@ export default function EventPage() {
         .eq('profile_id', user.id)
         .maybeSingle()
       setRegistration(reg)
+
+      if (reg?.id) {
+        const { data: fb } = await supabase
+          .from('event_feedback')
+          .select('id, rating, feedback_text')
+          .eq('registration_id', reg.id)
+          .maybeSingle()
+        if (fb) { setFeedback(fb); setFbRating(fb.rating); setFbText(fb.feedback_text || '') }
+      }
     }
     setLoading(false)
   }
@@ -111,6 +125,25 @@ export default function EventPage() {
     else { flash(lang === 'bg' ? 'Отбелязахте участие!' : 'Attendance marked!'); setShowHoursForm(false) }
     await load()
     setActing(null)
+  }
+
+  const saveFeedback = async () => {
+    if (!registration?.id) return
+    setFbSaving(true)
+    const payload = {
+      event_id: id,
+      profile_id: user.id,
+      registration_id: registration.id,
+      rating: fbRating,
+      feedback_text: fbText.trim() || null,
+      updated_at: new Date().toISOString(),
+    }
+    const { error } = feedback?.id
+      ? await supabase.from('event_feedback').update(payload).eq('id', feedback.id)
+      : await supabase.from('event_feedback').insert(payload)
+    if (error) flash(error.message, 'error')
+    else { flash(lang === 'bg' ? 'Благодарим за обратната връзка!' : 'Thank you for your feedback!'); setShowFbForm(false); load() }
+    setFbSaving(false)
   }
 
   if (loading) return (
@@ -211,12 +244,90 @@ export default function EventPage() {
             </p>
           )}
 
-          {/* Confirmed */}
-          {registration.status === 'confirmed' && (
-            <p className="text-xs text-center text-green-700 bg-green-50 border border-green-200 rounded-xl py-2 px-4">
-              {lang === 'bg' ? 'Участието ви е потвърдено' : 'Your attendance has been confirmed'}
-            </p>
-          )}
+          {/* Confirmed → feedback + share */}
+          {registration.status === 'confirmed' && (() => {
+            const eventUrl = window.location.href
+            const shareText = lang === 'bg'
+              ? `Участвах в "${event.title}" — доброволчество с GiveForward!`
+              : `I volunteered at "${event.title}" with GiveForward!`
+            const shareLinks = [
+              { name: 'Facebook', icon: '📘', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(eventUrl)}` },
+              { name: 'LinkedIn', icon: '💼', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(eventUrl)}` },
+              { name: 'X', icon: '✖', url: `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(eventUrl)}` },
+            ]
+            const StarRow = () => (
+              <div className="flex gap-1 justify-center">
+                {[1,2,3,4,5].map(n => (
+                  <button key={n} type="button" onClick={() => setFbRating(n)}
+                    className={'text-2xl transition-transform hover:scale-110 ' + (n <= fbRating ? 'text-amber-400' : 'text-gray-200')}>
+                    ★
+                  </button>
+                ))}
+              </div>
+            )
+            return (
+              <div className="flex flex-col gap-3">
+                <p className="text-xs text-center text-green-700 bg-green-50 border border-green-200 rounded-xl py-2 px-4">
+                  ✓ {lang === 'bg' ? 'Участието ви е потвърдено' : 'Your attendance has been confirmed'}
+                  {registration.hours_logged > 0 && <span className="ml-1 text-brand-600">· ⏱ {registration.hours_logged}h</span>}
+                </p>
+
+                {/* Feedback */}
+                {!showFbForm && !feedback?.id && (
+                  <button onClick={() => setShowFbForm(true)}
+                    className="w-full text-sm border border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-xl py-2.5 transition-colors">
+                    ⭐ {lang === 'bg' ? 'Дайте обратна връзка' : 'Leave feedback'}
+                  </button>
+                )}
+                {feedback?.id && !showFbForm && (
+                  <div className="text-center">
+                    <div className="flex gap-0.5 justify-center mb-0.5">
+                      {[1,2,3,4,5].map(n => (
+                        <span key={n} className={'text-lg ' + (n <= feedback.rating ? 'text-amber-400' : 'text-gray-200')}>★</span>
+                      ))}
+                    </div>
+                    {feedback.feedback_text && <p className="text-xs text-gray-500 italic">"{feedback.feedback_text}"</p>}
+                    <button onClick={() => setShowFbForm(true)} className="text-xs text-brand-500 hover:underline mt-1">
+                      {lang === 'bg' ? 'Редактирай' : 'Edit feedback'}
+                    </button>
+                  </div>
+                )}
+                {showFbForm && (
+                  <div className="flex flex-col gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                    <p className="text-xs font-medium text-amber-800">{lang === 'bg' ? 'Вашата оценка' : 'Your rating'}</p>
+                    <StarRow />
+                    <textarea
+                      rows={3} className="input resize-none text-sm"
+                      placeholder={lang === 'bg' ? 'Споделете преживяването си...' : 'Share your experience...'}
+                      value={fbText} onChange={e => setFbText(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={saveFeedback} disabled={fbSaving || fbRating === 0}
+                        className="btn-primary flex-1 text-sm flex items-center justify-center gap-1.5 disabled:opacity-50">
+                        {fbSaving && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                        {lang === 'bg' ? 'Изпрати' : 'Submit'}
+                      </button>
+                      <button onClick={() => setShowFbForm(false)} className="btn-secondary text-sm px-3">✕</button>
+                    </div>
+                    {fbRating === 0 && <p className="text-xs text-amber-600">{lang === 'bg' ? 'Моля изберете оценка.' : 'Please select a rating.'}</p>}
+                  </div>
+                )}
+
+                {/* Share */}
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-xs text-center text-gray-400">{lang === 'bg' ? 'Сподели преживяването' : 'Share your experience'}</p>
+                  <div className="flex gap-2 justify-center">
+                    {shareLinks.map(s => (
+                      <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg px-3 py-1.5 transition-colors">
+                        {s.icon} {s.name}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Rejected */}
           {registration.status === 'rejected' && (
