@@ -1,3 +1,4 @@
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -21,7 +22,17 @@ function OrgRow({ org, onAction }) {
   const [note, setNote] = useState('')
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [confirm, setConfirm] = useState(null)
 
+  const confirmHandle = (status) => {
+    const cfg = {
+      suspended: { title: 'Suspend?', variant: 'danger', confirm: 'Suspend' },
+      approved:  { title: 'Approve?', variant: 'default', confirm: 'Approve' },
+      declined:  { title: 'Decline?', variant: 'danger', confirm: 'Decline' },
+    }[status] || { title: `Set to ${status}?`, variant: 'warning', confirm: 'Confirm' }
+    setConfirm({ title: cfg.title, confirmLabel: cfg.confirm, variant: cfg.variant,
+      onConfirm: () => handle(status) })
+  }
   const handle = async (status) => {
     setLoading(true)
     await onAction(org.id, status, note)
@@ -31,7 +42,9 @@ function OrgRow({ org, onAction }) {
   }
 
   return (
-    <div className="card flex flex-col gap-4">
+    <>
+      <ConfirmDialog config={confirm} onClose={() => setConfirm(null)} />
+      <div className="card flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -67,13 +80,13 @@ function OrgRow({ org, onAction }) {
             </button>
           )}
           {org.status === 'approved' && (
-            <button onClick={() => handle('suspended')} disabled={loading}
+            <button onClick={() => confirmHandle('suspended')} disabled={loading}
               className="text-xs border border-red-200 text-red-600 hover:bg-red-50 rounded-lg px-3 py-1.5">
               Suspend
             </button>
           )}
           {(org.status === 'declined' || org.status === 'suspended') && (
-            <button onClick={() => handle('approved')} disabled={loading}
+            <button onClick={() => confirmHandle('approved')} disabled={loading}
               className="btn-primary text-xs py-1.5">
               Re-approve
             </button>
@@ -105,12 +118,12 @@ function OrgRow({ org, onAction }) {
               value={note} onChange={e => setNote(e.target.value)} />
           </div>
           <div className="flex gap-2">
-            <button onClick={() => handle('approved')} disabled={loading}
+            <button onClick={() => confirmHandle('approved')} disabled={loading}
               className="btn-primary text-sm flex items-center gap-1.5">
               {loading && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
               ✓ Approve
             </button>
-            <button onClick={() => handle('declined')} disabled={loading}
+            <button onClick={() => confirmHandle('declined')} disabled={loading}
               className="border border-red-200 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm">
               ✗ Decline
             </button>
@@ -118,6 +131,7 @@ function OrgRow({ org, onAction }) {
         </div>
       )}
     </div>
+    </>
   )
 }
 
