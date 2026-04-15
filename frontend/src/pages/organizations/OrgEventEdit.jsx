@@ -240,8 +240,8 @@ export default function OrgEventEdit() {
       contact_email: form.contact_email || null, contact_phone: form.contact_phone || null,
       city: form.city || null, city_bg: form.city_bg || null,
       address: form.address || null, address_bg: form.address_bg || null,
-      location_lat: form.location_lat ? parseFloat(form.location_lat) : null,
-      location_lng: form.location_lng ? parseFloat(form.location_lng) : null,
+      location_lat: form.location_lat !== '' ? parseFloat(form.location_lat) : null,
+      location_lng: form.location_lng !== '' ? parseFloat(form.location_lng) : null,
       event_type: form.event_type,
       is_online: isOnline,
       online_url: (isOnline && form.online_url) ? form.online_url : null,
@@ -249,22 +249,29 @@ export default function OrgEventEdit() {
       end_date: form.end_date ? new Date(form.end_date).toISOString() : null,
       volunteers_needed: form.volunteers_needed ? parseInt(form.volunteers_needed) : 0,
       invitation_image_url: form.invitation_image_url || null,
-      gallery_images: form.gallery_images,
+      gallery_images: Array.isArray(form.gallery_images) ? form.gallery_images : [],
       show_in_public: form.show_in_public,
       updated_at: new Date().toISOString(),
     }
     let err
-    if (isNew) {
-      const { error } = await supabase.from('events').insert({
-        ...payload, status: 'draft', organization_id: org.id, project_id: projectId, created_by: user.id,
-      })
-      err = error
-    } else {
-      const { error } = await supabase.from('events').update(payload).eq('id', eventId)
-      err = error
+    try {
+      if (isNew) {
+        const { error, data } = await supabase.from('events').insert({
+          ...payload, status: 'draft', organization_id: org.id, project_id: projectId, created_by: user.id,
+        })
+        console.log('insert result:', { error, data })
+        err = error
+      } else {
+        const { error, data, status, statusText } = await supabase.from('events').update(payload).eq('id', eventId)
+        console.log('update result:', { error, data, status, statusText })
+        err = error
+      }
+    } catch (e) {
+      console.error('save exception:', e)
+      err = e
     }
     setSaving(false)
-    if (err) { setError(err.message); return }
+    if (err) { setError(err.message || String(err)); return }
     navigate('/org/projects/' + projectId + '/events')
   }
 
