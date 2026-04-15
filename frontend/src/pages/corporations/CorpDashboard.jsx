@@ -46,7 +46,16 @@ export default function CorpDashboard() {
     return fresh
   }
 
-  const approve = async (id) => {
+  const approve = (id, name) => {
+    setConfirm({
+      title: 'Approve membership?',
+      message: name,
+      confirmLabel: 'Approve',
+      variant: 'default',
+      onConfirm: () => _execApprove(id),
+    })
+  }
+  const _execApprove = async (id) => {
     setActing(id)
     await supabase.from('corporation_members')
       .update({ request_status: 'approved', reviewed_by: user.id, reviewed_at: new Date().toISOString() })
@@ -58,7 +67,16 @@ export default function CorpDashboard() {
     setActing(null)
   }
 
-  const decline = async (id) => {
+  const decline = (id, name) => {
+    setConfirm({
+      title: 'Decline membership request?',
+      message: name,
+      confirmLabel: 'Decline',
+      variant: 'danger',
+      onConfirm: () => _execDecline(id),
+    })
+  }
+  const _execDecline = async (id) => {
     setActing(id)
     await supabase.from('corporation_members')
       .update({ request_status: 'declined', reviewed_by: user.id, reviewed_at: new Date().toISOString() })
@@ -68,8 +86,16 @@ export default function CorpDashboard() {
     setActing(null)
   }
 
-  const remove = async (id, name) => {
-    if (!confirm('Remove ' + name + ' from this corporation?')) return
+  const remove = (id, name) => {
+    setConfirm({
+      title: 'Remove member?',
+      message: name,
+      confirmLabel: 'Remove',
+      variant: 'danger',
+      onConfirm: () => _execRemove(id, name),
+    })
+  }
+  const _execRemove = async (id, name) => {
     setActing(id)
     await supabase.from('corporation_members').delete().eq('id', id)
     flash(name + ' removed')
