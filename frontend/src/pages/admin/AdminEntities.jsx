@@ -1,3 +1,4 @@
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
@@ -62,6 +63,7 @@ function VolunteerRow({ user, onToggle, loading }) {
         </button>
       </div>
     </div>
+    </>
   )
 }
 
@@ -98,6 +100,7 @@ function EntityRow({ entity, kind, onToggle, loading }) {
 }
 
 export default function AdminEntities() {
+  const [confirm, setConfirm] = useState(null)
   const { user: adminUser } = useAuthStore()
   const [tab, setTab] = useState('volunteers')
   const [search, setSearch] = useState('')
@@ -201,7 +204,9 @@ export default function AdminEntities() {
   ]
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10">
+    <>
+      <ConfirmDialog config={confirm} onClose={() => setConfirm(null)} />
+      <div className="max-w-6xl mx-auto px-4 py-10">
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white ${toast.type === 'error' ? 'bg-red-500' : 'bg-brand-400'}`}>
           {toast.msg}
