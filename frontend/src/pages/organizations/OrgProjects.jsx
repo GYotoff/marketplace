@@ -53,17 +53,36 @@ export default function OrgProjects() {
     setLoading(false)
   }
 
-  const togglePublic = async (project) => {
+  const togglePublic = (project) => {
+    const next = !project.show_in_public
+    setConfirm({
+      title: next ? (lang === 'bg' ? 'Публикуване за публиката?' : 'Make publicly visible?') : (lang === 'bg' ? 'Скриване от публиката?' : 'Hide from public?'),
+      message: project.title,
+      confirmLabel: next ? (lang === 'bg' ? 'Публикувай' : 'Make visible') : (lang === 'bg' ? 'Скрий' : 'Hide'),
+      variant: next ? 'default' : 'warning',
+      onConfirm: () => _execTogglePublic(project),
+    })
+  }
+  const _execTogglePublic = async (project) => {
     const next = !project.show_in_public
     const { error } = await supabase
       .from('projects')
       .update({ show_in_public: next, updated_at: new Date().toISOString() })
       .eq('id', project.id)
     if (error) flash(error.message, 'error')
-    else { flash(next ? lang === 'bg' ? 'Проектът е вече публично видим' : 'Project is now visible publicly' : lang === 'bg' ? 'Проектът е скрит от публиката' : 'Project hidden from public'); load() }
+    else { flash(next ? (lang === 'bg' ? 'Проектът е вече публично видим' : 'Project is now visible publicly') : (lang === 'bg' ? 'Проектът е скрит от публиката' : 'Project hidden from public')); load() }
   }
 
-  const publish = async (project) => {
+  const publish = (project) => {
+    setConfirm({
+      title: lang === 'bg' ? 'Публикуване на проект?' : 'Publish project?',
+      message: project.title,
+      confirmLabel: lang === 'bg' ? 'Публикувай' : 'Publish',
+      variant: 'default',
+      onConfirm: () => _execPublish(project),
+    })
+  }
+  const _execPublish = async (project) => {
     const { error } = await supabase
       .from('projects')
       .update({ status: 'published', updated_at: new Date().toISOString() })
@@ -72,8 +91,16 @@ export default function OrgProjects() {
     else { flash(lang === 'bg' ? 'Проектът е публикуван' : 'Project published'); load() }
   }
 
-  const complete = async (project) => {
-    if (!confirm(lang === 'bg' ? 'Да отбележим "' + project.title + '" като завършен?' : 'Mark "' + project.title + '" as completed?')) return
+  const complete = (project) => {
+    setConfirm({
+      title: lang === 'bg' ? 'Завърши проект?' : 'Complete project?',
+      message: project.title,
+      confirmLabel: lang === 'bg' ? 'Завърши' : 'Complete',
+      variant: 'warning',
+      onConfirm: () => _execComplete(project),
+    })
+  }
+  const _execComplete = async (project) => {
     const { error } = await supabase
       .from('projects')
       .update({ status: 'completed', show_in_public: false, updated_at: new Date().toISOString() })
