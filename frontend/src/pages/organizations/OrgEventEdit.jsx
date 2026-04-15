@@ -174,7 +174,7 @@ export default function OrgEventEdit() {
   const [tab, setTab] = useState('Basic')
   const isNew = !eventId
 
-  useEffect(() => { load() }, [user, projectId, eventId])
+  useEffect(() => { load() }, [user?.id, projectId, eventId])
 
   const load = async () => {
     if (!user) return
@@ -203,7 +203,8 @@ export default function OrgEventEdit() {
           contact_email: ev.contact_email || '', contact_phone: ev.contact_phone || '',
           city: ev.city || '', city_bg: ev.city_bg || '',
           address: ev.address || '', address_bg: ev.address_bg || '',
-          location_lat: ev.location_lat || '', location_lng: ev.location_lng || '',
+          location_lat: ev.location_lat != null ? String(parseFloat(ev.location_lat)) : '',
+          location_lng: ev.location_lng != null ? String(parseFloat(ev.location_lng)) : '',
           event_type: ev.event_type || (ev.is_online ? 'online' : 'onsite'),
           online_url: ev.online_url || '',
           is_online: ev.is_online || false,
