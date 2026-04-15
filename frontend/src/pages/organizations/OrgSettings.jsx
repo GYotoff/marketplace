@@ -197,8 +197,7 @@ export default function OrgSettings() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  const handleSave = async (e) => {
-    e.preventDefault()
+  const handleSave = async () => {
     setSaving(true)
     const { error } = await supabase
       .from('organizations')
@@ -291,7 +290,7 @@ export default function OrgSettings() {
         ))}
       </div>
 
-      <form onSubmit={handleSave}>
+      <div>
 
         {/* GENERAL TAB */}
         {tab === 'general' && (
@@ -449,7 +448,7 @@ export default function OrgSettings() {
             </div>
           </div>
         )}
-      </form>
+      </div>
     </div>
   )
 }
@@ -457,7 +456,7 @@ export default function OrgSettings() {
 function SaveButton({ saving }) {
   return (
     <div className="flex justify-end pt-3 border-t border-gray-100">
-      <button type="submit" disabled={saving}
+      <button type="button" onClick={handleSave} disabled={saving}
         className="btn-primary flex items-center gap-2">
         {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
         {saving ? 'Saving...' : 'Save changes'}
