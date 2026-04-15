@@ -88,7 +88,7 @@ export default function OrgProjects() {
       .update({ status: 'published', updated_at: new Date().toISOString() })
       .eq('id', project.id)
     if (error) flash(error.message, 'error')
-    else { flash(lang === 'bg' ? 'Проектът е публикуван' : 'Project published'); load() }
+    else { flash(lang === 'bg' ? 'Проектът е публикуван' : 'Project published'); await load() }
   }
 
   const complete = (project) => {
@@ -106,7 +106,7 @@ export default function OrgProjects() {
       .update({ status: 'completed', show_in_public: false, updated_at: new Date().toISOString() })
       .eq('id', project.id)
     if (error) flash(error.message, 'error')
-    else { flash(lang === 'bg' ? 'Проектът е отбелязан като завършен' : 'Project marked as completed'); load() }
+    else { flash(lang === 'bg' ? 'Проектът е отбелязан като завършен' : 'Project marked as completed'); await load() }
   }
 
   const deleteProject = async (project) => {
@@ -121,7 +121,7 @@ export default function OrgProjects() {
   const _doDelete = async (project) => {
     const { error } = await supabase.from('projects').delete().eq('id', project.id)
     if (error) flash(error.message, 'error')
-    else { flash(lang === 'bg' ? 'Проектът е изтрит' : 'Project deleted'); load() }
+    else { flash(lang === 'bg' ? 'Проектът е изтрит' : 'Project deleted'); await load() }
   }
 
   if (loading) return (
