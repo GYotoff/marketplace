@@ -177,8 +177,7 @@ export default function AdminEntities() {
     if (!error) {
       await supabase.from('admin_audit_log').insert({ admin_id: adminUser.id, entity_type: 'volunteer', entity_id: u.id, action: newActive ? 'activate' : 'deactivate' }).catch(() => {})
       showToast(`${u.full_name || u.email} ${newActive ? 'activated' : 'deactivated'}`)
-      fetchData()
-      fetchCounts()
+      await Promise.all([fetchData(), fetchCounts()])
     } else {
       showToast(error.message, 'error')
     }
@@ -201,8 +200,7 @@ export default function AdminEntities() {
     const { error } = await supabase.from(table).update({ is_active: newActive }).eq('id', entity.id)
     if (!error) {
       showToast(`${entity.name} ${newActive ? 'activated' : 'deactivated'}`)
-      fetchData()
-      fetchCounts()
+      await Promise.all([fetchData(), fetchCounts()])
     } else {
       showToast(error.message, 'error')
     }
