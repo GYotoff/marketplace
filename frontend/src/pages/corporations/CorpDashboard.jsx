@@ -1,3 +1,4 @@
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
@@ -7,6 +8,7 @@ export default function CorpDashboard() {
   const { user } = useAuthStore()
   const [corp, setCorp] = useState(null)
   const [members, setMembers] = useState([])
+  const [confirm, setConfirm] = useState(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState('overview')
   const [acting, setActing] = useState(null)
@@ -110,6 +112,7 @@ export default function CorpDashboard() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
+      <ConfirmDialog config={confirm} onClose={() => setConfirm(null)} />
       {toast && (
         <div className={'fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white ' + (toast.type === 'error' ? 'bg-red-500' : 'bg-brand-400')}>
           {toast.msg}
