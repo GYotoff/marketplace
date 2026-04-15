@@ -145,10 +145,10 @@ export default function EditProfile() {
       <div className="card mb-6 flex flex-col sm:flex-row items-center gap-6">
         <AvatarUpload size="lg" />
         <div className="min-w-0 text-center sm:text-left">
-          <p className="font-medium text-gray-900 truncate">{profile?.full_name || lang === 'bg' ? 'Не е зададено' : 'No name set'}</p>
+          <p className="font-medium text-gray-900 truncate">{profile?.full_name || (lang === 'bg' ? 'Не е зададено' : 'No name set')}</p>
           <p className="text-sm text-gray-500 truncate">{profile?.email}</p>
           <span className="text-xs text-brand-400 font-medium capitalize">
-            {profile?.role?.replace('_', ' ')}
+            {{ volunteer: lang === 'bg' ? 'Доброволец' : 'Volunteer', org_admin: lang === 'bg' ? 'Администратор на организация' : 'Organization admin', corp_admin: lang === 'bg' ? 'Администратор на корпорация' : 'Corporation admin', super_admin: lang === 'bg' ? 'Администратор на платформата' : 'Platform admin' }[profile?.role] || profile?.role?.replace('_', ' ')}
           </span>
         </div>
       </div>
