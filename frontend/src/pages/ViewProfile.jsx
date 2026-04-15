@@ -17,6 +17,8 @@ export default function ViewProfile() {
   const { user, profile } = useAuthStore()
   const { i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [stats, setStats] = useState({ applications: 0, events: 0, hours: 0 })
   const [loading, setLoading] = useState(true)
 
@@ -92,7 +94,7 @@ export default function ViewProfile() {
           {/* Name + meta */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h1 className="text-xl font-medium text-gray-900">{profile.full_name || 'No name set'}</h1>
+              <h1 className="text-xl font-medium text-gray-900">{(lang === 'bg' ? (profile.full_name_bg || profile.full_name) : profile.full_name) || (lang === 'bg' ? 'Не е зададено' : 'No name set')}</h1>
               <span className={`badge ${roleColor} text-xs`}>{roleLabel}</span>
             </div>
             <p className="text-sm text-gray-500">{profile.email}</p>
@@ -102,7 +104,7 @@ export default function ViewProfile() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                {profile.city}, {profile.country}
+                {lang === 'bg' ? (profile.city_bg || profile.city) : profile.city}, {lang === 'bg' ? (profile.country_bg || profile.country) : profile.country}
               </p>
             )}
             <p className="text-xs text-gray-400 mt-1">
@@ -157,7 +159,7 @@ export default function ViewProfile() {
       {profile.bio && (
         <div className="card mb-5">
           <h2 className="text-sm font-medium text-gray-700 mb-2">About</h2>
-          <p className="text-sm text-gray-600 leading-relaxed">{profile.bio}</p>
+          <p className="text-sm text-gray-600 leading-relaxed">{lang === 'bg' ? (profile.bio_bg || profile.bio) : profile.bio}</p>
         </div>
       )}
 
@@ -165,11 +167,11 @@ export default function ViewProfile() {
       <div className="card">
         <h2 className="text-sm font-medium text-gray-700 mb-4">Profile details</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <FIELD label={lang === 'bg' ? 'Пълно име' : 'Full name'} value={profile.full_name} />
+          <FIELD label={lang === 'bg' ? 'Пълно име' : 'Full name'} value={lang === 'bg' ? (profile.full_name_bg || profile.full_name) : profile.full_name} />
           <FIELD label={lang === 'bg' ? 'Имейл' : 'Email'} value={profile.email} />
           <FIELD label={lang === 'bg' ? 'Телефон' : 'Phone'} value={profile.phone} />
-          <FIELD label={lang === 'bg' ? 'Град' : 'City'} value={profile.city} />
-          <FIELD label={lang === 'bg' ? 'Държава' : 'Country'} value={profile.country} />
+          <FIELD label={lang === 'bg' ? 'Град' : 'City'} value={lang === 'bg' ? (profile.city_bg || profile.city) : profile.city} />
+          <FIELD label={lang === 'bg' ? 'Държава' : 'Country'} value={lang === 'bg' ? (profile.country_bg || profile.country) : profile.country} />
           <FIELD label={lang === 'bg' ? 'Предпочитан език' : 'Preferred language'} value={profile.preferred_language === 'bg' ? 'Български' : 'English'} />
           <FIELD label={lang === 'bg' ? 'Роля' : 'Role'} value={roleLabel} />
           <FIELD label={lang === 'bg' ? 'Статус на акаунта' : 'Account status'} value={lang === 'bg' ? (profile.is_active ? 'Активен' : 'Неактивен') : (profile.is_active ? 'Active' : 'Inactive')} />
