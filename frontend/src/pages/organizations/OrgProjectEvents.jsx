@@ -1,3 +1,4 @@
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
@@ -26,6 +27,7 @@ export default function OrgProjectEvents() {
   const [toast, setToast] = useState(null)
   // expandedId → null means collapsed, eventId means expanded
   const [expandedId, setExpandedId] = useState(null)
+  const [confirm, setConfirm] = useState(null)
   // registrations cache: { [eventId]: [] }
   const [registrations, setRegistrations] = useState({})
   const [regLoading, setRegLoading] = useState(null)
@@ -75,6 +77,10 @@ export default function OrgProjectEvents() {
   }
 
   const confirmAttendance = async (regId, eventId) => {
+    setConfirm({ title: 'Confirm attendance?', confirmLabel: 'Confirm', variant: 'default',
+      onConfirm: () => _doConfirmAttendance(regId, eventId) })
+  }
+  const _doConfirmAttendance = async (regId, eventId) => {
     const { error } = await supabase
       .from('event_registrations')
       .update({ status: 'confirmed', updated_at: new Date().toISOString() })
@@ -89,6 +95,10 @@ export default function OrgProjectEvents() {
   }
 
   const rejectAttendance = async (regId, eventId) => {
+    setConfirm({ title: 'Reject attendance?', confirmLabel: 'Reject', variant: 'danger',
+      onConfirm: () => _doRejectAttendance(regId, eventId) })
+  }
+  const _doRejectAttendance = async (regId, eventId) => {
     const { error } = await supabase
       .from('event_registrations')
       .update({ status: 'rejected', updated_at: new Date().toISOString() })
@@ -102,6 +112,15 @@ export default function OrgProjectEvents() {
   }
 
   const togglePublic = async (ev) => {
+    setConfirm({
+      title: ev.show_in_public ? 'Hide event from public?' : 'Make event publicly visible?',
+      message: ev.title,
+      confirmLabel: ev.show_in_public ? 'Hide' : 'Make visible',
+      variant: ev.show_in_public ? 'warning' : 'default',
+      onConfirm: () => _doTogglePublic(ev),
+    })
+  }
+  const _doTogglePublic = async (ev) => {
     const { error } = await supabase
       .from('events')
       .update({ show_in_public: !ev.show_in_public, updated_at: new Date().toISOString() })
@@ -110,6 +129,15 @@ export default function OrgProjectEvents() {
   }
 
   const setStatus = async (ev, status) => {
+    const labels = {
+      published: { title: 'Publish event?', confirm: 'Publish', variant: 'default' },
+      completed: { title: 'Mark event as completed?', confirm: 'Complete', variant: 'warning' },
+    }
+    const l = labels[status] || { title: `Set status to ${status}?`, confirm: 'Confirm', variant: 'default' }
+    setConfirm({ title: l.title, message: ev.title, confirmLabel: l.confirm, variant: l.variant,
+      onConfirm: () => _doSetStatus(ev, status) })
+  }
+  const _doSetStatus = async (ev, status) => {
     const { error } = await supabase
       .from('events')
       .update({ status, updated_at: new Date().toISOString() })
@@ -118,7 +146,10 @@ export default function OrgProjectEvents() {
   }
 
   const deleteEvent = async (ev) => {
-    if (!confirm('Delete "' + ev.title + '"?')) return
+    setConfirm({ title: 'Delete event?', message: ev.title, confirmLabel: 'Delete', variant: 'danger',
+      onConfirm: () => _doDeleteEvent(ev) })
+  }
+  const _doDeleteEvent = async (ev) => {
     const { error } = await supabase.from('events').delete().eq('id', ev.id)
     if (!error) { flash('Event deleted'); load() } else flash(error.message, 'error')
   }
@@ -138,6 +169,7 @@ export default function OrgProjectEvents() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
+      <ConfirmDialog config={confirm} onClose={() => setConfirm(null)} />
       {toast && (
         <div className={'fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white ' + (toast.type === 'error' ? 'bg-red-500' : 'bg-brand-400')}>
           {toast.msg}
