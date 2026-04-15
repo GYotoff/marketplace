@@ -285,5 +285,6 @@ export default function AdminEntities() {
         </div>
       )}
     </div>
+    </>
   )
 }
