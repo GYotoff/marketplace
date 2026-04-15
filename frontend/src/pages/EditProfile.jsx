@@ -81,8 +81,7 @@ export default function EditProfile() {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const setPw = (k, v) => setPwForm(f => ({ ...f, [k]: v }))
 
-  const handleSaveProfile = async (e) => {
-    e.preventDefault()
+  const handleSaveProfile = async () => {
     setSaving(true)
     try {
       await updateProfile({
@@ -100,8 +99,7 @@ export default function EditProfile() {
     }
   }
 
-  const handleChangePassword = async (e) => {
-    e.preventDefault()
+  const handleChangePassword = async () => {
     if (pwForm.password !== pwForm.confirm) {
       setToast({ message: 'Passwords do not match', type: 'error' }); return
     }
@@ -169,7 +167,7 @@ export default function EditProfile() {
 
       {/* Personal info tab */}
       {tab === 'personal' && (
-        <form onSubmit={handleSaveProfile} className="card flex flex-col gap-5">
+        <div className="card flex flex-col gap-5">
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
@@ -246,18 +244,18 @@ export default function EditProfile() {
 
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
             <Link to="/dashboard/profile" className="btn-secondary text-sm">Cancel</Link>
-            <button type="submit" disabled={saving}
+            <button type="button" onClick={handleSaveProfile} disabled={saving}
               className="btn-primary flex items-center gap-2">
               {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
               {saving ? 'Saving...' : 'Save changes'}
             </button>
           </div>
-        </form>
+        </div>
       )}
 
       {/* Password tab */}
       {tab === 'security' && (
-        <form onSubmit={handleChangePassword} className="card flex flex-col gap-5">
+        <div className="card flex flex-col gap-5">
           <div>
             <h3 className="text-sm font-medium text-gray-900 mb-1">Change password</h3>
             <p className="text-xs text-gray-500">Choose a strong password with at least 8 characters.</p>
@@ -313,13 +311,13 @@ export default function EditProfile() {
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
             <button type="button" onClick={() => setPwForm({ current: '', password: '', confirm: '' })}
               className="btn-secondary text-sm">Clear</button>
-            <button type="submit" disabled={pwSaving}
+            <button type="button" onClick={handleChangePassword} disabled={pwSaving}
               className="btn-primary flex items-center gap-2">
               {pwSaving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
               {pwSaving ? 'Updating...' : 'Update password'}
             </button>
           </div>
-        </form>
+        </div>
       )}
     </div>
   )
