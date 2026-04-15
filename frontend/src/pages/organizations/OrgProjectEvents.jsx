@@ -58,7 +58,7 @@ export default function OrgProjectEvents() {
     setRegLoading(eventId)
     const { data } = await supabase
       .from('event_registrations')
-      .select('id, status, registered_at, profiles!event_registrations_profile_id_fkey(id, full_name, email, avatar_url, city, phone)')
+      .select('id, status, registered_at, hours_logged, profiles!event_registrations_profile_id_fkey(id, full_name, email, avatar_url, city, phone)')
       .eq('event_id', eventId)
       .order('registered_at', { ascending: true })
     setRegistrations(prev => ({ ...prev, [eventId]: data || [] }))
