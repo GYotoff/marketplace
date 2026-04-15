@@ -17,8 +17,6 @@ export default function ViewProfile() {
   const { user, profile } = useAuthStore()
   const { i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
-  const { i18n } = useTranslation()
-  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [stats, setStats] = useState({ applications: 0, events: 0, hours: 0 })
   const [loading, setLoading] = useState(true)
 
