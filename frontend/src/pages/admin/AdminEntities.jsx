@@ -161,7 +161,17 @@ export default function AdminEntities() {
     fetchCounts()
   }, [fetchData, fetchCounts])
 
-  const toggleVolunteer = async (u) => {
+  const toggleVolunteer = (u) => {
+    const newActive = !u.is_active
+    setConfirm({
+      title: newActive ? 'Activate volunteer?' : 'Deactivate volunteer?',
+      message: u.full_name || u.email,
+      confirmLabel: newActive ? 'Activate' : 'Deactivate',
+      variant: newActive ? 'default' : 'danger',
+      onConfirm: () => _execToggleVolunteer(u),
+    })
+  }
+  const _execToggleVolunteer = async (u) => {
     setActionLoading(u.id)
     const newActive = !u.is_active
     const { error } = await supabase.from('profiles').update({ is_active: newActive }).eq('id', u.id)
@@ -176,7 +186,17 @@ export default function AdminEntities() {
     setActionLoading(null)
   }
 
-  const toggleEntity = async (entity, table) => {
+  const toggleEntity = (entity, table) => {
+    const newActive = !entity.is_active
+    setConfirm({
+      title: newActive ? 'Activate?' : 'Deactivate?',
+      message: entity.name,
+      confirmLabel: newActive ? 'Activate' : 'Deactivate',
+      variant: newActive ? 'default' : 'danger',
+      onConfirm: () => _execToggleEntity(entity, table),
+    })
+  }
+  const _execToggleEntity = async (entity, table) => {
     setActionLoading(entity.id)
     const newActive = !entity.is_active
     const { error } = await supabase.from(table).update({ is_active: newActive }).eq('id', entity.id)
