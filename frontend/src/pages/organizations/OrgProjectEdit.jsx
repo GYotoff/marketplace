@@ -56,8 +56,7 @@ export default function OrgProjectEdit() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  const save = async (e) => {
-    e.preventDefault()
+  const save = async () => {
     setError('')
     if (!form.title.trim()) { setError('Title is required'); return }
     setSaving(true)
@@ -101,7 +100,7 @@ export default function OrgProjectEdit() {
 
       {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl mb-5">{error}</div>}
 
-      <form onSubmit={save} className="card flex flex-col gap-5">
+      <div className="card flex flex-col gap-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Title (EN) <span className="text-red-400">*</span></label>
@@ -172,12 +171,12 @@ export default function OrgProjectEdit() {
 
         <div className="flex justify-between pt-3 border-t border-gray-100">
           <Link to="/org/projects" className="btn-secondary">Cancel</Link>
-          <button type="submit" disabled={saving} className="btn-primary flex items-center gap-2">
+          <button type="button" onClick={save} disabled={saving} className="btn-primary flex items-center gap-2">
             {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
             {saving ? 'Saving...' : (isNew ? 'Create project' : 'Save changes')}
           </button>
         </div>
-      </form>
+      </div>
     </div>
   )
 }
