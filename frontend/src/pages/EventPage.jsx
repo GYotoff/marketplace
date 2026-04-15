@@ -377,36 +377,120 @@ export default function EventPage() {
         ← {lang === 'bg' ? 'Всички събития' : 'All events'}
       </Link>
 
-      {event.cover_url && (
-        <div className="w-full h-48 sm:h-64 rounded-2xl overflow-hidden mb-6 bg-gray-100">
-          <img src={event.cover_url} alt={title} className="w-full h-full object-cover" />
+      {/* Invitation image */}
+      {(event.invitation_image_url || event.cover_url) && (
+        <div className="w-full h-52 sm:h-72 rounded-2xl overflow-hidden mb-6 bg-gray-100">
+          <img src={event.invitation_image_url || event.cover_url} alt={title} className="w-full h-full object-cover" />
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* ── Main column ── */}
         <div className="md:col-span-2 flex flex-col gap-6">
+
+          {/* Header */}
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              {event.is_online && <span className="badge bg-blue-50 text-blue-700 text-xs px-2 py-0.5">{lang === 'bg' ? 'Онлайн' : 'Online'}</span>}
+              {event.event_type && (
+                <span className={'badge text-xs px-2 py-0.5 ' + (event.event_type === 'online' ? 'bg-blue-50 text-blue-700' : event.event_type === 'hybrid' ? 'bg-purple-50 text-purple-700' : 'bg-gray-100 text-gray-600')}>
+                  {event.event_type === 'online' ? '💻 ' : event.event_type === 'hybrid' ? '🔀 ' : '🏢 '}
+                  {lang === 'bg'
+                    ? { onsite: 'На място', online: 'Онлайн', hybrid: 'Хибридно' }[event.event_type]
+                    : { onsite: 'On site', online: 'Online', hybrid: 'Hybrid' }[event.event_type]}
+                </span>
+              )}
               <span className="badge bg-brand-50 text-brand-700 border border-brand-200 text-xs px-2 py-0.5 capitalize">{event.status}</span>
             </div>
             <h1 className="text-2xl font-medium text-gray-900 mb-2">{title}</h1>
             {event.organizations && (
-              <Link to={'/organizations/' + event.organizations.slug} className="flex items-center gap-2 text-sm text-brand-500 hover:text-brand-600 mb-4">
+              <Link to={'/organizations/' + event.organizations.slug} className="flex items-center gap-2 text-sm text-brand-500 hover:text-brand-600 mb-3">
                 {event.organizations.logo_url && <img src={event.organizations.logo_url} alt="" className="w-5 h-5 rounded object-cover" />}
                 {event.organizations.name}
               </Link>
             )}
             {event.projects && (
-              <Link to={'/projects/' + event.projects.id} className="text-xs text-gray-400 hover:text-gray-600 mb-4 block">
+              <Link to={'/projects/' + event.projects.id} className="text-xs text-gray-400 hover:text-gray-600 mb-3 block">
                 📋 {lang === 'bg' ? 'Проект' : 'Project'}: {event.projects.title}
               </Link>
             )}
             {desc && <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{desc}</p>}
           </div>
+
+          {/* Summary */}
+          {(lang === 'bg' ? (event.summary_bg || event.summary) : event.summary) && (
+            <div className="card bg-brand-50 border-brand-100">
+              <h2 className="text-sm font-medium text-brand-800 mb-1.5">{lang === 'bg' ? 'Резюме' : 'Summary'}</h2>
+              <p className="text-sm text-brand-700 leading-relaxed">
+                {lang === 'bg' ? (event.summary_bg || event.summary) : event.summary}
+              </p>
+            </div>
+          )}
+
+          {/* Goal */}
+          {(lang === 'bg' ? (event.goal_bg || event.goal) : event.goal) && (
+            <div className="card">
+              <h2 className="text-sm font-medium text-gray-700 mb-1.5">🎯 {lang === 'bg' ? 'Цел' : 'Goal'}</h2>
+              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                {lang === 'bg' ? (event.goal_bg || event.goal) : event.goal}
+              </p>
+            </div>
+          )}
+
+          {/* Requirements */}
+          {(lang === 'bg' ? (event.requirements_bg || event.requirements) : event.requirements) && (
+            <div className="card">
+              <h2 className="text-sm font-medium text-gray-700 mb-1.5">✅ {lang === 'bg' ? 'Изисквания към доброволците' : 'Volunteer requirements'}</h2>
+              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                {lang === 'bg' ? (event.requirements_bg || event.requirements) : event.requirements}
+              </p>
+            </div>
+          )}
+
+          {/* Meeting point */}
+          {(lang === 'bg' ? (event.meeting_point_bg || event.meeting_point) : event.meeting_point) && (
+            <div className="card">
+              <h2 className="text-sm font-medium text-gray-700 mb-1.5">📍 {lang === 'bg' ? 'Точка за среща' : 'Meeting point'}</h2>
+              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                {lang === 'bg' ? (event.meeting_point_bg || event.meeting_point) : event.meeting_point}
+              </p>
+            </div>
+          )}
+
+          {/* Map */}
+          {event.location_lat && event.location_lng && (
+            <div className="card p-0 overflow-hidden">
+              <a href={`https://www.google.com/maps?q=${event.location_lat},${event.location_lng}`}
+                target="_blank" rel="noreferrer" className="block relative group">
+                <iframe
+                  title="Event location"
+                  className="w-full h-48 pointer-events-none"
+                  src={`https://maps.google.com/maps?q=${event.location_lat},${event.location_lng}&z=15&output=embed`}
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                  <span className="opacity-0 group-hover:opacity-100 bg-white text-gray-700 text-xs px-3 py-1.5 rounded-lg shadow transition-opacity">
+                    {lang === 'bg' ? 'Отвори в Google Maps' : 'Open in Google Maps'} →
+                  </span>
+                </div>
+              </a>
+              <div className="p-3">
+                <p className="text-sm text-gray-600">
+                  📍 {lang === 'bg' ? (event.city_bg || event.city) : event.city}
+                  {(lang === 'bg' ? (event.address_bg || event.address) : event.address) ? ', ' + (lang === 'bg' ? (event.address_bg || event.address) : event.address) : ''}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Gallery slideshow */}
+          {event.gallery_images?.length > 0 && <Slideshow images={event.gallery_images} lang={lang} />}
+
         </div>
 
+        {/* ── Sidebar ── */}
         <div className="flex flex-col gap-4">
+
+          {/* Registration */}
           <div className="card flex flex-col gap-4">
             {event.volunteers_needed > 0 && (
               <div className="text-center py-2">
@@ -417,6 +501,7 @@ export default function EventPage() {
             <RegisterBtn />
           </div>
 
+          {/* Details */}
           <div className="card flex flex-col gap-3">
             <h2 className="text-sm font-medium text-gray-700">{lang === 'bg' ? 'Детайли' : 'Details'}</h2>
             {eventDate && (
@@ -427,30 +512,87 @@ export default function EventPage() {
                 <span>{eventDate}{endDate ? ` – ${endDate}` : ''}</span>
               </div>
             )}
-            {event.is_online ? (
+            {event.online_url && (event.event_type === 'online' || event.event_type === 'hybrid') && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
-                {event.online_url
-                  ? <a href={event.online_url} target="_blank" rel="noreferrer" className="text-brand-500 hover:underline truncate">{event.online_url}</a>
-                  : <span>{lang === 'bg' ? 'Онлайн' : 'Online'}</span>}
+                <a href={event.online_url} target="_blank" rel="noreferrer" className="text-brand-500 hover:underline truncate">{event.online_url}</a>
               </div>
-            ) : event.city && (
+            )}
+            {(event.city || event.city_bg) && event.event_type !== 'online' && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                {event.city}{event.address ? ', ' + event.address : ''}
+                <span>
+                  {lang === 'bg' ? (event.city_bg || event.city) : event.city}
+                  {(lang === 'bg' ? (event.address_bg || event.address) : event.address) ? ', ' + (lang === 'bg' ? (event.address_bg || event.address) : event.address) : ''}
+                </span>
               </div>
             )}
+            {event.location_lat && event.location_lng && (
+              <a href={`https://www.google.com/maps?q=${event.location_lat},${event.location_lng}`}
+                target="_blank" rel="noreferrer"
+                className="text-xs text-brand-500 hover:underline">
+                📍 {lang === 'bg' ? 'Виж на картата' : 'View on map'} →
+              </a>
+            )}
           </div>
+
+          {/* Contact */}
+          {(event.contact_person || event.contact_person_bg || event.contact_email || event.contact_phone) && (
+            <div className="card flex flex-col gap-2">
+              <h2 className="text-sm font-medium text-gray-700">{lang === 'bg' ? 'Отговорно лице' : 'Contact person'}</h2>
+              {(event.contact_person || event.contact_person_bg) && (
+                <p className="text-sm text-gray-700 font-medium">
+                  {lang === 'bg' ? (event.contact_person_bg || event.contact_person) : event.contact_person}
+                </p>
+              )}
+              {event.contact_email && (
+                <a href={`mailto:${event.contact_email}`} className="text-sm text-brand-500 hover:underline flex items-center gap-1.5">
+                  ✉ {event.contact_email}
+                </a>
+              )}
+              {event.contact_phone && (
+                <a href={`tel:${event.contact_phone}`} className="text-sm text-gray-600 flex items-center gap-1.5">
+                  📞 {event.contact_phone}
+                </a>
+              )}
+            </div>
+          )}
 
           {/* Public stats for completed events */}
           {event.status === 'completed' && <EventStats eventId={id} lang={lang} />}
         </div>
       </div>
+    </div>
+  )
+}
+
+function Slideshow({ images, lang }) {
+  const [idx, setIdx] = useState(0)
+  if (!images?.length) return null
+  const prev = () => setIdx(i => (i - 1 + images.length) % images.length)
+  const next = () => setIdx(i => (i + 1) % images.length)
+  return (
+    <div className="card p-0 overflow-hidden">
+      <div className="relative bg-black">
+        <img src={images[idx]} alt={`Photo ${idx + 1}`} className="w-full h-64 sm:h-80 object-cover" />
+        {images.length > 1 && <>
+          <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70">‹</button>
+          <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70">›</button>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, i) => (
+              <button key={i} onClick={() => setIdx(i)}
+                className={'w-1.5 h-1.5 rounded-full transition-colors ' + (i === idx ? 'bg-white' : 'bg-white/50')} />
+            ))}
+          </div>
+        </>}
+        <span className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-lg">{idx + 1} / {images.length}</span>
+      </div>
+      <p className="text-xs text-gray-400 text-center py-2">{lang === 'bg' ? 'Снимки от събитието' : 'Event photos'}</p>
     </div>
   )
 }
