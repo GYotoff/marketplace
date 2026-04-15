@@ -23,7 +23,8 @@ function VolunteerDashboard({ profile }) {
   useEffect(() => {
     supabase.from('project_applications').select('*, projects(title, organizations(name))').eq('profile_id', profile.id)
       .then(({ data }) => setApplications(data || []))
-    supabase.from('event_registrations').select('*, events(title, event_date, organizations(name))').eq('profile_id', profile.id)
+    // Use RPC to bypass RLS — fetches all registered events including completed ones
+    supabase.rpc('get_volunteer_registered_events')
       .then(({ data }) => setRegistrations(data || []))
     supabase.from('corporation_members')
       .select('request_status, reviewed_at, corporations(id, name, slug, logo_url, city, industry)')
@@ -94,7 +95,7 @@ function VolunteerDashboard({ profile }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label={L.project_applications} value={applications.length} />
         <StatCard label={L.event_registrations}  value={registrations.length} />
-        <StatCard label={L.hours_logged}          value={applications.reduce((s, a) => s + (a.hours_logged || 0), 0)} />
+        <StatCard label={L.hours_logged}          value={registrations.reduce((s, r) => s + (r.hours_logged || 0), 0)} />
       </div>
 
       <div>
@@ -121,12 +122,15 @@ function VolunteerDashboard({ profile }) {
           ? <div className="card text-center text-sm text-gray-400 py-8">{L.no_registrations}<Link to="/events" className="text-brand-400">{L.browse_events}</Link></div>
           : <div className="flex flex-col gap-2">
               {registrations.map(r => (
-                <div key={r.id} className="card flex items-center justify-between gap-3">
+                <div key={r.reg_id} className="card flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-medium text-sm">{r.events?.title}</p>
-                    <p className="text-xs text-gray-400">{r.events?.organizations?.name} · {r.events?.event_date ? new Date(r.events.event_date).toLocaleDateString() : ''}</p>
+                    <p className="font-medium text-sm">{r.event_title}</p>
+                    <p className="text-xs text-gray-400">
+                      {r.org_name}{r.event_date ? ' · ' + new Date(r.event_date).toLocaleDateString() : ''}
+                      {r.hours_logged > 0 ? ' · ⏱ ' + r.hours_logged + 'h' : ''}
+                    </p>
                   </div>
-                  <span className={`badge ${statusColor[r.status] || 'bg-gray-100 text-gray-600'} capitalize`}>{r.status}</span>
+                  <span className={`badge ${statusColor[r.reg_status] || 'bg-gray-100 text-gray-600'} capitalize`}>{r.reg_status}</span>
                 </div>
               ))}
             </div>
