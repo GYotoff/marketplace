@@ -176,8 +176,10 @@ export default function AdminEntities() {
     const { error } = await supabase.from('profiles').update({ is_active: newActive }).eq('id', u.id)
     if (!error) {
       await supabase.from('admin_audit_log').insert({ admin_id: adminUser.id, entity_type: 'volunteer', entity_id: u.id, action: newActive ? 'activate' : 'deactivate' }).catch(() => {})
+      // Optimistic update — flip is_active in local state immediately
+      setData(prev => prev.map(p => p.id === u.id ? { ...p, is_active: newActive } : p))
       showToast(`${u.full_name || u.email} ${newActive ? 'activated' : 'deactivated'}`)
-      await Promise.all([fetchData(), fetchCounts()])
+      fetchCounts()
     } else {
       showToast(error.message, 'error')
     }
@@ -199,8 +201,10 @@ export default function AdminEntities() {
     const newActive = !entity.is_active
     const { error } = await supabase.from(table).update({ is_active: newActive }).eq('id', entity.id)
     if (!error) {
+      // Optimistic update — flip is_active in local state immediately
+      setData(prev => prev.map(e => e.id === entity.id ? { ...e, is_active: newActive } : e))
       showToast(`${entity.name} ${newActive ? 'activated' : 'deactivated'}`)
-      await Promise.all([fetchData(), fetchCounts()])
+      fetchCounts()
     } else {
       showToast(error.message, 'error')
     }
