@@ -63,7 +63,6 @@ function VolunteerRow({ user, onToggle, loading }) {
         </button>
       </div>
     </div>
-    </>
   )
 }
 
