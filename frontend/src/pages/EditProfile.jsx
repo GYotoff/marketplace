@@ -49,7 +49,11 @@ export default function EditProfile() {
 
   // Personal info form
   const [form, setForm] = useState({
-    full_name: '', phone: '', bio: '', city: '', preferred_language: 'en',
+    full_name: '', full_name_bg: '', phone: '',
+    bio: '', bio_bg: '',
+    city: '', city_bg: '',
+    country_bg: '',
+    preferred_language: 'en',
   })
   const [saving, setSaving] = useState(false)
 
@@ -62,9 +66,13 @@ export default function EditProfile() {
     if (profile) {
       setForm({
         full_name: profile.full_name || '',
+        full_name_bg: profile.full_name_bg || '',
         phone: profile.phone || '',
         bio: profile.bio || '',
+        bio_bg: profile.bio_bg || '',
         city: profile.city || '',
+        city_bg: profile.city_bg || '',
+        country_bg: profile.country_bg || '',
         preferred_language: profile.preferred_language || 'en',
       })
     }
@@ -77,7 +85,13 @@ export default function EditProfile() {
     e.preventDefault()
     setSaving(true)
     try {
-      await updateProfile(form)
+      await updateProfile({
+        ...form,
+        full_name_bg: form.full_name_bg || null,
+        bio_bg: form.bio_bg || null,
+        city_bg: form.city_bg || null,
+        country_bg: form.country_bg || null,
+      })
       setToast({ message: 'Profile saved successfully', type: 'success' })
     } catch (err) {
       setToast({ message: err.message, type: 'error' })
@@ -159,10 +173,16 @@ export default function EditProfile() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.full_name')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.full_name')} (EN)</label>
               <input type="text" required className="input"
                 placeholder="Maria Kostadinova"
                 value={form.full_name} onChange={e => set('full_name', e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.full_name')} (BG)</label>
+              <input type="text" className="input"
+                placeholder="Мария Костадинова"
+                value={form.full_name_bg} onChange={e => set('full_name_bg', e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('common.phone')}</label>
@@ -180,18 +200,29 @@ export default function EditProfile() {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              {lang === 'bg' ? 'Биография' : 'Bio'} <span className="text-gray-400 font-normal">{lang === 'bg' ? '— видима за организациите' : '— visible to organizations'}</span>
-            </label>
-            <textarea rows={4} className="input resize-none"
-              placeholder={lang === 'bg' ? 'Опишете уменията, интересите и каузите, които ви вълнуват...' : 'Describe your skills, interests and the causes you care about...'}
-              maxLength={500}
-              value={form.bio} onChange={e => set('bio', e.target.value)} />
-            <div className="flex justify-between mt-1">
-              <p className="text-xs text-gray-400">{lang === 'bg' ? 'Показва се в публичния ви профил' : 'This appears on your public profile'}</p>
-              <p className="text-xs text-gray-400">{form.bio.length}/500</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Bio (EN) <span className="text-gray-400 font-normal">— visible to organizations</span></label>
+              <textarea rows={4} className="input resize-none"
+                placeholder="Describe your skills, interests and the causes you care about..."
+                maxLength={500}
+                value={form.bio} onChange={e => set('bio', e.target.value)} />
+              <p className="text-xs text-gray-400 mt-1">{form.bio.length}/500</p>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Биография (BG) <span className="text-gray-400 font-normal">— видима за организациите</span></label>
+              <textarea rows={4} className="input resize-none"
+                placeholder="Опишете уменията, интересите и каузите, които ви вълнуват..."
+                maxLength={500}
+                value={form.bio_bg} onChange={e => set('bio_bg', e.target.value)} />
+              <p className="text-xs text-gray-400 mt-1">{form.bio_bg.length}/500</p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Country (BG) — Държава (BG)</label>
+            <input type="text" className="input" placeholder="напр. България"
+              value={form.country_bg} onChange={e => set('country_bg', e.target.value)} />
           </div>
 
           <div>
