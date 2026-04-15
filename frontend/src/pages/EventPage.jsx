@@ -446,8 +446,76 @@ export default function EventPage() {
               </div>
             )}
           </div>
+
+          {/* Public stats for completed events */}
+          {event.status === 'completed' && <EventStats eventId={id} lang={lang} />}
         </div>
       </div>
+    </div>
+  )
+}
+
+function EventStats({ eventId, lang }) {
+  const [stats, setStats] = useState(null)
+  const [reviews, setReviews] = useState([])
+
+  useEffect(() => {
+    supabase.rpc('get_past_public_events', { p_limit: 100 })
+      .then(({ data }) => {
+        const ev = (data || []).find(e => e.id === eventId)
+        if (ev) setStats(ev)
+      })
+    supabase.from('event_feedback')
+      .select('rating, feedback_text, created_at')
+      .eq('event_id', eventId)
+      .not('feedback_text', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(5)
+      .then(({ data }) => setReviews(data || []))
+  }, [eventId])
+
+  if (!stats && reviews.length === 0) return null
+
+  return (
+    <div className="card flex flex-col gap-3">
+      <h2 className="text-sm font-medium text-gray-700">{lang === 'bg' ? 'Резултати' : 'Impact'}</h2>
+      <div className="grid grid-cols-2 gap-3">
+        {stats?.volunteers_enrolled > 0 && (
+          <div className="text-center bg-brand-50 rounded-xl py-3">
+            <p className="text-2xl font-semibold text-brand-400">{stats.volunteers_enrolled}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{lang === 'bg' ? 'доброволци' : 'volunteers'}</p>
+          </div>
+        )}
+        {stats?.total_hours > 0 && (
+          <div className="text-center bg-brand-50 rounded-xl py-3">
+            <p className="text-2xl font-semibold text-brand-400">{stats.total_hours}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{lang === 'bg' ? 'часа' : 'hours'}</p>
+          </div>
+        )}
+      </div>
+      {stats?.review_count > 0 && (
+        <div className="flex items-center gap-2">
+          <div className="flex gap-0.5">
+            {[1,2,3,4,5].map(n => (
+              <span key={n} className={'text-base ' + (n <= Math.round(stats.avg_rating) ? 'text-amber-400' : 'text-gray-200')}>★</span>
+            ))}
+          </div>
+          <span className="text-sm font-medium text-gray-700">{Number(stats.avg_rating).toFixed(1)}</span>
+          <span className="text-xs text-gray-400">({stats.review_count} {lang === 'bg' ? 'отзива' : 'reviews'})</span>
+        </div>
+      )}
+      {reviews.length > 0 && (
+        <div className="flex flex-col gap-2 mt-1">
+          {reviews.map((r, i) => (
+            <div key={i} className="bg-gray-50 rounded-xl px-3 py-2">
+              <div className="flex gap-0.5 mb-1">
+                {[1,2,3,4,5].map(n => <span key={n} className={'text-xs ' + (n <= r.rating ? 'text-amber-400' : 'text-gray-200')}>★</span>)}
+              </div>
+              <p className="text-xs text-gray-600 italic">"{r.feedback_text}"</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
