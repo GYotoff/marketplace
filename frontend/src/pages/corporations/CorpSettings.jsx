@@ -88,7 +88,7 @@ function ImageUpload({ label, hint, currentUrl, bucket, entityId, field, onUploa
 function SaveBtn({ saving }) {
   return (
     <div className="flex justify-end pt-3 border-t border-gray-100">
-      <button type="submit" disabled={saving} className="btn-primary flex items-center gap-2">
+      <button type="button" onClick={save} disabled={saving} className="btn-primary flex items-center gap-2">
         {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
         {saving ? 'Saving...' : 'Save changes'}
       </button>
@@ -140,8 +140,7 @@ export default function CorpSettings() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  const save = async (e) => {
-    e.preventDefault()
+  const save = async () => {
     setSaving(true)
     const { error } = await supabase.from('corporations').update({
       name: form.name, industry: form.industry || null, tagline: form.tagline || null,
@@ -188,7 +187,7 @@ export default function CorpSettings() {
           </button>
         ))}
       </div>
-      <form onSubmit={save}>
+      <div>
         {tab === 'general' && (
           <div className="card flex flex-col gap-5">
             <div>
@@ -279,7 +278,7 @@ export default function CorpSettings() {
             </div>
           </div>
         )}
-      </form>
+      </div>
     </div>
   )
 }
