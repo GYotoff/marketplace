@@ -222,8 +222,7 @@ export default function OrgEventEdit() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  const save = async (e) => {
-    e.preventDefault()
+  const save = async () => {
     setError('')
     if (!form.title.trim()) { setError('Title (EN) is required'); return }
     if (!form.event_date) { setError('Start date & time is required'); return }
@@ -302,7 +301,7 @@ export default function OrgEventEdit() {
         ))}
       </div>
 
-      <form onSubmit={save} className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5">
 
         {/* ── Basic ── */}
         {tab === 'Basic' && <>
@@ -475,12 +474,12 @@ export default function OrgEventEdit() {
 
         <div className="flex justify-between pt-2">
           <Link to={'/org/projects/' + projectId + '/events'} className="btn-secondary">Cancel</Link>
-          <button type="submit" disabled={saving} className="btn-primary flex items-center gap-2">
+          <button type="button" onClick={save} disabled={saving} className="btn-primary flex items-center gap-2">
             {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
             {saving ? 'Saving...' : (isNew ? 'Create event' : 'Save changes')}
           </button>
         </div>
-      </form>
+      </div>
     </div>
   )
 }
