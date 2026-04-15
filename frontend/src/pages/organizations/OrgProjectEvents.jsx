@@ -125,7 +125,7 @@ export default function OrgProjectEvents() {
       .from('events')
       .update({ show_in_public: !ev.show_in_public, updated_at: new Date().toISOString() })
       .eq('id', ev.id)
-    if (!error) { flash('Updated'); load() } else flash(error.message, 'error')
+    if (!error) { flash('Updated'); await load() } else flash(error.message, 'error')
   }
 
   const setStatus = async (ev, status) => {
@@ -142,7 +142,7 @@ export default function OrgProjectEvents() {
       .from('events')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', ev.id)
-    if (!error) { flash('Status updated'); load() } else flash(error.message, 'error')
+    if (!error) { flash('Status updated'); await load() } else flash(error.message, 'error')
   }
 
   const deleteEvent = async (ev) => {
@@ -151,7 +151,7 @@ export default function OrgProjectEvents() {
   }
   const _doDeleteEvent = async (ev) => {
     const { error } = await supabase.from('events').delete().eq('id', ev.id)
-    if (!error) { flash('Event deleted'); load() } else flash(error.message, 'error')
+    if (!error) { flash('Event deleted'); await load() } else flash(error.message, 'error')
   }
 
   if (loading) return (
