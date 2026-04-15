@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
@@ -21,6 +22,7 @@ export default function OrgProjects() {
   const [org, setOrg] = useState(null)
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
+  const [confirm, setConfirm] = useState(null)
   const [toast, setToast] = useState(null)
 
   const flash = (msg, type = 'success') => {
@@ -81,7 +83,15 @@ export default function OrgProjects() {
   }
 
   const deleteProject = async (project) => {
-    if (!confirm(lang === 'bg' ? 'Изтриване на "' + project.title + '"? Това не може да се отмени.' : 'Delete "' + project.title + '"? This cannot be undone.')) return
+    setConfirm({
+      title: lang === 'bg' ? 'Изтриване на проект?' : 'Delete project?',
+      message: project.title,
+      confirmLabel: lang === 'bg' ? 'Изтрий' : 'Delete',
+      variant: 'danger',
+      onConfirm: () => _doDelete(project),
+    })
+  }
+  const _doDelete = async (project) => {
     const { error } = await supabase.from('projects').delete().eq('id', project.id)
     if (error) flash(error.message, 'error')
     else { flash(lang === 'bg' ? 'Проектът е изтрит' : 'Project deleted'); load() }
@@ -103,6 +113,7 @@ export default function OrgProjects() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
+      <ConfirmDialog config={confirm} onClose={() => setConfirm(null)} />
       {toast && (
         <div className={'fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white ' + (toast.type === 'error' ? 'bg-red-500' : 'bg-brand-400')}>
           {toast.msg}
