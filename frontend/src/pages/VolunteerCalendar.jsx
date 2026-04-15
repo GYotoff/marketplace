@@ -136,11 +136,11 @@ export default function VolunteerCalendar() {
   const nextMonth = () => { if (month === 11) { setMonth(0); setYear(y => y+1) } else setMonth(m => m+1); setSelected(null) }
 
   const upcomingRegs = registrations
-    .filter(r => r.events?.event_date && new Date(r.events.event_date) >= today)
+    .filter(r => r.events?.event_status !== 'completed' && r.events?.event_date && new Date(r.events.event_date) >= today)
     .sort((a, b) => new Date(a.events.event_date) - new Date(b.events.event_date))
 
   const pastRegs = registrations
-    .filter(r => r.events?.event_date && new Date(r.events.event_date) < today)
+    .filter(r => r.events?.event_status === 'completed' || (r.events?.event_date && new Date(r.events.event_date) < today))
     .sort((a, b) => new Date(b.events.event_date) - new Date(a.events.event_date))
 
   const selectedRegs = selected ? (eventsByDay[selected] || []) : []
@@ -226,7 +226,7 @@ export default function VolunteerCalendar() {
                     {evs.length > 0 && (
                       <span className={'mt-0.5 flex gap-0.5 flex-wrap justify-center'}>
                         {evs.slice(0, 3).map((ev, j) => {
-                            const isPastEv = ev.events?.event_date && new Date(ev.events.event_date) < today
+                            const isPastEv = ev.events?.event_status === 'completed' || (ev.events?.event_date && new Date(ev.events.event_date) < today)
                             return <span key={j} className={'inline-block w-1.5 h-1.5 rounded-full ' + (isSelected ? 'bg-white' : isPastEv ? 'bg-gray-300' : 'bg-brand-400')} />
                           })}
                       </span>
@@ -362,7 +362,7 @@ export default function VolunteerCalendar() {
             </div>
 
             {detail.events?.event_date && (() => {
-              const isPast = new Date(detail.events.event_date) <= today
+              const isPast = detail.events?.event_status === 'completed' || new Date(detail.events.event_date) <= today
               if (!isPast) return (
                 <button
                   onClick={() => unregister(detail)}
