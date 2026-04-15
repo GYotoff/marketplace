@@ -23,7 +23,9 @@ export default function VolunteerAttendance() {
   const [loading, setLoading] = useState(true)
   const [marking, setMarking] = useState(null)
   const [hoursInput, setHoursInput] = useState({})
-  const [showHours, setShowHours] = useState(null) // reg_id
+  const [showHours, setShowHours] = useState(null)
+  const [feedbackMap, setFeedbackMap] = useState({})   // reg_id → feedback row
+  const [fbState, setFbState] = useState({})           // reg_id → { rating, text, saving, open }
   const [toast, setToast] = useState(null)
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500) }
@@ -32,11 +34,44 @@ export default function VolunteerAttendance() {
 
   const load = async () => {
     setLoading(true)
-    // Use RPC to bypass RLS — fetches all registered events regardless of status
     const { data, error } = await supabase.rpc('get_volunteer_registered_events')
     if (error) console.error(error)
-    setRegs(data || [])
+    const rows = data || []
+    setRegs(rows)
+
+    // Load existing feedback for confirmed registrations
+    const confirmedRegIds = rows.filter(r => r.reg_status === 'confirmed').map(r => r.reg_id)
+    if (confirmedRegIds.length > 0) {
+      const { data: fbs } = await supabase
+        .from('event_feedback')
+        .select('id, registration_id, rating, feedback_text')
+        .in('registration_id', confirmedRegIds)
+      const map = {}
+      ;(fbs || []).forEach(fb => { map[fb.registration_id] = fb })
+      setFeedbackMap(map)
+      // Pre-populate fbState with existing values
+      const state = {}
+      ;(fbs || []).forEach(fb => { state[fb.registration_id] = { rating: fb.rating, text: fb.feedback_text || '', saving: false, open: false } })
+      setFbState(prev => ({ ...prev, ...state }))
+    }
     setLoading(false)
+  }
+
+  const saveFeedback = async (reg) => {
+    const s = fbState[reg.reg_id] || { rating: 0, text: '' }
+    setFbState(prev => ({ ...prev, [reg.reg_id]: { ...s, saving: true } }))
+    const fb = feedbackMap[reg.reg_id]
+    const payload = {
+      event_id: reg.event_id, profile_id: user.id,
+      registration_id: reg.reg_id, rating: s.rating,
+      feedback_text: s.text.trim() || null, updated_at: new Date().toISOString(),
+    }
+    const { error } = fb?.id
+      ? await supabase.from('event_feedback').update(payload).eq('id', fb.id)
+      : await supabase.from('event_feedback').insert(payload)
+    if (error) flash(error.message, 'error')
+    else { flash(lang === 'bg' ? 'Благодарим за обратната връзка!' : 'Thank you for your feedback!'); load() }
+    setFbState(prev => ({ ...prev, [reg.reg_id]: { ...s, saving: false, open: false } }))
   }
 
   const markAttended = async (regId) => {
@@ -186,11 +221,78 @@ export default function VolunteerAttendance() {
                       ⏳ {L.pending_confirm}
                     </p>
                   )}
-                  {reg.reg_status === 'confirmed' && (
-                    <p className="text-xs text-center text-green-700 bg-green-50 border border-green-200 rounded-xl py-2.5 px-4">
-                      ✓ {lang === 'bg' ? 'Участието ви е потвърдено от организатора' : 'Your attendance has been confirmed by the organizer'}
-                    </p>
-                  )}
+                  {reg.reg_status === 'confirmed' && (() => {
+                    const fb = feedbackMap[reg.reg_id]
+                    const s = fbState[reg.reg_id] || { rating: fb?.rating || 0, text: fb?.feedback_text || '', saving: false, open: false }
+                    const setS = (patch) => setFbState(prev => ({ ...prev, [reg.reg_id]: { ...s, ...patch } }))
+                    const eventUrl = window.location.origin + '/events/' + reg.event_id
+                    const shareText = lang === 'bg'
+                      ? `Участвах в "${reg.event_title}" — доброволчество с GiveForward!`
+                      : `I volunteered at "${reg.event_title}" with GiveForward!`
+                    return (
+                      <div className="flex flex-col gap-2.5">
+                        <p className="text-xs text-center text-green-700 bg-green-50 border border-green-200 rounded-xl py-2 px-4">
+                          ✓ {lang === 'bg' ? 'Участието ви е потвърдено' : 'Your attendance has been confirmed'}
+                          {reg.hours_logged > 0 && <span className="ml-1 text-brand-600">· ⏱ {reg.hours_logged}h</span>}
+                        </p>
+
+                        {/* Feedback toggle */}
+                        {!s.open && !fb && (
+                          <button onClick={() => setS({ open: true })}
+                            className="w-full text-sm border border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-xl py-2 transition-colors">
+                            ⭐ {lang === 'bg' ? 'Дайте обратна връзка' : 'Leave feedback'}
+                          </button>
+                        )}
+                        {fb && !s.open && (
+                          <div className="text-center">
+                            <div className="flex gap-0.5 justify-center mb-0.5">
+                              {[1,2,3,4,5].map(n => <span key={n} className={'text-base ' + (n <= fb.rating ? 'text-amber-400' : 'text-gray-200')}>★</span>)}
+                            </div>
+                            {fb.feedback_text && <p className="text-xs text-gray-500 italic">"{fb.feedback_text}"</p>}
+                            <button onClick={() => setS({ open: true })} className="text-xs text-brand-500 hover:underline mt-0.5">
+                              {lang === 'bg' ? 'Редактирай' : 'Edit feedback'}
+                            </button>
+                          </div>
+                        )}
+                        {s.open && (
+                          <div className="flex flex-col gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                            <p className="text-xs font-medium text-amber-800">{lang === 'bg' ? 'Вашата оценка' : 'Your rating'}</p>
+                            <div className="flex gap-1 justify-center">
+                              {[1,2,3,4,5].map(n => (
+                                <button key={n} type="button" onClick={() => setS({ rating: n })}
+                                  className={'text-2xl transition-transform hover:scale-110 ' + (n <= s.rating ? 'text-amber-400' : 'text-gray-200')}>★</button>
+                              ))}
+                            </div>
+                            <textarea rows={2} className="input resize-none text-sm"
+                              placeholder={lang === 'bg' ? 'Споделете преживяването си...' : 'Share your experience...'}
+                              value={s.text} onChange={e => setS({ text: e.target.value })} />
+                            <div className="flex gap-2">
+                              <button onClick={() => saveFeedback(reg)} disabled={s.saving || s.rating === 0}
+                                className="btn-primary flex-1 text-sm flex items-center justify-center gap-1.5 disabled:opacity-50">
+                                {s.saving && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                                {lang === 'bg' ? 'Изпрати' : 'Submit'}
+                              </button>
+                              <button onClick={() => setS({ open: false })} className="btn-secondary text-sm px-3">✕</button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Share */}
+                        <div className="flex gap-1.5 justify-center flex-wrap">
+                          {[
+                            { name: 'Facebook', icon: '📘', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(eventUrl)}` },
+                            { name: 'LinkedIn', icon: '💼', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(eventUrl)}` },
+                            { name: 'X', icon: '✖', url: `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(eventUrl)}` },
+                          ].map(s => (
+                            <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer"
+                              className="text-xs border border-gray-200 text-gray-500 hover:bg-gray-50 rounded-lg px-2.5 py-1 transition-colors">
+                              {s.icon} {s.name}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })()}
                   {reg.reg_status === 'rejected' && (
                     <p className="text-xs text-center text-red-600 bg-red-50 border border-red-200 rounded-xl py-2.5 px-4">
                       ✗ {lang === 'bg' ? 'Участието не беше потвърдено' : 'Your attendance was not confirmed'}
