@@ -30,7 +30,7 @@ export default function OrgProjects() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  useEffect(() => { load() }, [user])
+  useEffect(() => { load() }, [user?.id])
 
   const load = async () => {
     if (!user) return
