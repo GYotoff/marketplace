@@ -91,13 +91,13 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-brand-50 via-white to-white py-16 px-4">
+      <section className="py-16 px-4" style={{ background: 'var(--bg)', backgroundImage: 'var(--hero-gradient)' }}>
         <div className="max-w-3xl mx-auto text-center">
           <span className="inline-flex items-center gap-2 bg-brand-50 text-brand-600 text-xs font-medium px-3 py-1.5 rounded-full mb-5">
             <span className="w-1.5 h-1.5 bg-brand-400 rounded-full" />
             {t('hero.badge')}
           </span>
-          <h1 className="text-4xl sm:text-5xl font-medium leading-tight" style={{ color: 'var(--text)' }} mb-4">
+          <h1 className="text-4xl sm:text-5xl font-medium leading-tight mb-4" style={{ color: 'var(--text)' }}>
             {t('hero.title').split('Volunteer.').map((part, i) => i === 0
               ? <span key={i}>{part}<span className="text-brand-400">Volunteer.</span></span>
               : <span key={i}>{part}</span>)}
