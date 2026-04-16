@@ -53,15 +53,15 @@ export default function ConfirmDialog({ config, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
       onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-4"
+      <div className="rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
         onClick={e => e.stopPropagation()}>
         <div className="flex items-start gap-4">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${iconBg}`}>
             {icons[variant]}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-gray-900 text-base">{title}</h3>
-            {message && <p className="text-sm text-gray-500 mt-1">{message}</p>}
+            <h3 className="font-medium text-base" style={{ color: 'var(--text)' }}>{title}</h3>
+            {message && <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>{message}</p>}
           </div>
         </div>
         <div className="flex gap-3 justify-end">
