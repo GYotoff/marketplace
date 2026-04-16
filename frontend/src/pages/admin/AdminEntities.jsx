@@ -1,5 +1,5 @@
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -105,6 +105,14 @@ export default function AdminEntities() {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
   const [data, setData] = useState([])
+  const dataRef = useRef([])
+  const setDataSynced = (updater) => {
+    setData(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      dataRef.current = next
+      return next
+    })
+  }
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(null)
   const [counts, setCounts] = useState({ volunteers: 0, organizations: 0, corporations: 0 })
@@ -125,19 +133,19 @@ export default function AdminEntities() {
         if (filter === 'active') q = q.eq('is_active', true)
         if (filter === 'inactive') q = q.eq('is_active', false)
         const rows = await safeQuery(() => q)
-        setData(rows)
+        setDataSynced(rows)
       } else if (tab === 'organizations') {
         let q = supabase.from('organizations').select('*').order('created_at', { ascending: false })
         if (filter === 'active') q = q.eq('is_active', true)
         if (filter === 'inactive') q = q.eq('is_active', false)
         const rows = await safeQuery(() => q)
-        setData(rows)
+        setDataSynced(rows)
       } else if (tab === 'corporations') {
         let q = supabase.from('corporations').select('*').order('created_at', { ascending: false })
         if (filter === 'active') q = q.eq('is_active', true)
         if (filter === 'inactive') q = q.eq('is_active', false)
         const rows = await safeQuery(() => q)
-        setData(rows)
+        setDataSynced(rows)
       }
     } catch (e) {
       setError(e.message)
@@ -171,14 +179,15 @@ export default function AdminEntities() {
     })
   }
   const _execToggleVolunteer = async (u) => {
+    // Look up current state from data array (not from stale closure)
+    const current = dataRef.current.find(p => p.id === u.id) || u
+    const newActive = !current.is_active
     setActionLoading(u.id)
-    const newActive = !u.is_active
     const { error } = await supabase.from('profiles').update({ is_active: newActive }).eq('id', u.id)
     if (!error) {
       await supabase.from('admin_audit_log').insert({ admin_id: adminUser.id, entity_type: 'volunteer', entity_id: u.id, action: newActive ? 'activate' : 'deactivate' }).catch(() => {})
-      // Optimistic update — flip is_active in local state immediately
-      setData(prev => prev.map(p => p.id === u.id ? { ...p, is_active: newActive } : p))
-      showToast(`${u.full_name || u.email} ${newActive ? 'activated' : 'deactivated'}`)
+      setDataSynced(prev => prev.map(p => p.id === u.id ? { ...p, is_active: newActive } : p))
+      showToast(`${current.full_name || current.email} ${newActive ? 'activated' : 'deactivated'}`)
       fetchCounts()
     } else {
       showToast(error.message, 'error')
@@ -197,13 +206,14 @@ export default function AdminEntities() {
     })
   }
   const _execToggleEntity = async (entity, table) => {
+    // Look up current state from data array (not from stale closure)
+    const current = dataRef.current.find(e => e.id === entity.id) || entity
+    const newActive = !current.is_active
     setActionLoading(entity.id)
-    const newActive = !entity.is_active
     const { error } = await supabase.from(table).update({ is_active: newActive }).eq('id', entity.id)
     if (!error) {
-      // Optimistic update — flip is_active in local state immediately
-      setData(prev => prev.map(e => e.id === entity.id ? { ...e, is_active: newActive } : e))
-      showToast(`${entity.name} ${newActive ? 'activated' : 'deactivated'}`)
+      setDataSynced(prev => prev.map(e => e.id === entity.id ? { ...e, is_active: newActive } : e))
+      showToast(`${current.name} ${newActive ? 'activated' : 'deactivated'}`)
       fetchCounts()
     } else {
       showToast(error.message, 'error')
