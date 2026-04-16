@@ -34,7 +34,7 @@ export default function VolunteerCalendar() {
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500) }
 
-  useEffect(() => { if (user) load() }, [user])
+  useEffect(() => { if (user) load() }, [user?.id])
 
   const load = async () => {
     setLoading(true)
@@ -309,7 +309,7 @@ export default function VolunteerCalendar() {
       {detail && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setDetail(null)}>
           <div className="absolute inset-0 bg-black/40" />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10" onClick={e => e.stopPropagation()}>
+          <div className="relative rounded-2xl shadow-xl w-full max-w-md p-6 z-10" onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
               <div>
                 <Link to={'/events/' + detail.events?.id} onClick={() => setDetail(null)}
