@@ -7,7 +7,7 @@ const THEMES = [
     key: 'light',
     icon: '☀️',
     label: { en: 'Light',  bg: 'Светла' },
-    desc:  { en: 'Classic white background', bg: 'Класически бял фон' },
+    desc:  { en: 'Default — white background', bg: 'По подразбиране — бял фон' },
   },
   {
     key: 'dark',
