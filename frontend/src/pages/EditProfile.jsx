@@ -59,7 +59,6 @@ export default function EditProfile() {
     availability: [],
     skills: '', skills_bg: '',
     facebook_url: '', instagram_url: '', linkedin_url: '',
-    preferred_language: 'en',
   })
   const [pwForm, setPwForm] = useState({ current: '', password: '', confirm: '' })
   const [saving, setSaving] = useState(false)
@@ -81,8 +80,7 @@ export default function EditProfile() {
       facebook_url: profile.facebook_url || '',
       instagram_url: profile.instagram_url || '',
       linkedin_url: profile.linkedin_url || '',
-      preferred_language: profile.preferred_language || 'en',
-    })
+      })
     setMediaLibrary(profile.media_library || [])
   }, [profile?.id])
 
@@ -115,7 +113,6 @@ export default function EditProfile() {
         facebook_url: form.facebook_url || null,
         instagram_url: form.instagram_url || null,
         linkedin_url: form.linkedin_url || null,
-        preferred_language: form.preferred_language,
       })
       flash(lang === 'bg' ? 'Профилът е запазен' : 'Profile saved')
     } catch (e) {
@@ -300,20 +297,6 @@ export default function EditProfile() {
                       ? 'border-brand-400 bg-brand-50 text-brand-700'
                       : 'border-gray-100 text-gray-500 hover:border-gray-200')}>
                   {lang === 'bg' ? a.bg : a.en}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Language preference */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Preferred language</label>
-            <div className="flex gap-3">
-              {[['en','English'],['bg','Български']].map(([val, lbl]) => (
-                <button key={val} type="button" onClick={() => set('preferred_language', val)}
-                  className={'text-sm px-4 py-2 rounded-xl border-2 font-medium transition-colors ' +
-                    (form.preferred_language === val ? 'border-brand-400 bg-brand-50 text-brand-700' : 'border-gray-100 text-gray-500 hover:border-gray-200')}>
-                  {lbl}
                 </button>
               ))}
             </div>
