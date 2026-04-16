@@ -24,8 +24,8 @@ const THEMES = [
 ]
 
 const LANGUAGES = [
-  { key: 'en', flag: '🇬🇧', label: 'English' },
-  { key: 'bg', flag: '🇧🇬', label: 'Български' },
+  { key: 'en', label: 'English' },
+  { key: 'bg', label: 'Български' },
 ]
 
 export default function Settings() {
@@ -98,7 +98,6 @@ export default function Settings() {
                   borderColor: active ? 'var(--brand-400, #1D9E75)' : 'var(--border-mid)',
                   background: active ? 'rgba(29,158,117,0.08)' : 'var(--bg-subtle)',
                 }}>
-                <span className="text-xl">{l.flag}</span>
                 <span className="text-sm font-medium" style={{ color: active ? '#1D9E75' : 'var(--text)' }}>
                   {l.label}
                 </span>
