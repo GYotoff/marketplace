@@ -181,15 +181,6 @@ export default function Volunteers() {
                   )}
                 </div>
               )}
-
-              {/* Social links */}
-              {(v.facebook_url || v.instagram_url || v.linkedin_url) && (
-                <div className="flex gap-3 pt-1 border-t border-gray-50">
-                  {v.facebook_url && <a href={v.facebook_url} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-brand-500 text-xs">f</a>}
-                  {v.instagram_url && <a href={v.instagram_url} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-brand-500 text-xs">📷</a>}
-                  {v.linkedin_url && <a href={v.linkedin_url} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-brand-500 text-xs">in</a>}
-                </div>
-              )}
             </div>
           )
         })}
