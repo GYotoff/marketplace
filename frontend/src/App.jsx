@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
+import { useThemeStore } from '@/store/themeStore'
 import Layout from '@/components/layout/Layout'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import Settings from '@/pages/Settings'
 
 import Home from '@/pages/Home'
 import Login from '@/pages/Login'
@@ -65,7 +67,8 @@ function NotFound() {
 
 export default function App() {
   const init = useAuthStore(s => s.init)
-  useEffect(() => { init() }, [init])
+  const initTheme = useThemeStore(s => s.init)
+  useEffect(() => { init(); initTheme() }, [init, initTheme])
 
   return (
     <Routes>
@@ -108,6 +111,7 @@ export default function App() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/dashboard/profile" element={<ProtectedRoute><ViewProfile /></ProtectedRoute>} />
         <Route path="/dashboard/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
         {/* Organization flows */}
         <Route path="/org/dashboard" element={
