@@ -97,7 +97,7 @@ export default function Home() {
             <span className="w-1.5 h-1.5 bg-brand-400 rounded-full" />
             {t('hero.badge')}
           </span>
-          <h1 className="text-4xl sm:text-5xl font-medium text-gray-900 leading-tight mb-4">
+          <h1 className="text-4xl sm:text-5xl font-medium leading-tight" style={{ color: 'var(--text)' }} mb-4">
             {t('hero.title').split('Volunteer.').map((part, i) => i === 0
               ? <span key={i}>{part}<span className="text-brand-400">Volunteer.</span></span>
               : <span key={i}>{part}</span>)}
@@ -111,7 +111,7 @@ export default function Home() {
       </section>
 
       {/* Stats */}
-      <section className="border-y border-gray-100">
+      <section className="" style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
           <StatCard num={stats.orgs} label={t('stats.organizations')} />
           <StatCard num={stats.volunteers} label={t('stats.volunteers')} />
@@ -149,7 +149,7 @@ export default function Home() {
       </section>
 
       {/* Roles */}
-      <section className="bg-gray-50 py-14 px-4">
+      <section className="py-14 px-4" style={{ background: 'var(--bg-subtle)' }}>
         <div className="max-w-7xl mx-auto">
           <h2 className="text-xl font-medium mb-6 text-center">{t('roles.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
