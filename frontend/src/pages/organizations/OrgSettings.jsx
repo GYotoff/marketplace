@@ -147,7 +147,7 @@ export default function OrgSettings() {
 
   useEffect(() => {
     fetchOrg()
-  }, [user])
+  }, [user?.id])
 
   const fetchOrg = async () => {
     if (!user) return
