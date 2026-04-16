@@ -373,7 +373,7 @@ export default function OrgEventEdit() {
               valueEn={form.meeting_point} valueBg={form.meeting_point_bg}
               onChangeEn={v => set('meeting_point', v)} onChangeBg={v => set('meeting_point_bg', v)} rows={2} />
 
-            {!isNew && form.status === 'published' && (
+            {!isNew && (form.status === 'published' || form.status === 'completed') && (
               <div className="border-t border-gray-100 pt-3">
                 <Toggle value={form.show_in_public} onChange={v => set('show_in_public', v)}
                   label="Show on public page" hint="Visible at /events and on the project page" />
