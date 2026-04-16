@@ -29,7 +29,7 @@ export default function OrgDashboard() {
 
   useEffect(() => {
     fetchOrgData()
-  }, [user])
+  }, [user?.id])
 
   const fetchOrgData = async () => {
     if (!user) return
