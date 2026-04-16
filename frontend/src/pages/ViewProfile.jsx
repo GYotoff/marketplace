@@ -4,14 +4,35 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 
-const FIELD = ({ label, value, placeholder = '—' }) => (
-  <div className="flex flex-col gap-0.5">
-    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</p>
-    <p className={`text-sm ${value ? 'text-gray-900' : 'text-gray-400 italic'}`}>
-      {value || placeholder}
-    </p>
-  </div>
-)
+const AVAILABILITY_LABEL = {
+  weekdays: { en: 'Weekdays',  bg: 'Делнични' },
+  weekends: { en: 'Weekends',  bg: 'Уикенди' },
+  mornings: { en: 'Mornings',  bg: 'Сутрини' },
+  evenings: { en: 'Evenings',  bg: 'Вечери' },
+}
+
+const GENDER_LABEL = {
+  male:             { en: 'Male',              bg: 'Мъж' },
+  female:           { en: 'Female',            bg: 'Жена' },
+  non_binary:       { en: 'Non-binary',        bg: 'Небинарен' },
+  prefer_not_to_say:{ en: 'Prefer not to say', bg: 'Предпочитам да не казвам' },
+}
+
+const ROLE_LABEL = {
+  volunteer:   { en: 'Volunteer',            bg: 'Доброволец' },
+  org_admin:   { en: 'Organization admin',   bg: 'Администратор на организация' },
+  corp_admin:  { en: 'Corporation admin',    bg: 'Администратор на корпорация' },
+  super_admin: { en: 'Platform admin',       bg: 'Администратор на платформата' },
+}
+
+function Stat({ label, value }) {
+  return (
+    <div className="text-center">
+      <p className="text-2xl font-semibold text-brand-400">{value}</p>
+      <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+    </div>
+  )
+}
 
 export default function ViewProfile() {
   const { user, profile } = useAuthStore()
@@ -19,162 +40,194 @@ export default function ViewProfile() {
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [stats, setStats] = useState({ applications: 0, events: 0, hours: 0 })
   const [loading, setLoading] = useState(true)
+  const [slideIdx, setSlideIdx] = useState(0)
 
   useEffect(() => {
     if (!user) return
     Promise.all([
-      supabase.from('project_applications')
-        .select('id, hours_logged', { count: 'exact' })
-        .eq('profile_id', user.id),
-      supabase.from('event_registrations')
-        .select('id, hours_logged', { count: 'exact' })
-        .eq('profile_id', user.id),
-    ]).then(([apps, regs]) => {
+      supabase.from('project_applications').select('id, hours_logged', { count: 'exact' }).eq('profile_id', user.id),
+      supabase.from('event_registrations').select('id, hours_logged').eq('profile_id', user.id).eq('status', 'confirmed'),
+    ]).then(([apps, evs]) => {
+      const evHours = (evs.data || []).reduce((s, r) => s + (r.hours_logged || 0), 0)
       const appHours = (apps.data || []).reduce((s, r) => s + (r.hours_logged || 0), 0)
-      const regHours = (regs.data || []).reduce((s, r) => s + (r.hours_logged || 0), 0)
-      setStats({
-        applications: apps.count || 0,
-        events: regs.count || 0,
-        hours: appHours + regHours,
-      })
+      setStats({ applications: apps.count || 0, events: (evs.data || []).length, hours: evHours + appHours })
       setLoading(false)
     })
-  }, [user])
+  }, [user?.id])
 
-  if (!profile) return (
-    <div className="flex items-center justify-center min-h-[40vh]">
-      <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
-    </div>
-  )
+  if (!profile) return <div className="flex items-center justify-center min-h-[40vh]"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>
 
-  const initials = profile.full_name
-    ? profile.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-    : profile.email[0].toUpperCase()
-
-  const roleLabel = lang === 'bg' ? {
-    volunteer: 'Доброволец',
-    org_admin: 'Администратор на организация',
-    corp_admin: 'Администратор на корпорация',
-    super_admin: 'Администратор на платформата',
-  }[profile.role] || profile.role : {
-    volunteer: 'Volunteer',
-    org_admin: 'Organization admin',
-    corp_admin: 'Corporation admin',
-    super_admin: 'Platform admin',
-  }[profile.role] || profile.role
-
-  const roleColor = {
-    volunteer: 'bg-brand-50 text-brand-700',
-    org_admin: 'bg-blue-50 text-blue-700',
-    corp_admin: 'bg-amber-50 text-amber-700',
-    super_admin: 'bg-purple-50 text-purple-700',
-  }[profile.role] || 'bg-gray-50 text-gray-700'
-
-  const completionFields = ['full_name', 'phone', 'bio', 'city']
-  const filled = completionFields.filter(f => profile[f]).length
-  const completionPct = Math.round((filled / completionFields.length) * 100)
+  const displayName = (lang === 'bg' ? (profile.full_name_bg || profile.full_name) : profile.full_name) || (lang === 'bg' ? 'Не е зададено' : 'No name set')
+  const city = lang === 'bg' ? (profile.city_bg || profile.city) : profile.city
+  const country = lang === 'bg' ? (profile.country_bg || 'Bulgaria') : (profile.country || 'Bulgaria')
+  const bio = lang === 'bg' ? (profile.bio_bg || profile.bio) : profile.bio
+  const skills = lang === 'bg' ? (profile.skills_bg || profile.skills) : profile.skills
+  const roleLabel = ROLE_LABEL[profile.role]?.[lang] || profile.role
+  const initials = profile.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
+  const media = profile.media_library || []
+  const badges = profile.badges || []
+  const achievements = profile.achievements || []
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
-
-      {/* Header card */}
-      <div className="card mb-5">
-        <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-
-          {/* Avatar */}
-          <div className="w-20 h-20 rounded-2xl bg-brand-50 flex items-center justify-center text-3xl font-medium text-brand-600 shrink-0 overflow-hidden">
-            {profile.avatar_url
-              ? <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
-              : initials
-            }
-          </div>
-
-          {/* Name + meta */}
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h1 className="text-xl font-medium text-gray-900">{(lang === 'bg' ? (profile.full_name_bg || profile.full_name) : profile.full_name) || (lang === 'bg' ? 'Не е зададено' : 'No name set')}</h1>
-              <span className={`badge ${roleColor} text-xs`}>{roleLabel}</span>
-            </div>
-            <p className="text-sm text-gray-500">{profile.email}</p>
-            {profile.city && (
-              <p className="text-sm text-gray-400 mt-0.5 flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                {lang === 'bg' ? (profile.city_bg || profile.city) : profile.city}, {lang === 'bg' ? (profile.country_bg || profile.country) : profile.country}
-              </p>
-            )}
-            <p className="text-xs text-gray-400 mt-1">
-              {lang === 'bg' ? 'Член от ' : 'Member since '}{new Date(profile.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
-            </p>
-          </div>
-
-          <Link to="/dashboard/profile/edit" className="btn-secondary text-sm shrink-0">
-            Edit profile
-          </Link>
-        </div>
-
-        {/* Profile completion bar */}
-        {completionPct < 100 && (
-          <div className="mt-5 pt-5 border-t border-gray-100">
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="text-xs font-medium text-gray-500">Profile completion</p>
-              <p className="text-xs text-brand-400 font-medium">{completionPct}%</p>
-            </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-brand-400 rounded-full transition-all"
-                style={{ width: `${completionPct}%` }}
-              />
-            </div>
-            {completionPct < 100 && (
-              <p className="text-xs text-gray-400 mt-1.5">
-                Add {completionFields.filter(f => !profile[f]).map(f => f.replace('_', ' ')).join(', ')} to complete your profile.
-              </p>
-            )}
-          </div>
-        )}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl font-medium text-gray-900">{lang === 'bg' ? 'Моят профил' : 'My profile'}</h1>
+        <Link to="/dashboard/profile/edit" className="btn-secondary text-sm">
+          {lang === 'bg' ? 'Редактирай' : 'Edit profile'}
+        </Link>
       </div>
 
-      {/* Stats row */}
+      {/* Avatar + name */}
+      <div className="card flex items-center gap-5 mb-6">
+        <div className="w-16 h-16 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-semibold text-xl overflow-hidden shrink-0">
+          {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" /> : initials}
+        </div>
+        <div className="min-w-0">
+          <h2 className="text-lg font-medium text-gray-900">{displayName}</h2>
+          <p className="text-sm text-gray-500">{profile.email}</p>
+          {(city || country) && <p className="text-xs text-gray-400 mt-0.5">{[city, country].filter(Boolean).join(', ')}</p>}
+          <span className="text-xs text-brand-400 font-medium">{roleLabel}</span>
+        </div>
+      </div>
+
+      {/* Stats */}
       {!loading && (
-        <div className="grid grid-cols-3 gap-4 mb-5">
-          {[
-            { label: lang === 'bg' ? 'Заявки за проекти' : 'Project applications', value: stats.applications },
-            { label: lang === 'bg' ? 'Регистрации за събития' : 'Events registered', value: stats.events },
-            { label: lang === 'bg' ? 'Доброволчески часове' : 'Volunteer hours', value: stats.hours },
-          ].map(s => (
-            <div key={s.label} className="card text-center py-4">
-              <p className="text-2xl font-medium text-brand-400">{s.value}</p>
-              <p className="text-xs text-gray-500 mt-1">{s.label}</p>
-            </div>
-          ))}
+        <div className="card grid grid-cols-3 gap-4 mb-6">
+          <Stat label={lang === 'bg' ? 'Приложения' : 'Applications'} value={stats.applications} />
+          <Stat label={lang === 'bg' ? 'Събития' : 'Events'} value={stats.events} />
+          <Stat label={lang === 'bg' ? 'Часове' : 'Hours'} value={stats.hours} />
         </div>
       )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        {/* Personal details */}
+        <div className="card flex flex-col gap-3">
+          <h3 className="text-sm font-medium text-gray-700">{lang === 'bg' ? 'Детайли' : 'Details'}</h3>
+          {profile.birth_year && (
+            <div className="flex gap-2 text-sm">
+              <span className="text-gray-400 w-24 shrink-0">{lang === 'bg' ? 'Година' : 'Birth year'}</span>
+              <span className="text-gray-700">{profile.birth_year}</span>
+            </div>
+          )}
+          {profile.gender && (
+            <div className="flex gap-2 text-sm">
+              <span className="text-gray-400 w-24 shrink-0">{lang === 'bg' ? 'Пол' : 'Gender'}</span>
+              <span className="text-gray-700">{GENDER_LABEL[profile.gender]?.[lang] || profile.gender}</span>
+            </div>
+          )}
+          {profile.phone && (
+            <div className="flex gap-2 text-sm">
+              <span className="text-gray-400 w-24 shrink-0">{lang === 'bg' ? 'Телефон' : 'Phone'}</span>
+              <span className="text-gray-700">{profile.phone}</span>
+            </div>
+          )}
+          {profile.availability?.length > 0 && (
+            <div className="flex gap-2 text-sm">
+              <span className="text-gray-400 w-24 shrink-0">{lang === 'bg' ? 'Наличност' : 'Available'}</span>
+              <div className="flex flex-wrap gap-1">
+                {profile.availability.map(a => (
+                  <span key={a} className="badge bg-brand-50 text-brand-700 border border-brand-100 text-xs px-2 py-0.5">
+                    {AVAILABILITY_LABEL[a]?.[lang] || a}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Social & skills */}
+        <div className="card flex flex-col gap-3">
+          {skills && (
+            <>
+              <h3 className="text-sm font-medium text-gray-700">{lang === 'bg' ? 'Умения' : 'Skills'}</h3>
+              <div className="flex flex-wrap gap-1">
+                {skills.split(',').map(s => s.trim()).filter(Boolean).map((s, i) => (
+                  <span key={i} className="badge bg-gray-50 text-gray-600 border border-gray-200 text-xs px-2 py-0.5">{s}</span>
+                ))}
+              </div>
+            </>
+          )}
+          {(profile.facebook_url || profile.instagram_url || profile.linkedin_url) && (
+            <div className="flex flex-col gap-1.5 mt-1">
+              {profile.facebook_url && <a href={profile.facebook_url} target="_blank" rel="noreferrer" className="text-sm text-brand-500 hover:underline flex items-center gap-1.5">f Facebook</a>}
+              {profile.instagram_url && <a href={profile.instagram_url} target="_blank" rel="noreferrer" className="text-sm text-brand-500 hover:underline flex items-center gap-1.5">📷 Instagram</a>}
+              {profile.linkedin_url && <a href={profile.linkedin_url} target="_blank" rel="noreferrer" className="text-sm text-brand-500 hover:underline flex items-center gap-1.5">in LinkedIn</a>}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Bio */}
-      {profile.bio && (
+      {bio && (
         <div className="card mb-5">
-          <h2 className="text-sm font-medium text-gray-700 mb-2">About</h2>
-          <p className="text-sm text-gray-600 leading-relaxed">{lang === 'bg' ? (profile.bio_bg || profile.bio) : profile.bio}</p>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">{lang === 'bg' ? 'За мен' : 'About me'}</h3>
+          <p className="text-sm text-gray-600 leading-relaxed">{bio}</p>
         </div>
       )}
 
-      {/* Details grid */}
-      <div className="card">
-        <h2 className="text-sm font-medium text-gray-700 mb-4">Profile details</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <FIELD label={lang === 'bg' ? 'Пълно име' : 'Full name'} value={lang === 'bg' ? (profile.full_name_bg || profile.full_name) : profile.full_name} />
-          <FIELD label={lang === 'bg' ? 'Имейл' : 'Email'} value={profile.email} />
-          <FIELD label={lang === 'bg' ? 'Телефон' : 'Phone'} value={profile.phone} />
-          <FIELD label={lang === 'bg' ? 'Град' : 'City'} value={lang === 'bg' ? (profile.city_bg || profile.city) : profile.city} />
-          <FIELD label={lang === 'bg' ? 'Държава' : 'Country'} value={lang === 'bg' ? (profile.country_bg || profile.country) : profile.country} />
-          <FIELD label={lang === 'bg' ? 'Предпочитан език' : 'Preferred language'} value={profile.preferred_language === 'bg' ? 'Български' : 'English'} />
-          <FIELD label={lang === 'bg' ? 'Роля' : 'Role'} value={roleLabel} />
-          <FIELD label={lang === 'bg' ? 'Статус на акаунта' : 'Account status'} value={lang === 'bg' ? (profile.is_active ? 'Активен' : 'Неактивен') : (profile.is_active ? 'Active' : 'Inactive')} />
+      {/* Badges */}
+      {badges.length > 0 && (
+        <div className="card mb-5">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">{lang === 'bg' ? 'Значки' : 'Badges'}</h3>
+          <div className="flex flex-wrap gap-3">
+            {badges.map((b, i) => (
+              <div key={i} className="flex flex-col items-center gap-1 text-center w-16">
+                <div className="w-12 h-12 rounded-full bg-brand-50 border-2 border-brand-200 flex items-center justify-center text-xl">
+                  {b.icon || '🏅'}
+                </div>
+                <p className="text-xs text-gray-600 leading-tight">{lang === 'bg' ? (b.label_bg || b.label) : b.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Achievements */}
+      {achievements.length > 0 && (
+        <div className="card mb-5">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">{lang === 'bg' ? 'Постижения' : 'Achievements'}</h3>
+          <div className="flex flex-col gap-2">
+            {achievements.map((a, i) => (
+              <div key={i} className="flex items-center gap-3 text-sm">
+                <span className="text-lg">{a.icon || '⭐'}</span>
+                <div>
+                  <p className="font-medium text-gray-800">{lang === 'bg' ? (a.title_bg || a.title) : a.title}</p>
+                  {(lang === 'bg' ? (a.desc_bg || a.desc) : a.desc) && (
+                    <p className="text-xs text-gray-400">{lang === 'bg' ? (a.desc_bg || a.desc) : a.desc}</p>
+                  )}
+                </div>
+                {a.date && <span className="ml-auto text-xs text-gray-400">{new Date(a.date).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB')}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Media library */}
+      {media.length > 0 && (
+        <div className="card">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">{lang === 'bg' ? 'Медийна библиотека' : 'Media library'}</h3>
+          {/* Slideshow */}
+          <div className="relative bg-black rounded-xl overflow-hidden mb-2">
+            <img src={media[slideIdx]} alt="" className="w-full h-56 object-cover" />
+            {media.length > 1 && <>
+              <button onClick={() => setSlideIdx(i => (i - 1 + media.length) % media.length)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70">‹</button>
+              <button onClick={() => setSlideIdx(i => (i + 1) % media.length)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70">›</button>
+              <span className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-lg">{slideIdx + 1}/{media.length}</span>
+            </>}
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
+            {media.map((url, i) => (
+              <button key={i} onClick={() => setSlideIdx(i)}
+                className={'w-10 h-10 rounded-lg overflow-hidden border-2 transition-colors ' + (i === slideIdx ? 'border-brand-400' : 'border-transparent')}>
+                <img src={url} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
