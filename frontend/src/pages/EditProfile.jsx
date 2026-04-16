@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
@@ -6,34 +6,36 @@ import { supabase } from '@/lib/supabase'
 import AvatarUpload from '@/components/ui/AvatarUpload'
 
 const BULGARIAN_CITIES = [
-  'Sofia', 'Plovdiv', 'Varna', 'Burgas', 'Ruse', 'Stara Zagora',
-  'Pleven', 'Sliven', 'Dobrich', 'Shumen', 'Pernik', 'Haskovo',
-  'Yambol', 'Pazardzhik', 'Blagoevgrad', 'Veliko Tarnovo', 'Vratsa',
-  'Gabrovo', 'Vidin', 'Montana', 'Other',
+  'Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven',
+  'Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik',
+  'Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Other',
 ]
 
-const TABS_EN = [
-  { id: 'personal', label: 'Personal info' },
-  { id: 'security', label: 'Password & security' },
+const AVAILABILITY_OPTIONS = [
+  { key: 'weekdays',  en: 'Weekdays',  bg: 'Делнични дни' },
+  { key: 'weekends',  en: 'Weekends',  bg: 'Уикенди' },
+  { key: 'mornings',  en: 'Mornings',  bg: 'Сутрини' },
+  { key: 'evenings',  en: 'Evenings',  bg: 'Вечери' },
 ]
-const TABS_BG = [
-  { id: 'personal', label: 'Лична информация' },
-  { id: 'security', label: 'Парола и сигурност' },
+
+const GENDER_OPTIONS = [
+  { key: 'male',            en: 'Male',              bg: 'Мъж' },
+  { key: 'female',          en: 'Female',            bg: 'Жена' },
+  { key: 'non_binary',      en: 'Non-binary',        bg: 'Небинарен' },
+  { key: 'prefer_not_to_say', en: 'Prefer not to say', bg: 'Предпочитам да не казвам' },
 ]
+
+const ROLE_LABEL = {
+  volunteer: { en: 'Volunteer', bg: 'Доброволец' },
+  org_admin: { en: 'Organization admin', bg: 'Администратор на организация' },
+  corp_admin: { en: 'Corporation admin', bg: 'Администратор на корпорация' },
+  super_admin: { en: 'Platform admin', bg: 'Администратор на платформата' },
+}
 
 function Toast({ message, type = 'success', onClose }) {
-  useEffect(() => {
-    const t = setTimeout(onClose, 3000)
-    return () => clearTimeout(t)
-  }, [onClose])
+  useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t) }, [onClose])
   return (
-    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium transition-all ${
-      type === 'success' ? 'bg-brand-400 text-white' : 'bg-red-500 text-white'
-    }`}>
-      {type === 'success'
-        ? <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-        : <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/></svg>
-      }
+    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${type === 'success' ? 'bg-brand-400 text-white' : 'bg-red-500 text-white'}`}>
       {message}
     </div>
   )
@@ -46,275 +48,384 @@ export default function EditProfile() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('personal')
   const [toast, setToast] = useState(null)
+  const flash = (msg, type = 'success') => setToast({ msg, type })
 
-  // Personal info form
+  // ── Forms ──────────────────────────────────────────────────────────────────
   const [form, setForm] = useState({
     full_name: '', full_name_bg: '', phone: '',
     bio: '', bio_bg: '',
-    city: '', city_bg: '',
-    country_bg: '',
+    city: '', city_bg: '', country_bg: '',
+    birth_year: '', gender: '',
+    availability: [],
+    skills: '', skills_bg: '',
+    facebook_url: '', instagram_url: '', linkedin_url: '',
     preferred_language: 'en',
   })
-  const [saving, setSaving] = useState(false)
-
-  // Password form
   const [pwForm, setPwForm] = useState({ current: '', password: '', confirm: '' })
+  const [saving, setSaving] = useState(false)
   const [pwSaving, setPwSaving] = useState(false)
-  const [showPw, setShowPw] = useState(false)
+  const [mediaLibrary, setMediaLibrary] = useState([])
+  const mediaRef = useRef()
 
   useEffect(() => {
-    if (profile) {
-      setForm({
-        full_name: profile.full_name || '',
-        full_name_bg: profile.full_name_bg || '',
-        phone: profile.phone || '',
-        bio: profile.bio || '',
-        bio_bg: profile.bio_bg || '',
-        city: profile.city || '',
-        city_bg: profile.city_bg || '',
-        country_bg: profile.country_bg || '',
-        preferred_language: profile.preferred_language || 'en',
-      })
-    }
-  }, [profile])
+    if (!profile) return
+    setForm({
+      full_name: profile.full_name || '', full_name_bg: profile.full_name_bg || '',
+      phone: profile.phone || '',
+      bio: profile.bio || '', bio_bg: profile.bio_bg || '',
+      city: profile.city || '', city_bg: profile.city_bg || '', country_bg: profile.country_bg || '',
+      birth_year: profile.birth_year || '',
+      gender: profile.gender || '',
+      availability: profile.availability || [],
+      skills: profile.skills || '', skills_bg: profile.skills_bg || '',
+      facebook_url: profile.facebook_url || '',
+      instagram_url: profile.instagram_url || '',
+      linkedin_url: profile.linkedin_url || '',
+      preferred_language: profile.preferred_language || 'en',
+    })
+    setMediaLibrary(profile.media_library || [])
+  }, [profile?.id])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
-  const setPw = (k, v) => setPwForm(f => ({ ...f, [k]: v }))
+  const toggleAvailability = (key) => setForm(f => ({
+    ...f,
+    availability: f.availability.includes(key)
+      ? f.availability.filter(k => k !== key)
+      : [...f.availability, key],
+  }))
 
+  // ── Save personal info ─────────────────────────────────────────────────────
   const handleSaveProfile = async () => {
     setSaving(true)
     try {
       await updateProfile({
-        ...form,
+        full_name: form.full_name,
         full_name_bg: form.full_name_bg || null,
+        phone: form.phone || null,
+        bio: form.bio || null,
         bio_bg: form.bio_bg || null,
+        city: form.city || null,
         city_bg: form.city_bg || null,
         country_bg: form.country_bg || null,
+        birth_year: form.birth_year ? parseInt(form.birth_year) : null,
+        gender: form.gender || null,
+        availability: form.availability,
+        skills: form.skills || null,
+        skills_bg: form.skills_bg || null,
+        facebook_url: form.facebook_url || null,
+        instagram_url: form.instagram_url || null,
+        linkedin_url: form.linkedin_url || null,
+        preferred_language: form.preferred_language,
       })
-      setToast({ message: 'Profile saved successfully', type: 'success' })
-    } catch (err) {
-      setToast({ message: err.message, type: 'error' })
-    } finally {
-      setSaving(false)
+      flash(lang === 'bg' ? 'Профилът е запазен' : 'Profile saved')
+    } catch (e) {
+      flash(e.message, 'error')
     }
+    setSaving(false)
   }
 
+  // ── Change password ────────────────────────────────────────────────────────
   const handleChangePassword = async () => {
-    if (pwForm.password !== pwForm.confirm) {
-      setToast({ message: 'Passwords do not match', type: 'error' }); return
-    }
-    if (pwForm.password.length < 8) {
-      setToast({ message: 'Password must be at least 8 characters', type: 'error' }); return
-    }
+    if (pwForm.password !== pwForm.confirm) { flash(lang === 'bg' ? 'Паролите не съвпадат' : 'Passwords do not match', 'error'); return }
+    if (pwForm.password.length < 8) { flash(lang === 'bg' ? 'Паролата трябва да е поне 8 символа' : 'Password must be at least 8 characters', 'error'); return }
     setPwSaving(true)
     const { error } = await supabase.auth.updateUser({ password: pwForm.password })
-    if (error) {
-      setToast({ message: error.message, type: 'error' })
-    } else {
-      setPwForm({ current: '', password: '', confirm: '' })
-      setToast({ message: 'Password updated successfully', type: 'success' })
-    }
+    if (error) flash(error.message, 'error')
+    else { flash(lang === 'bg' ? 'Паролата е сменена' : 'Password changed'); setPwForm({ current: '', password: '', confirm: '' }) }
     setPwSaving(false)
   }
 
-  const initials = profile?.full_name
-    ? profile.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-    : profile?.email?.[0]?.toUpperCase()
+  // ── Media library ──────────────────────────────────────────────────────────
+  const uploadMedia = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    const remaining = 20 - mediaLibrary.length
+    const toUpload = files.slice(0, remaining)
+    const urls = []
+    for (const file of toUpload) {
+      const ext = file.name.split('.').pop()
+      const path = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
+      const { error } = await supabase.storage.from('volunteer-media').upload(path, file, { upsert: true })
+      if (!error) {
+        const { data } = supabase.storage.from('volunteer-media').getPublicUrl(path)
+        urls.push(data.publicUrl)
+      }
+    }
+    const newLibrary = [...mediaLibrary, ...urls]
+    setMediaLibrary(newLibrary)
+    await supabase.from('profiles').update({ media_library: newLibrary }).eq('id', user.id)
+    flash(lang === 'bg' ? 'Снимките са качени' : 'Photos uploaded')
+  }
+
+  const removeMedia = async (url) => {
+    const newLibrary = mediaLibrary.filter(u => u !== url)
+    setMediaLibrary(newLibrary)
+    await supabase.from('profiles').update({ media_library: newLibrary }).eq('id', user.id)
+  }
+
+  if (!profile) return <div className="flex items-center justify-center min-h-[40vh]"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>
+
+  const initials = profile.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
+  const displayName = (lang === 'bg' ? (profile.full_name_bg || profile.full_name) : profile.full_name) || (lang === 'bg' ? 'Не е зададено' : 'No name set')
+  const roleLabel = ROLE_LABEL[profile.role]?.[lang] || profile.role
+
+  const TABS = [
+    { id: 'personal', label: lang === 'bg' ? 'Лична информация' : 'Personal info' },
+    { id: 'skills',   label: lang === 'bg' ? 'Умения и профили' : 'Skills & social' },
+    { id: 'media',    label: lang === 'bg' ? 'Медийна библиотека' : 'Media library' },
+    { id: 'security', label: lang === 'bg' ? 'Парола' : 'Password' },
+  ]
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
+    <div className="max-w-3xl mx-auto px-4 py-10">
+      {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link to="/dashboard/profile" className="text-gray-400 hover:text-gray-600 transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
-          </svg>
+        <Link to="/dashboard/profile" className="text-sm text-gray-400 hover:text-gray-600">
+          ← {lang === 'bg' ? 'Моят профил' : 'My profile'}
         </Link>
-        <div>
-          <h1 className="text-xl font-medium text-gray-900">Edit profile</h1>
-          <p className="text-sm text-gray-500">Update your personal information and account settings</p>
+      </div>
+
+      {/* Header card */}
+      <div className="card flex items-center gap-4 mb-6">
+        <AvatarUpload />
+        <div className="min-w-0">
+          <p className="font-medium text-gray-900 truncate">{displayName}</p>
+          <p className="text-sm text-gray-500 truncate">{profile.email}</p>
+          <span className="text-xs text-brand-400 font-medium">{roleLabel}</span>
         </div>
       </div>
 
-      {/* Avatar upload */}
-      <div className="card mb-6 flex flex-col sm:flex-row items-center gap-6">
-        <AvatarUpload size="lg" />
-        <div className="min-w-0 text-center sm:text-left">
-          <p className="font-medium text-gray-900 truncate">{(lang === 'bg' ? (profile?.full_name_bg || profile?.full_name) : profile?.full_name) || (lang === 'bg' ? 'Не е зададено' : 'No name set')}</p>
-          <p className="text-sm text-gray-500 truncate">{profile?.email}</p>
-          <span className="text-xs text-brand-400 font-medium capitalize">
-            {{ volunteer: lang === 'bg' ? 'Доброволец' : 'Volunteer', org_admin: lang === 'bg' ? 'Администратор на организация' : 'Organization admin', corp_admin: lang === 'bg' ? 'Администратор на корпорация' : 'Corporation admin', super_admin: lang === 'bg' ? 'Администратор на платформата' : 'Platform admin' }[profile?.role] || profile?.role?.replace('_', ' ')}
-          </span>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-gray-100 mb-6 gap-1">
-        {(lang === 'bg' ? TABS_BG : TABS_EN).map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
-              tab === t.id
-                ? 'border-brand-400 text-brand-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}>
+      {/* Tab bar */}
+      <div className="flex gap-0.5 border-b border-gray-100 mb-6 overflow-x-auto">
+        {TABS.map(t => (
+          <button key={t.id} type="button" onClick={() => setTab(t.id)}
+            className={'px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap -mb-px ' +
+              (tab === t.id ? 'border-brand-400 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700')}>
             {t.label}
           </button>
         ))}
       </div>
 
-      {/* Personal info tab */}
+      {/* ── Personal info ── */}
       {tab === 'personal' && (
         <div className="card flex flex-col gap-5">
-
+          {/* Name */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.full_name')} (EN)</label>
-              <input type="text" required className="input"
-                placeholder="Maria Kostadinova"
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Пълно име (EN)' : 'Full name (EN)'}</label>
+              <input type="text" className="input" placeholder="Maria Kostadinova"
                 value={form.full_name} onChange={e => set('full_name', e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.full_name')} (BG)</label>
-              <input type="text" className="input"
-                placeholder="Мария Костадинова"
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Пълно име (BG)' : 'Full name (BG)'}</label>
+              <input type="text" className="input" placeholder="Мария Костадинова"
                 value={form.full_name_bg} onChange={e => set('full_name_bg', e.target.value)} />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('common.phone')}</label>
-              <input type="tel" className="input"
-                placeholder="+359 88 123 4567"
-                value={form.phone} onChange={e => set('phone', e.target.value)} />
-            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('common.city')}</label>
-            <select className="input" value={form.city} onChange={e => set('city', e.target.value)}>
-              <option value="">Select your city</option>
-              {BULGARIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-
+          {/* Birth year + Gender */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Bio (EN) <span className="text-gray-400 font-normal">— visible to organizations</span></label>
-              <textarea rows={4} className="input resize-none"
-                placeholder="Describe your skills, interests and the causes you care about..."
-                maxLength={500}
-                value={form.bio} onChange={e => set('bio', e.target.value)} />
-              <p className="text-xs text-gray-400 mt-1">{form.bio.length}/500</p>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Година на раждане' : 'Year of birth'}</label>
+              <input type="number" className="input" placeholder="1990" min="1920" max={new Date().getFullYear() - 16}
+                value={form.birth_year} onChange={e => set('birth_year', e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Биография (BG) <span className="text-gray-400 font-normal">— видима за организациите</span></label>
-              <textarea rows={4} className="input resize-none"
-                placeholder="Опишете уменията, интересите и каузите, които ви вълнуват..."
-                maxLength={500}
-                value={form.bio_bg} onChange={e => set('bio_bg', e.target.value)} />
-              <p className="text-xs text-gray-400 mt-1">{form.bio_bg.length}/500</p>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Пол' : 'Gender'}</label>
+              <select className="input" value={form.gender} onChange={e => set('gender', e.target.value)}>
+                <option value="">{lang === 'bg' ? 'Изберете' : 'Select'}</option>
+                {GENDER_OPTIONS.map(g => <option key={g.key} value={g.key}>{lang === 'bg' ? g.bg : g.en}</option>)}
+              </select>
             </div>
           </div>
 
+          {/* Phone */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Телефон' : 'Phone'}</label>
+            <input type="tel" className="input" placeholder="+359 88 123 4567"
+              value={form.phone} onChange={e => set('phone', e.target.value)} />
+          </div>
+
+          {/* City */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (EN)' : 'City (EN)'}</label>
+              <select className="input" value={form.city} onChange={e => set('city', e.target.value)}>
+                <option value="">{lang === 'bg' ? 'Изберете' : 'Select city'}</option>
+                {BULGARIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (BG)' : 'City (BG)'}</label>
+              <input type="text" className="input" placeholder="напр. София"
+                value={form.city_bg} onChange={e => set('city_bg', e.target.value)} />
+            </div>
+          </div>
+
+          {/* Country BG */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Country (BG) — Държава (BG)</label>
             <input type="text" className="input" placeholder="напр. България"
               value={form.country_bg} onChange={e => set('country_bg', e.target.value)} />
           </div>
 
+          {/* Bio */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Bio (EN)</label>
+              <textarea rows={4} className="input resize-none" maxLength={500}
+                placeholder="Describe your skills, interests and the causes you care about..."
+                value={form.bio} onChange={e => set('bio', e.target.value)} />
+              <p className="text-xs text-gray-400 mt-1">{form.bio.length}/500</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Биография (BG)</label>
+              <textarea rows={4} className="input resize-none" maxLength={500}
+                placeholder="Опишете уменията, интересите и каузите..."
+                value={form.bio_bg} onChange={e => set('bio_bg', e.target.value)} />
+              <p className="text-xs text-gray-400 mt-1">{form.bio_bg.length}/500</p>
+            </div>
+          </div>
+
+          {/* Availability */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Preferred language</label>
-            <div className="flex gap-3">
-              {[{ value: 'en', label: '🇬🇧 English' }, { value: 'bg', label: '🇧🇬 Български' }].map(lang => (
-                <label key={lang.value}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-all text-sm font-medium flex-1 justify-center ${
-                    form.preferred_language === lang.value
+            <label className="block text-sm font-medium text-gray-700 mb-2">{lang === 'bg' ? 'Наличност' : 'Availability'}</label>
+            <div className="flex flex-wrap gap-2">
+              {AVAILABILITY_OPTIONS.map(a => (
+                <button key={a.key} type="button"
+                  onClick={() => toggleAvailability(a.key)}
+                  className={'text-sm px-3 py-1.5 rounded-lg border-2 transition-colors ' +
+                    (form.availability.includes(a.key)
                       ? 'border-brand-400 bg-brand-50 text-brand-700'
-                      : 'border-gray-100 text-gray-600 hover:border-gray-200'
-                  }`}>
-                  <input type="radio" name="lang" value={lang.value} className="sr-only"
-                    checked={form.preferred_language === lang.value}
-                    onChange={() => set('preferred_language', lang.value)} />
-                  {lang.label}
-                </label>
+                      : 'border-gray-100 text-gray-500 hover:border-gray-200')}>
+                  {lang === 'bg' ? a.bg : a.en}
+                </button>
               ))}
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <Link to="/dashboard/profile" className="btn-secondary text-sm">Cancel</Link>
-            <button type="button" onClick={handleSaveProfile} disabled={saving}
-              className="btn-primary flex items-center gap-2">
+          {/* Language preference */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Preferred language</label>
+            <div className="flex gap-3">
+              {[['en','English'],['bg','Български']].map(([val, lbl]) => (
+                <button key={val} type="button" onClick={() => set('preferred_language', val)}
+                  className={'text-sm px-4 py-2 rounded-xl border-2 font-medium transition-colors ' +
+                    (form.preferred_language === val ? 'border-brand-400 bg-brand-50 text-brand-700' : 'border-gray-100 text-gray-500 hover:border-gray-200')}>
+                  {lbl}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-between pt-3 border-t border-gray-100">
+            <Link to="/dashboard/profile" className="btn-secondary">{lang === 'bg' ? 'Отказ' : 'Cancel'}</Link>
+            <button type="button" onClick={handleSaveProfile} disabled={saving} className="btn-primary flex items-center gap-2">
               {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-              {saving ? 'Saving...' : 'Save changes'}
+              {saving ? (lang === 'bg' ? 'Запазване...' : 'Saving...') : (lang === 'bg' ? 'Запази' : 'Save changes')}
             </button>
           </div>
         </div>
       )}
 
-      {/* Password tab */}
+      {/* ── Skills & Social ── */}
+      {tab === 'skills' && (
+        <div className="card flex flex-col gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Умения (EN)' : 'Skills (EN)'}</label>
+              <textarea rows={3} className="input resize-none"
+                placeholder="e.g. First aid, Photography, Teaching, Gardening"
+                value={form.skills} onChange={e => set('skills', e.target.value)} />
+              <p className="text-xs text-gray-400 mt-1">{lang === 'bg' ? 'Разделете с запетая' : 'Separate with commas'}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Умения (BG)' : 'Skills (BG)'}</label>
+              <textarea rows={3} className="input resize-none"
+                placeholder="напр. Първа помощ, Фотография, Преподаване"
+                value={form.skills_bg} onChange={e => set('skills_bg', e.target.value)} />
+            </div>
+          </div>
+
+          <div className="border-t border-gray-100 pt-4">
+            <p className="text-sm font-medium text-gray-700 mb-3">{lang === 'bg' ? 'Социални мрежи' : 'Social networks'}</p>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <span className="w-6 text-center text-lg">f</span>
+                <input type="url" className="input flex-1" placeholder="https://facebook.com/yourprofile"
+                  value={form.facebook_url} onChange={e => set('facebook_url', e.target.value)} />
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-6 text-center text-lg">📷</span>
+                <input type="url" className="input flex-1" placeholder="https://instagram.com/yourprofile"
+                  value={form.instagram_url} onChange={e => set('instagram_url', e.target.value)} />
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-6 text-center text-lg">in</span>
+                <input type="url" className="input flex-1" placeholder="https://linkedin.com/in/yourprofile"
+                  value={form.linkedin_url} onChange={e => set('linkedin_url', e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-between pt-3 border-t border-gray-100">
+            <Link to="/dashboard/profile" className="btn-secondary">{lang === 'bg' ? 'Отказ' : 'Cancel'}</Link>
+            <button type="button" onClick={handleSaveProfile} disabled={saving} className="btn-primary flex items-center gap-2">
+              {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+              {saving ? (lang === 'bg' ? 'Запазване...' : 'Saving...') : (lang === 'bg' ? 'Запази' : 'Save changes')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Media library ── */}
+      {tab === 'media' && (
+        <div className="card flex flex-col gap-5">
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-1">{lang === 'bg' ? 'Медийна библиотека' : 'Media library'}</p>
+            <p className="text-xs text-gray-400 mb-4">{lang === 'bg' ? `Снимки от доброволчески събития (${mediaLibrary.length}/20)` : `Photos from volunteering events (${mediaLibrary.length}/20)`}</p>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {mediaLibrary.map((url, i) => (
+                <div key={i} className="relative group w-24 h-24">
+                  <img src={url} alt="" className="w-full h-full object-cover rounded-xl border border-gray-200" />
+                  <button type="button" onClick={() => removeMedia(url)}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    ×
+                  </button>
+                </div>
+              ))}
+              {mediaLibrary.length < 20 && (
+                <button type="button" onClick={() => mediaRef.current?.click()}
+                  className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 text-2xl hover:border-brand-300 hover:text-brand-400 flex items-center justify-center transition-colors">
+                  +
+                </button>
+              )}
+            </div>
+            <input ref={mediaRef} type="file" accept="image/*" multiple className="hidden" onChange={uploadMedia} />
+            {mediaLibrary.length >= 20 && <p className="text-xs text-amber-600">{lang === 'bg' ? 'Достигнато е максималното количество (20).' : 'Maximum 20 photos reached.'}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* ── Password ── */}
       {tab === 'security' && (
         <div className="card flex flex-col gap-5">
           <div>
-            <h3 className="text-sm font-medium text-gray-900 mb-1">Change password</h3>
-            <p className="text-xs text-gray-500">Choose a strong password with at least 8 characters.</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Нова парола' : 'New password'}</label>
+            <input type="password" className="input"
+              value={pwForm.password} onChange={e => setPwForm(f => ({ ...f, password: e.target.value }))} />
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">New password</label>
-            <div className="relative">
-              <input type={showPw ? 'text' : 'password'} required className="input pr-10"
-                placeholder={lang === 'bg' ? 'Мин. 8 символа' : 'Min. 8 characters'}
-                value={pwForm.password} onChange={e => setPw('password', e.target.value)} />
-              <button type="button" onClick={() => setShowPw(!showPw)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-              </button>
-            </div>
-            {/* Strength bar */}
-            {pwForm.password && (
-              <div className="flex gap-1 mt-2">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className={`h-1 flex-1 rounded-full ${
-                    pwForm.password.length >= i * 3
-                      ? i <= 1 ? 'bg-red-400' : i <= 2 ? 'bg-amber-400' : i <= 3 ? 'bg-brand-300' : 'bg-brand-500'
-                      : 'bg-gray-100'
-                  }`} />
-                ))}
-              </div>
-            )}
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Потвърдете паролата' : 'Confirm password'}</label>
+            <input type="password" className="input"
+              value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm new password</label>
-            <input type={showPw ? 'text' : 'password'} required className={`input ${
-              pwForm.confirm && pwForm.password !== pwForm.confirm ? 'border-red-300 focus:ring-red-400' : ''
-            }`}
-              placeholder={lang === 'bg' ? 'Повторете новата парола' : 'Repeat your new password'}
-              value={pwForm.confirm} onChange={e => setPw('confirm', e.target.value)} />
-            {pwForm.confirm && pwForm.password !== pwForm.confirm && (
-              <p className="text-xs text-red-500 mt-1">Passwords don't match</p>
-            )}
-          </div>
-
-          <div className="bg-gray-50 rounded-xl p-4 text-xs text-gray-500 flex gap-2">
-            <svg className="w-4 h-4 mt-0.5 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span>You will remain logged in on this device after changing your password.</span>
-          </div>
-
-          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <button type="button" onClick={() => setPwForm({ current: '', password: '', confirm: '' })}
-              className="btn-secondary text-sm">Clear</button>
-            <button type="button" onClick={handleChangePassword} disabled={pwSaving}
-              className="btn-primary flex items-center gap-2">
+          <div className="flex justify-between pt-3 border-t border-gray-100">
+            <Link to="/dashboard/profile" className="btn-secondary">{lang === 'bg' ? 'Отказ' : 'Cancel'}</Link>
+            <button type="button" onClick={handleChangePassword} disabled={pwSaving} className="btn-primary flex items-center gap-2">
               {pwSaving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-              {pwSaving ? 'Updating...' : 'Update password'}
+              {pwSaving ? (lang === 'bg' ? 'Запазване...' : 'Saving...') : (lang === 'bg' ? 'Смени паролата' : 'Change password')}
             </button>
           </div>
         </div>
