@@ -13,10 +13,10 @@ function applyTheme(pref) {
 }
 
 export const useThemeStore = create((set, get) => ({
-  theme: localStorage.getItem(STORAGE_KEY) || 'system',
+  theme: localStorage.getItem(STORAGE_KEY) || 'light',
 
   init() {
-    const t = localStorage.getItem(STORAGE_KEY) || 'system'
+    const t = localStorage.getItem(STORAGE_KEY) || 'light'
     set({ theme: t })
     applyTheme(t)
     // Watch system preference changes
