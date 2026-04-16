@@ -85,10 +85,10 @@ function ImageUpload({ label, hint, currentUrl, bucket, entityId, field, onUploa
   )
 }
 
-function SaveBtn({ saving }) {
+function SaveBtn({ saving, onSave }) {
   return (
     <div className="flex justify-end pt-3 border-t border-gray-100">
-      <button type="button" onClick={save} disabled={saving} className="btn-primary flex items-center gap-2">
+      <button type="button" onClick={onSave} disabled={saving} className="btn-primary flex items-center gap-2">
         {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
         {saving ? 'Saving...' : 'Save changes'}
       </button>
@@ -109,7 +109,7 @@ export default function CorpSettings() {
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3000) }
 
-  useEffect(() => { load() }, [user])
+  useEffect(() => { load() }, [user?.id])
 
   const load = async () => {
     if (!user) return
@@ -223,7 +223,7 @@ export default function CorpSettings() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Registration number</label>
               <input type="text" className="input" placeholder="UIC / Bulstat" value={form.registration_number} onChange={e => set('registration_number', e.target.value)} />
             </div>
-            <SaveBtn saving={saving} />
+            <SaveBtn saving={saving} onSave={save} />
           </div>
         )}
         {tab === 'contact' && (
@@ -264,7 +264,7 @@ export default function CorpSettings() {
                 ))}
               </div>
             </div>
-            <SaveBtn saving={saving} />
+            <SaveBtn saving={saving} onSave={save} />
           </div>
         )}
         {tab === 'images' && (
@@ -274,7 +274,7 @@ export default function CorpSettings() {
               <ImageUpload label="Cover image" hint="JPG, PNG or WebP - Max 5MB - 1200x400px recommended" currentUrl={form.cover_url} bucket="corp-covers" entityId={corp.id} field="cover" wide={true} onUploaded={url => set('cover_url', url)} />
             </div>
             <div className="border-t border-gray-100 pt-4">
-              <SaveBtn saving={saving} />
+              <SaveBtn saving={saving} onSave={save} />
             </div>
           </div>
         )}
