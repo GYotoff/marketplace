@@ -2,9 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme variables ───────────────────────────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  --bg:          #ffffff;
+  --bg-subtle:   #f9fafb;
+  --bg-card:     #ffffff;
+  --border:      #f3f4f6;
+  --border-mid:  #e5e7eb;
+  --text:        #111827;
+  --text-muted:  #6b7280;
+  --text-faint:  #9ca3af;
+  --input-bg:    #ffffff;
+}
+
+[data-theme="dark"] {
+  --bg:          #0f1117;
+  --bg-subtle:   #1a1d27;
+  --bg-card:     #1e2130;
+  --border:      #2a2f45;
+  --border-mid:  #343a52;
+  --text:        #e8eaf0;
+  --text-muted:  #9095aa;
+  --text-faint:  #5c6278;
+  --input-bg:    #252a3d;
+}
+
 @layer base {
   body {
-    @apply text-gray-900 bg-white antialiased;
+    background-color: var(--bg);
+    color: var(--text);
+    @apply antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 
@@ -13,13 +42,26 @@
     @apply bg-brand-400 hover:bg-brand-600 text-white font-medium px-5 py-2.5 rounded-lg transition-colors text-sm;
   }
   .btn-secondary {
-    @apply border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium px-5 py-2.5 rounded-lg transition-colors text-sm;
+    border: 1px solid var(--border-mid);
+    color: var(--text-muted);
+    @apply font-medium px-5 py-2.5 rounded-lg transition-colors text-sm;
+  }
+  .btn-secondary:hover {
+    background-color: var(--bg-subtle);
   }
   .card {
-    @apply bg-white border border-gray-100 rounded-xl p-5;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    @apply rounded-xl p-5;
   }
   .input {
-    @apply w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-mid);
+    color: var(--text);
+    @apply w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent;
+  }
+  .input::placeholder {
+    color: var(--text-faint);
   }
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
