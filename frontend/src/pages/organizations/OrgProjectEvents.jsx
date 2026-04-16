@@ -34,7 +34,7 @@ export default function OrgProjectEvents() {
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3000) }
 
-  useEffect(() => { load() }, [user, projectId])
+  useEffect(() => { load() }, [user?.id, projectId])
 
   const load = async () => {
     if (!user) return
@@ -210,7 +210,7 @@ export default function OrgProjectEvents() {
                       <span className={'badge text-xs px-2 py-0.5 capitalize ' + (STATUS_BADGE[ev.status] || 'bg-gray-100 text-gray-600')}>
                         {ev.status}
                       </span>
-                      {ev.show_in_public && ev.status === 'published' && (
+                      {ev.show_in_public && (ev.status === 'published' || ev.status === 'completed') && (
                         <span className="badge bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5">Public</span>
                       )}
                     </div>
@@ -246,7 +246,7 @@ export default function OrgProjectEvents() {
                     {ev.status === 'draft' && (
                       <button onClick={() => setStatus(ev, 'published')} className="btn-primary text-xs py-1.5">Publish</button>
                     )}
-                    {ev.status === 'published' && (
+                    {(ev.status === 'published' || ev.status === 'completed') && (
                       <button
                         onClick={() => togglePublic(ev)}
                         className={'text-xs border rounded-lg px-2.5 py-1.5 ' + (ev.show_in_public ? 'border-green-200 text-green-700 hover:bg-green-50' : 'border-gray-200 text-gray-500 hover:bg-gray-50')}
