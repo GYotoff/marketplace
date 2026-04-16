@@ -14,26 +14,61 @@
   --text-muted:  #6b7280;
   --text-faint:  #9ca3af;
   --input-bg:    #ffffff;
+  --shadow:      0 1px 3px rgba(0,0,0,0.08);
 }
 
 [data-theme="dark"] {
   --bg:          #0f1117;
-  --bg-subtle:   #1a1d27;
-  --bg-card:     #1e2130;
+  --bg-subtle:   #181c27;
+  --bg-card:     #1e2233;
   --border:      #2a2f45;
-  --border-mid:  #343a52;
+  --border-mid:  #353b55;
   --text:        #e8eaf0;
   --text-muted:  #9095aa;
   --text-faint:  #5c6278;
   --input-bg:    #252a3d;
+  --shadow:      0 1px 3px rgba(0,0,0,0.4);
 }
 
 @layer base {
+  html {
+    background-color: var(--bg);
+  }
   body {
     background-color: var(--bg);
     color: var(--text);
     @apply antialiased;
     transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* ── Global dark mode overrides for Tailwind classes ── */
+  [data-theme="dark"] .bg-white          { background-color: var(--bg-card) !important; }
+  [data-theme="dark"] .bg-gray-50        { background-color: var(--bg-subtle) !important; }
+  [data-theme="dark"] .bg-gray-100       { background-color: var(--bg-subtle) !important; }
+  [data-theme="dark"] .border-gray-100   { border-color: var(--border) !important; }
+  [data-theme="dark"] .border-gray-200   { border-color: var(--border-mid) !important; }
+  [data-theme="dark"] .text-gray-900     { color: var(--text) !important; }
+  [data-theme="dark"] .text-gray-800     { color: var(--text) !important; }
+  [data-theme="dark"] .text-gray-700     { color: var(--text-muted) !important; }
+  [data-theme="dark"] .text-gray-600     { color: var(--text-muted) !important; }
+  [data-theme="dark"] .text-gray-500     { color: var(--text-muted) !important; }
+  [data-theme="dark"] .text-gray-400     { color: var(--text-faint) !important; }
+  [data-theme="dark"] .text-gray-300     { color: var(--text-faint) !important; }
+  [data-theme="dark"] .divide-gray-100   > * + * { border-color: var(--border) !important; }
+  [data-theme="dark"] .hover\:bg-gray-50:hover { background-color: var(--bg-subtle) !important; }
+
+  /* Badges in dark mode */
+  [data-theme="dark"] .bg-gray-50.text-gray-600  { background-color: var(--bg-subtle) !important; color: var(--text-muted) !important; }
+  [data-theme="dark"] .bg-gray-100.text-gray-500 { background-color: var(--bg-subtle) !important; color: var(--text-muted) !important; }
+  [data-theme="dark"] .bg-gray-100.text-gray-600 { background-color: var(--bg-subtle) !important; color: var(--text-muted) !important; }
+
+  /* Calendar cells */
+  [data-theme="dark"] .bg-white.border   { background-color: var(--bg-card) !important; }
+
+  /* Sticky nav already handled via inline styles */
+  [data-theme="dark"] select option {
+    background-color: var(--bg-card);
+    color: var(--text);
   }
 }
 
@@ -44,6 +79,7 @@
   .btn-secondary {
     border: 1px solid var(--border-mid);
     color: var(--text-muted);
+    background: transparent;
     @apply font-medium px-5 py-2.5 rounded-lg transition-colors text-sm;
   }
   .btn-secondary:hover {
