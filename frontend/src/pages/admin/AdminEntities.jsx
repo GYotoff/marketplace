@@ -59,7 +59,7 @@ function VolunteerRow({ user, onToggle, loading }) {
         </span>
         <button onClick={() => onToggle(user)} disabled={loading === user.id || user.role === 'super_admin'}
           className={`text-xs px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-40 ${user.is_active ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-brand-200 text-brand-600 hover:bg-brand-50'}`}>
-          {loading === user.id ? '...' : user.is_active ? 'Deactivate' : 'Activate'}
+          {loading === user.id ? '…' : user.is_active === true ? 'Deactivate' : 'Activate'}
         </button>
       </div>
     </div>
@@ -106,13 +106,6 @@ export default function AdminEntities() {
   const [filter, setFilter] = useState('all')
   const [data, setData] = useState([])
   const dataRef = useRef([])
-  const setDataSynced = (updater) => {
-    setData(prev => {
-      const next = typeof updater === 'function' ? updater(prev) : updater
-      dataRef.current = next
-      return next
-    })
-  }
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(null)
   const [counts, setCounts] = useState({ volunteers: 0, organizations: 0, corporations: 0 })
@@ -133,19 +126,22 @@ export default function AdminEntities() {
         if (filter === 'active') q = q.eq('is_active', true)
         if (filter === 'inactive') q = q.eq('is_active', false)
         const rows = await safeQuery(() => q)
-        setDataSynced(rows)
+        dataRef.current = rows
+        setData(rows)
       } else if (tab === 'organizations') {
         let q = supabase.from('organizations').select('*').order('created_at', { ascending: false })
         if (filter === 'active') q = q.eq('is_active', true)
         if (filter === 'inactive') q = q.eq('is_active', false)
         const rows = await safeQuery(() => q)
-        setDataSynced(rows)
+        dataRef.current = rows
+        setData(rows)
       } else if (tab === 'corporations') {
         let q = supabase.from('corporations').select('*').order('created_at', { ascending: false })
         if (filter === 'active') q = q.eq('is_active', true)
         if (filter === 'inactive') q = q.eq('is_active', false)
         const rows = await safeQuery(() => q)
-        setDataSynced(rows)
+        dataRef.current = rows
+        setData(rows)
       }
     } catch (e) {
       setError(e.message)
@@ -179,14 +175,18 @@ export default function AdminEntities() {
     })
   }
   const _execToggleVolunteer = async (u) => {
-    // Look up current state from data array (not from stale closure)
     const current = dataRef.current.find(p => p.id === u.id) || u
     const newActive = !current.is_active
     setActionLoading(u.id)
     const { error } = await supabase.from('profiles').update({ is_active: newActive }).eq('id', u.id)
     if (!error) {
       await supabase.from('admin_audit_log').insert({ admin_id: adminUser.id, entity_type: 'volunteer', entity_id: u.id, action: newActive ? 'activate' : 'deactivate' }).catch(() => {})
-      setDataSynced(prev => prev.map(p => p.id === u.id ? { ...p, is_active: newActive } : p))
+      // Update data and clear loading in same render to avoid blank button flash
+      setData(prev => {
+        const next = prev.map(p => p.id === u.id ? { ...p, is_active: newActive } : p)
+        dataRef.current = next
+        return next
+      })
       showToast(`${current.full_name || current.email} ${newActive ? 'activated' : 'deactivated'}`)
       fetchCounts()
     } else {
@@ -206,13 +206,16 @@ export default function AdminEntities() {
     })
   }
   const _execToggleEntity = async (entity, table) => {
-    // Look up current state from data array (not from stale closure)
     const current = dataRef.current.find(e => e.id === entity.id) || entity
     const newActive = !current.is_active
     setActionLoading(entity.id)
     const { error } = await supabase.from(table).update({ is_active: newActive }).eq('id', entity.id)
     if (!error) {
-      setDataSynced(prev => prev.map(e => e.id === entity.id ? { ...e, is_active: newActive } : e))
+      setData(prev => {
+        const next = prev.map(e => e.id === entity.id ? { ...e, is_active: newActive } : e)
+        dataRef.current = next
+        return next
+      })
       showToast(`${current.name} ${newActive ? 'activated' : 'deactivated'}`)
       fetchCounts()
     } else {
