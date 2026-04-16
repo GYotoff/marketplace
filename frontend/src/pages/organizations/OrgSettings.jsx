@@ -353,7 +353,7 @@ export default function OrgSettings() {
                 value={form.registration_number} onChange={e => set('registration_number', e.target.value)} />
             </div>
 
-            <SaveButton saving={saving} />
+            <SaveButton saving={saving} onSave={handleSave} />
           </div>
         )}
 
@@ -412,7 +412,7 @@ export default function OrgSettings() {
               </div>
             </div>
 
-            <SaveButton saving={saving} />
+            <SaveButton saving={saving} onSave={handleSave} />
           </div>
         )}
 
@@ -444,7 +444,7 @@ export default function OrgSettings() {
             </div>
 
             <div className="border-t border-gray-100 pt-4">
-              <SaveButton saving={saving} />
+              <SaveButton saving={saving} onSave={handleSave} />
             </div>
           </div>
         )}
@@ -453,10 +453,10 @@ export default function OrgSettings() {
   )
 }
 
-function SaveButton({ saving }) {
+function SaveButton({ saving, onSave }) {
   return (
     <div className="flex justify-end pt-3 border-t border-gray-100">
-      <button type="button" onClick={handleSave} disabled={saving}
+      <button type="button" onClick={onSave} disabled={saving}
         className="btn-primary flex items-center gap-2">
         {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
         {saving ? 'Saving...' : 'Save changes'}
