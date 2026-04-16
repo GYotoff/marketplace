@@ -34,7 +34,7 @@ export default function OrgCalendar() {
   const [detail, setDetail] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { if (user) load() }, [user])
+  useEffect(() => { if (user) load() }, [user?.id])
 
   const load = async () => {
     setLoading(true)
@@ -289,7 +289,7 @@ export default function OrgCalendar() {
       {detail && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setDetail(null)}>
           <div className="absolute inset-0 bg-black/40" />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10" onClick={e => e.stopPropagation()}>
+          <div className="relative rounded-2xl shadow-xl w-full max-w-md p-6 z-10" onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
               <div className="pr-4">
                 <div className="flex items-center gap-2 mb-1">
