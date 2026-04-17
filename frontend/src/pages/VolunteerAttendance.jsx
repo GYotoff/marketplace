@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { generateCertificate } from '@/lib/generateCertificate'
 
 const STATUS_CONFIG = {
   approved:  { label: 'Registered',       labelBg: 'Регистриран',              badge: 'bg-brand-50 text-brand-700 border border-brand-200' },
@@ -30,7 +31,7 @@ export default function VolunteerAttendance() {
 
   const flash = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500) }
 
-  useEffect(() => { if (user) load() }, [user])
+  useEffect(() => { if (user) load() }, [user?.id])
 
   const load = async () => {
     setLoading(true)
@@ -276,6 +277,24 @@ export default function VolunteerAttendance() {
                             </div>
                           </div>
                         )}
+
+                        {/* Certificate */}
+                        <button
+                          onClick={() => generateCertificate({
+                            volunteerName: profile?.full_name || profile?.full_name_bg,
+                            eventTitle: (lang === 'bg' && reg.event_title_bg) ? reg.event_title_bg : reg.event_title,
+                            eventDate: reg.event_date ? new Date(reg.event_date).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '',
+                            eventLocation: (lang === 'bg' ? (reg.city_bg || reg.city) : reg.city) || (reg.address || ''),
+                            orgName: reg.org_name,
+                            orgLogoUrl: reg.org_logo_url,
+                            contactPerson: lang === 'bg' ? (reg.contact_person_bg || reg.contact_person) : reg.contact_person,
+                            hoursLogged: reg.hours_logged || 0,
+                            lang,
+                          })}
+                          className="w-full flex items-center justify-center gap-2 text-sm border-2 border-brand-400 text-brand-600 hover:bg-brand-50 rounded-xl py-2.5 transition-colors font-medium"
+                        >
+                          🏅 {lang === 'bg' ? 'Изтегли сертификат' : 'Download certificate'}
+                        </button>
 
                         {/* Share */}
                         <div className="flex gap-1.5 justify-center flex-wrap">
