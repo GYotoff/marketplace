@@ -46,7 +46,8 @@ function RoleCard({ icon, title, desc, cta, to, colorClass }) {
 }
 
 export default function Home() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [events, setEvents] = useState([])
   const [spotlights, setSpotlights] = useState([])
   const [stats, setStats] = useState({ orgs: 0, volunteers: 0, corps: 0, events: 0 })
@@ -94,9 +95,17 @@ export default function Home() {
       <section className="py-6 px-4" style={{ background: 'var(--bg)', backgroundImage: 'var(--hero-gradient)' }}>
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-4 sm:whitespace-nowrap" style={{ color: 'var(--text)' }}>
-            {t('hero.title').split('Volunteer.').map((part, i) => i === 0
-              ? <span key={i}>{part}<span className="text-brand-400">Volunteer.</span></span>
-              : <span key={i}>{part}</span>)}
+            {(() => {
+              const title = t('hero.title')
+              const highlight = lang === 'bg' ? 'Доброволствай.' : 'Volunteer.'
+              const idx = title.indexOf(highlight)
+              if (idx === -1) return <span>{title}</span>
+              return <>
+                <span>{title.slice(0, idx)}</span>
+                <span className="text-brand-400">{highlight}</span>
+                <span>{title.slice(idx + highlight.length)}</span>
+              </>
+            })()}
           </h1>
           <p className="text-gray-500 text-base leading-relaxed mb-6 max-w-xl mx-auto">{t('hero.subtitle')}</p>
           <div className="flex gap-3 justify-center flex-wrap">
