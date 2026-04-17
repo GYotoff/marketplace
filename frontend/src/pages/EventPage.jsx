@@ -183,6 +183,13 @@ export default function EventPage() {
   }
 
   const RegisterBtn = () => {
+    // Completed events — no registration possible for anyone
+    if (event.status === 'completed') return (
+      <span className="block text-center text-sm py-2" style={{ color: 'var(--text-faint)' }}>
+        {lang === 'bg' ? 'Събитието е приключило' : 'This event has ended'}
+      </span>
+    )
+
     if (!user) return (
       <Link to="/register" className="btn-primary w-full text-center">
         {lang === 'bg' ? 'Регистрирай се за участие' : 'Sign up to register'}
