@@ -86,6 +86,24 @@ export default function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+
+            {/* Language toggle */}
+            <button
+              onClick={() => {
+                const next = lang === 'en' ? 'bg' : 'en'
+                i18n.changeLanguage(next)
+                localStorage.setItem('i18nextLng', next)
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors"
+              style={{ borderColor: 'var(--border-mid)', color: 'var(--text-muted)', background: 'transparent' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-subtle)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+              </svg>
+              {lang === 'en' ? 'БГ' : 'EN'}
+            </button>
             {user ? (
               <div className="relative" ref={menuRef}>
                 <button onClick={() => setMenuOpen(!menuOpen)}
