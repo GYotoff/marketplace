@@ -104,7 +104,7 @@ export default function Volunteers() {
                     <div className="absolute -bottom-1 -right-1">
                       <img src={v.ranking_icon_url || `/badges/${v.ranking_type.toLowerCase()}.png`}
                         alt={v.ranking_type} title={lang === 'bg' ? v.ranking_type_bg : v.ranking_type}
-                        className="w-5 h-5 object-contain drop-shadow" />
+                        className="w-7 h-7 object-contain drop-shadow" />
                     </div>
                   )}
                 </div>
