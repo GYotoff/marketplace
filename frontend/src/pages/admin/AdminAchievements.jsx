@@ -3,6 +3,82 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
+/** Inline badge upload — picks file, uploads to achievement-badges bucket, returns public URL */
+function BadgeUpload({ currentUrl, onUploaded }) {
+  const { user } = useAuthStore()
+  const [uploading, setUploading] = useState(false)
+  const [preview, setPreview]     = useState(currentUrl || null)
+  const [error, setError]         = useState('')
+  const inputRef = useRef(null)
+
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) { setError('Max 2 MB'); return }
+    if (!['image/png','image/jpeg','image/webp','image/svg+xml'].includes(file.type)) {
+      setError('PNG, JPG, WebP or SVG only'); return
+    }
+    setError('')
+    setUploading(true)
+
+    const localPreview = URL.createObjectURL(file)
+    setPreview(localPreview)
+
+    const ext  = file.name.split('.').pop()
+    const path = `${user.id}/${Date.now()}.${ext}`
+    const { error: upErr } = await supabase.storage
+      .from('achievement-badges').upload(path, file, { upsert: true })
+
+    if (upErr) { setError(upErr.message); setUploading(false); return }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('achievement-badges').getPublicUrl(path)
+
+    onUploaded(publicUrl)
+    setUploading(false)
+  }
+
+  const handleRemove = () => {
+    setPreview(null)
+    onUploaded('')
+    if (inputRef.current) inputRef.current.value = ''
+  }
+
+  return (
+    <div className="flex items-center gap-4">
+      {/* Preview */}
+      <div className="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden shrink-0"
+        style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-mid)' }}>
+        {preview
+          ? <img src={preview} alt="" className="w-full h-full object-contain p-1" />
+          : <span className="text-2xl">🎖️</span>}
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <div className="flex gap-2">
+          <button type="button" onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="btn-secondary text-xs py-1.5 px-3 disabled:opacity-50">
+            {uploading ? 'Uploading…' : preview ? 'Change badge' : 'Upload badge'}
+          </button>
+          {preview && (
+            <button type="button" onClick={handleRemove}
+              className="text-xs px-3 py-1.5 rounded-lg border transition-colors"
+              style={{ borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}>
+              Remove
+            </button>
+          )}
+        </div>
+        <p className="text-xs" style={{ color: 'var(--text-faint)' }}>PNG, JPG, WebP or SVG · max 2 MB</p>
+        {error && <p className="text-xs text-red-500">{error}</p>}
+        <input ref={inputRef} type="file" className="hidden"
+          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+          onChange={handleFile} />
+      </div>
+    </div>
+  )
+}
+
 const EMPTY = { name: '', name_bg: '', message: '', message_bg: '', badge_url: '' }
 
 function AchievementForm({ initial = EMPTY, onSave, onCancel, saving }) {
@@ -38,13 +114,11 @@ function AchievementForm({ initial = EMPTY, onSave, onCancel, saving }) {
             placeholder="Присъдено за завършване на 10 събития…" />
         </div>
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>Badge URL</label>
-          <input className="input" value={form.badge_url} onChange={e => set('badge_url', e.target.value)}
-            placeholder="https://… or /badges/my-achievement.png" />
-          {form.badge_url && (
-            <img src={form.badge_url} alt="" className="w-12 h-12 mt-2 object-contain rounded-lg"
-              style={{ background: 'var(--bg-subtle)' }} />
-          )}
+          <label className="block text-xs font-medium mb-2" style={{ color: 'var(--text-muted)' }}>Badge image</label>
+          <BadgeUpload
+            currentUrl={form.badge_url || ''}
+            onUploaded={url => set('badge_url', url)}
+          />
         </div>
       </div>
       <div className="flex gap-2 justify-end pt-1">
