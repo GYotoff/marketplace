@@ -50,6 +50,7 @@ import AdminEntities from '@/pages/admin/AdminEntities'
 import AdminCorporations from '@/pages/admin/AdminCorporations'
 import AdminRankings from '@/pages/admin/AdminRankings'
 import AdminAchievements from '@/pages/admin/AdminAchievements'
+import AdminProgressionRules from '@/pages/admin/AdminProgressionRules'
 import RegisterCorporation from '@/pages/corporations/RegisterCorporation'
 import CorpDashboard from '@/pages/corporations/CorpDashboard'
 import CorpSettings from '@/pages/corporations/CorpSettings'
@@ -200,6 +201,11 @@ export default function App() {
         <Route path="/admin/achievements" element={
           <ProtectedRoute allowedRoles={['super_admin']}>
             <AdminAchievements />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/progression-rules" element={
+          <ProtectedRoute allowedRoles={['super_admin']}>
+            <AdminProgressionRules />
           </ProtectedRoute>
         } />
         <Route path="/admin/corporations" element={
