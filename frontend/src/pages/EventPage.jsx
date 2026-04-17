@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { generateCertificate } from '@/lib/generateCertificate'
 
 const EDGE_FN = 'https://yxqqxjyuqjoraxjjwcdp.supabase.co/functions/v1/event-registration-notify'
 
@@ -319,6 +320,24 @@ export default function EventPage() {
                     {fbRating === 0 && <p className="text-xs text-amber-600">{lang === 'bg' ? 'Моля изберете оценка.' : 'Please select a rating.'}</p>}
                   </div>
                 )}
+
+                {/* Certificate */}
+                <button
+                  onClick={() => generateCertificate({
+                    volunteerName: profile?.full_name || profile?.full_name_bg,
+                    eventTitle: (lang === 'bg' && event.title_bg) ? event.title_bg : event.title,
+                    eventDate: event.event_date ? new Date(event.event_date).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '',
+                    eventLocation: (lang === 'bg' ? (event.city_bg || event.city) : event.city) || '',
+                    orgName: event.organizations?.name,
+                    orgLogoUrl: event.organizations?.logo_url,
+                    contactPerson: lang === 'bg' ? (event.contact_person_bg || event.contact_person) : event.contact_person,
+                    hoursLogged: registration?.hours_logged || 0,
+                    lang,
+                  })}
+                  className="w-full flex items-center justify-center gap-2 text-sm border-2 border-brand-400 text-brand-600 hover:bg-brand-50 rounded-xl py-2.5 transition-colors font-medium"
+                >
+                  🏅 {lang === 'bg' ? 'Изтегли сертификат' : 'Download certificate'}
+                </button>
 
                 {/* Share */}
                 <div className="flex flex-col gap-1.5">
