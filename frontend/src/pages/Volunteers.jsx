@@ -2,12 +2,21 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
+import RankingBadge from '@/components/ui/RankingBadge'
 
 const AVAILABILITY_LABEL = {
   weekdays: { en: 'Weekdays',  bg: 'Делнични' },
   weekends: { en: 'Weekends',  bg: 'Уикенди' },
   mornings: { en: 'Mornings',  bg: 'Сутрини' },
   evenings: { en: 'Evenings',  bg: 'Вечери' },
+}
+
+const RANK_COLOR = {
+  Standard: '#6b7280',
+  Bronze:   '#cd7f32',
+  Silver:   '#708090',
+  Gold:     '#c9a200',
+  Platinum: '#4a90a4',
 }
 
 export default function Volunteers() {
@@ -83,17 +92,31 @@ export default function Volunteers() {
 
           return (
             <div key={v.id} className="card flex flex-col gap-3">
-              {/* Header: avatar + name + location */}
+              {/* Header: avatar + name + location + ranking */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-semibold text-lg shrink-0 overflow-hidden">
-                  {v.avatar_url
-                    ? <img src={v.avatar_url} alt={name} className="w-full h-full object-cover" />
-                    : initials}
+                <div className="relative shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-semibold text-lg overflow-hidden">
+                    {v.avatar_url
+                      ? <img src={v.avatar_url} alt={name} className="w-full h-full object-cover" />
+                      : initials}
+                  </div>
+                  {v.ranking_type && (
+                    <div className="absolute -bottom-1 -right-1">
+                      <img src={v.ranking_icon_url || `/badges/${v.ranking_type.toLowerCase()}.png`}
+                        alt={v.ranking_type} title={lang === 'bg' ? v.ranking_type_bg : v.ranking_type}
+                        className="w-5 h-5 object-contain drop-shadow" />
+                    </div>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-medium text-gray-900 truncate">{name}</h3>
                   {(city || country) && (
                     <p className="text-xs text-gray-400 truncate">{[city, country].filter(Boolean).join(', ')}</p>
+                  )}
+                  {v.ranking_type && (
+                    <span className="text-xs font-semibold" style={{ color: RANK_COLOR[v.ranking_type] || '#6b7280' }}>
+                      {lang === 'bg' ? v.ranking_type_bg : v.ranking_type}
+                    </span>
                   )}
                 </div>
               </div>
