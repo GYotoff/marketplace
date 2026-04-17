@@ -1,6 +1,25 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
 
+// Apply saved language + theme from the user's profile
+function applyUserPreferences(profile) {
+  if (!profile) return
+
+  // Language
+  const lang = profile.ui_language || 'en'
+  localStorage.setItem('i18nextLng', lang)
+  // i18next may not be loaded yet — dispatch a custom event that i18n/index.js can listen to
+  window.dispatchEvent(new CustomEvent('gf:lang', { detail: lang }))
+
+  // Theme
+  const theme = profile.ui_theme || 'light'
+  localStorage.setItem('gf_theme', theme)
+  const resolved = theme === 'system'
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : theme
+  document.documentElement.setAttribute('data-theme', resolved)
+}
+
 export const useAuthStore = create((set, get) => ({
   user: null,
   profile: null,
@@ -19,6 +38,10 @@ export const useAuthStore = create((set, get) => ({
         await get().fetchProfile(session.user)
       } else {
         set({ user: null, profile: null })
+        // Reset to defaults on logout
+        localStorage.setItem('i18nextLng', 'en')
+        localStorage.setItem('gf_theme', 'light')
+        document.documentElement.setAttribute('data-theme', 'light')
       }
     })
   },
@@ -31,7 +54,6 @@ export const useAuthStore = create((set, get) => ({
       .single()
 
     if (error || !data) {
-      // Profile missing — create it (fallback if trigger didn't fire)
       const meta = user.user_metadata || {}
       const { data: created } = await supabase
         .from('profiles')
@@ -40,12 +62,16 @@ export const useAuthStore = create((set, get) => ({
           email: user.email,
           full_name: meta.full_name || '',
           role: meta.role || 'volunteer',
+          ui_language: 'en',
+          ui_theme: 'light',
         }, { onConflict: 'id' })
         .select()
         .single()
       set({ user, profile: created })
+      applyUserPreferences(created)
     } else {
       set({ user, profile: data })
+      applyUserPreferences(data)
     }
   },
 
@@ -59,9 +85,7 @@ export const useAuthStore = create((set, get) => ({
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { full_name: fullName, role }
-      }
+      options: { data: { full_name: fullName, role } }
     })
     if (error) throw error
     return data
@@ -70,14 +94,12 @@ export const useAuthStore = create((set, get) => ({
   updateProfile: async (updates) => {
     const { user } = get()
     if (!user) throw new Error('Not authenticated')
-
     const { data, error } = await supabase
       .from('profiles')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', user.id)
       .select()
       .single()
-
     if (error) throw error
     set({ profile: data })
     return data
@@ -86,5 +108,8 @@ export const useAuthStore = create((set, get) => ({
   logout: async () => {
     await supabase.auth.signOut()
     set({ user: null, profile: null })
+    localStorage.setItem('i18nextLng', 'en')
+    localStorage.setItem('gf_theme', 'light')
+    document.documentElement.setAttribute('data-theme', 'light')
   },
 }))
