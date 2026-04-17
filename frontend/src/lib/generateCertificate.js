@@ -1,13 +1,6 @@
 /**
  * generateCertificate(data)
- * Opens a printable/saveable A4-landscape certificate in a new browser window.
- *
- * data: {
- *   volunteerName, eventTitle, eventDate, eventLocation,
- *   orgName, orgLogoUrl, contactPerson,
- *   hoursLogged,   // optional – number
- *   lang           // 'en' | 'bg'
- * }
+ * Opens a printable A4-landscape Certificate of Participation in a new browser tab.
  */
 export function generateCertificate(data) {
   const {
@@ -26,93 +19,97 @@ export function generateCertificate(data) {
     day: '2-digit', month: '2-digit', year: 'numeric',
   }).replace(/\//g, '.')
 
-  const L = {
-    cert_title:    lang === 'bg' ? 'СЕРТИФИКАТ ЗА ДОБРОВОЛЧЕСТВО'           : 'VOLUNTEER CERTIFICATE',
-    certifies:     lang === 'bg' ? 'Настоящото удостоверява, че'             : 'This is to certify that',
-    participated:  lang === 'bg' ? 'успешно участва в следното доброволческо събитие:' : 'has successfully participated in the following volunteering event:',
-    event_label:   lang === 'bg' ? 'СЪБИТИЕ'                                 : 'EVENT',
-    date_label:    lang === 'bg' ? 'ДАТА'                                    : 'DATE',
-    location:      lang === 'bg' ? 'МЯСТО'                                   : 'LOCATION',
-    hours_label:   lang === 'bg' ? 'ЧАСОВЕ'                                  : 'HOURS',
-    issued_by:     lang === 'bg' ? 'ИЗДАДЕНО ОТ'                             : 'ISSUED BY',
-    contact:       lang === 'bg' ? 'ОТГОВОРНО ЛИЦЕ'                          : 'CONTACT PERSON',
-    issue_date:    lang === 'bg' ? 'ДАТА НА ИЗДАВАНЕ'                        : 'ISSUE DATE',
-    online:        lang === 'bg' ? 'Онлайн'                                  : 'Online',
-    signature:     lang === 'bg' ? 'ПОДПИС И ПЕЧАТ'                          : 'SIGNATURE & STAMP',
-    platform:      'GiveForward',
-    hours_unit:    lang === 'bg' ? 'ч.'                                      : 'h',
+  // ── Both-language labels ───────────────────────────────────────────────────
+  const EN = {
+    cert_title:   'CERTIFICATE OF PARTICIPATION',
+    certifies:    'This is to certify that',
+    participated: 'has successfully participated in the following volunteering event:',
+    event_label:  'EVENT',
+    date_label:   'DATE',
+    location:     'LOCATION',
+    hours_label:  'HOURS',
+    hours_unit:   'h',
+    issued_by:    'ISSUED BY',
+    contact:      'CONTACT PERSON',
+    issue_date:   'ISSUE DATE',
+    signature:    'SIGNATURE & STAMP',
+    online:       'Online',
+    appreciation: 'Your dedication, time, and contribution were essential to the success of this event. We sincerely appreciate your commitment and support.',
   }
+  const BG = {
+    cert_title:   'СЕРТИФИКАТ ЗА УЧАСТИЕ',
+    certifies:    'Настоящото удостоверява, че',
+    participated: 'успешно участва в следното доброволческо събитие:',
+    event_label:  'СЪБИТИЕ',
+    date_label:   'ДАТА',
+    location:     'МЯСТО',
+    hours_label:  'ЧАСОВЕ',
+    hours_unit:   'ч.',
+    issued_by:    'ИЗДАДЕНО ОТ',
+    contact:      'ОТГОВОРНО ЛИЦЕ',
+    issue_date:   'ДАТА НА ИЗДАВАНЕ',
+    signature:    'ПОДПИС И ПЕЧАТ',
+    online:       'Онлайн',
+    appreciation: 'Вашата отдаденост, време и принос бяха от съществено значение за успеха на това събитие. Искрено оценяваме ангажираността и подкрепата ви.',
+  }
+
+  // Show both languages on the certificate — primary first, secondary below
+  const P = lang === 'bg' ? BG : EN   // primary (user's language)
+  const S = lang === 'bg' ? EN : BG   // secondary
 
   const orgInitial = (orgName || '?')[0].toUpperCase()
 
-  // Logo: image or initial monogram — use data URL to avoid CORS/timing issues
   const logoHtml = orgLogoUrl
-    ? `<img id="org-logo" src="${escHtml(orgLogoUrl)}" alt="" style="height:64px;max-width:180px;object-fit:contain;display:block;" crossorigin="anonymous" />`
-    : `<div style="width:64px;height:64px;border-radius:10px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#1D9E75;font-family:Inter,sans-serif;">${orgInitial}</div>`
+    ? `<img id="org-logo" src="${escHtml(orgLogoUrl)}" alt="" crossorigin="anonymous"
+         style="height:68px;max-width:180px;object-fit:contain;display:block;" />`
+    : `<div style="width:68px;height:68px;border-radius:10px;background:#E1F5EE;display:flex;
+         align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#1D9E75;">
+         ${orgInitial}</div>`
 
-  // Hours detail cell — only if > 0
-  const hoursCell = hoursLogged > 0
-    ? `<div class="detail-cell">
-        <div class="detail-label">${L.hours_label}</div>
-        <div class="detail-value">${hoursLogged} ${L.hours_unit}</div>
-      </div>`
-    : ''
+  const detailCols = hoursLogged > 0 ? '1fr 1fr 1fr 0.7fr' : '1fr 1fr 1fr'
 
-  const detailsCols = hoursLogged > 0 ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr'
+  const hoursCell = hoursLogged > 0 ? `
+    <div class="dc">
+      <div class="dl">${P.hours_label} / ${S.hours_label}</div>
+      <div class="dv">${hoursLogged} ${P.hours_unit}</div>
+    </div>` : ''
 
   const html = `<!DOCTYPE html>
 <html lang="${lang}">
 <head>
   <meta charset="UTF-8"/>
-  <title>${L.cert_title} — ${escHtml(volunteerName)}</title>
+  <title>${P.cert_title}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,700&display=swap');
 
-    @page {
-      size: A4 landscape;
-      margin: 0;
-    }
+    @page { size: A4 landscape; margin: 0; }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
-      width: 297mm;
-      height: 210mm;
+      width: 297mm; height: 210mm;
       font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-      background: #ffffff;
-      color: #111827;
+      background: #fff; color: #111827;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
 
     .page {
-      width: 297mm;
-      height: 210mm;
-      padding: 16mm 20mm 14mm;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      background: #ffffff;
+      width: 297mm; height: 210mm;
+      padding: 14mm 20mm 13mm;
+      display: flex; flex-direction: column;
+      position: relative; overflow: hidden; background: #fff;
     }
 
-    /* Outer decorative border */
+    /* Outer border */
     .page::before {
-      content: '';
-      position: absolute;
-      inset: 7mm;
-      border: 2px solid #1D9E75;
-      border-radius: 5px;
-      pointer-events: none;
+      content: ''; position: absolute; inset: 7mm;
+      border: 2px solid #1D9E75; border-radius: 5px; pointer-events: none;
     }
-    /* Inner hairline border */
+    /* Inner hairline */
     .page::after {
-      content: '';
-      position: absolute;
-      inset: 9.5mm;
-      border: 0.75px solid #9FE1CB;
-      border-radius: 3px;
-      pointer-events: none;
+      content: ''; position: absolute; inset: 9.5mm;
+      border: 0.75px solid #9FE1CB; border-radius: 3px; pointer-events: none;
     }
 
     /* Corner brackets */
@@ -122,144 +119,78 @@ export function generateCertificate(data) {
     .bl { bottom: 5.5mm; left: 5.5mm; border-width: 0 0 2px 2px; }
     .br { bottom: 5.5mm; right: 5.5mm; border-width: 0 2px 2px 0; }
 
-    /* Watermark */
-    .watermark {
-      position: absolute;
-      right: 14mm;
-      bottom: 14mm;
-      font-size: 100px;
-      font-weight: 900;
-      color: #1D9E75;
-      opacity: 0.035;
-      pointer-events: none;
-      user-select: none;
-      line-height: 1;
-    }
-
-    /* Green accent strip — left edge */
-    .accent-strip {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 4mm;
-      height: 100%;
+    /* Left accent strip */
+    .strip {
+      position: absolute; left: 0; top: 0; width: 4.5mm; height: 100%;
       background: linear-gradient(180deg, #1D9E75 0%, #0F6E56 100%);
     }
 
-    /* ── Header ── */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6mm;
-    }
-    .org-block { display: flex; align-items: center; gap: 10px; }
-    .org-name  { font-size: 12px; font-weight: 600; color: #1D9E75; max-width: 150px; line-height: 1.3; }
-    .platform-badge {
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: #ffffff;
-      background: linear-gradient(135deg, #1D9E75 0%, #085041 100%);
-      padding: 5px 16px;
-      border-radius: 20px;
+    /* Watermark */
+    .wm {
+      position: absolute; right: 13mm; bottom: 13mm;
+      font-size: 110px; font-weight: 900; color: #1D9E75;
+      opacity: 0.03; pointer-events: none; user-select: none; line-height: 1;
     }
 
+    /* ── Header ── */
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5mm; }
+    .org-block { display: flex; align-items: center; gap: 11px; }
+    .org-name  { font-size: 13px; font-weight: 600; color: #1D9E75; max-width: 160px; line-height: 1.3; }
+
     /* ── Title ── */
-    .title-block { text-align: center; margin-bottom: 4mm; }
-    .cert-title  {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0.22em;
-      color: #0F6E56;
-      text-transform: uppercase;
-      margin-bottom: 5px;
+    .title-block { text-align: center; margin-bottom: 5mm; }
+    .title-primary {
+      font-size: 22px; font-weight: 700; letter-spacing: 0.22em;
+      color: #0F6E56; text-transform: uppercase; margin-bottom: 2px;
     }
-    .title-divider {
-      width: 72px;
-      height: 2px;
+    .title-secondary {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.14em;
+      color: #9FE1CB; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .divider {
+      width: 80px; height: 2px;
       background: linear-gradient(90deg, transparent, #1D9E75, transparent);
       margin: 0 auto;
     }
 
-    /* ── Body copy ── */
-    .certifies-text   { text-align: center; font-size: 10px; color: #6b7280; margin-bottom: 3px; letter-spacing: 0.04em; }
-    .volunteer-name   {
-      text-align: center;
-      font-size: 26px;
-      font-weight: 700;
-      color: #111827;
-      letter-spacing: 0.03em;
-      margin-bottom: 3px;
-      font-style: italic;
-    }
-    .participated-text { text-align: center; font-size: 10px; color: #6b7280; margin-bottom: 5mm; letter-spacing: 0.02em; }
+    /* ── Body ── */
+    .certifies-block { text-align: center; margin-bottom: 5mm; }
+    .certifies-p  { font-size: 11px; color: #6b7280; margin-bottom: 3px; letter-spacing: 0.03em; }
+    .certifies-s  { font-size: 9px; color: #9ca3af; margin-bottom: 5px; letter-spacing: 0.02em; font-style: italic; }
+    .vol-name     { font-size: 28px; font-weight: 700; font-style: italic; color: #111827; letter-spacing: 0.03em; margin-bottom: 4px; }
+    .participated-p { font-size: 11px; color: #6b7280; letter-spacing: 0.02em; }
+    .participated-s { font-size: 9px; color: #9ca3af; font-style: italic; }
 
     /* ── Details grid ── */
     .details {
-      display: grid;
-      grid-template-columns: ${detailsCols};
-      background: #f0fdf4;
-      border: 0.75px solid #9FE1CB;
-      border-radius: 7px;
-      overflow: hidden;
-      margin-bottom: 6mm;
-      flex-shrink: 0;
+      display: grid; grid-template-columns: ${detailCols};
+      background: #f0fdf4; border: 0.75px solid #9FE1CB;
+      border-radius: 7px; overflow: hidden; margin-bottom: 4mm; flex-shrink: 0;
     }
-    .detail-cell {
-      padding: 4mm 5mm;
-      border-right: 0.75px solid #9FE1CB;
+    .dc { padding: 4mm 5mm; border-right: 0.75px solid #9FE1CB; }
+    .dc:last-child { border-right: none; }
+    .dl  { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #1D9E75; margin-bottom: 3px; }
+    .dv  { font-size: 12px; font-weight: 600; color: #111827; line-height: 1.35; }
+
+    /* ── Appreciation quote ── */
+    .appreciation {
+      text-align: center; margin-bottom: 5mm; padding: 0 8mm;
     }
-    .detail-cell:last-child { border-right: none; }
-    .detail-label {
-      font-size: 7px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: #1D9E75;
-      margin-bottom: 3px;
-    }
-    .detail-value {
-      font-size: 11px;
-      font-weight: 600;
-      color: #111827;
-      line-height: 1.35;
-    }
+    .appr-p { font-size: 9.5px; font-style: italic; color: #4b5563; line-height: 1.6; margin-bottom: 2px; }
+    .appr-s { font-size: 8px; font-style: italic; color: #9ca3af; line-height: 1.5; }
 
     /* ── Footer ── */
     .footer {
-      margin-top: auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      padding-top: 4mm;
-      border-top: 0.75px solid #e5e7eb;
-      align-items: end;
+      margin-top: auto; display: grid; grid-template-columns: 1fr 1fr 1fr;
+      padding-top: 4mm; border-top: 0.75px solid #e5e7eb; align-items: end;
     }
-    .footer-cell { }
-    .footer-cell.mid { text-align: center; }
-    .footer-cell.right { text-align: right; }
-    .footer-label {
-      font-size: 7px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #9ca3af;
-      margin-bottom: 2px;
-    }
-    .footer-value {
-      font-size: 10px;
-      font-weight: 600;
-      color: #374151;
-      line-height: 1.4;
-    }
-    .sig-line {
-      width: 52mm;
-      height: 0.75px;
-      background: #d1d5db;
-      display: inline-block;
-      margin-bottom: 3px;
-    }
+    .fc { }
+    .fc.mid  { text-align: center; }
+    .fc.right{ text-align: right; }
+    .fl  { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #9ca3af; margin-bottom: 2px; }
+    .fv  { font-size: 10px; font-weight: 600; color: #374151; line-height: 1.4; }
+    .fvs { font-size: 8px; color: #9ca3af; font-style: italic; line-height: 1.3; }
+    .sig-line { width: 52mm; height: 0.75px; background: #d1d5db; display: inline-block; margin-bottom: 4px; }
 
     @media print {
       html, body { width: 297mm; height: 210mm; }
@@ -269,106 +200,100 @@ export function generateCertificate(data) {
 </head>
 <body>
 <div class="page">
-  <div class="accent-strip"></div>
-  <div class="corner tl"></div>
-  <div class="corner tr"></div>
-  <div class="corner bl"></div>
-  <div class="corner br"></div>
-  <div class="watermark">&#10003;</div>
+  <div class="strip"></div>
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+  <div class="wm">&#10003;</div>
 
-  <!-- Header: org logo + name | platform badge -->
+  <!-- Header: org logo + name (no platform badge) -->
   <div class="header">
     <div class="org-block">
       ${logoHtml}
       <div class="org-name">${escHtml(orgName)}</div>
     </div>
-    <div class="platform-badge">${escHtml(L.platform)}</div>
   </div>
 
-  <!-- Title -->
+  <!-- Title — both languages -->
   <div class="title-block">
-    <div class="cert-title">${L.cert_title}</div>
-    <div class="title-divider"></div>
+    <div class="title-primary">${P.cert_title}</div>
+    <div class="title-secondary">${S.cert_title}</div>
+    <div class="divider"></div>
   </div>
 
-  <!-- Body -->
-  <p class="certifies-text">${L.certifies}</p>
-  <p class="volunteer-name">${escHtml(volunteerName)}</p>
-  <p class="participated-text">${L.participated}</p>
+  <!-- Certifies + name + participated — both languages -->
+  <div class="certifies-block">
+    <p class="certifies-p">${P.certifies}</p>
+    <p class="certifies-s">${S.certifies}</p>
+    <p class="vol-name">${escHtml(volunteerName)}</p>
+    <p class="participated-p">${P.participated}</p>
+    <p class="participated-s">${S.participated}</p>
+  </div>
 
-  <!-- Event details -->
+  <!-- Event details grid — bilingual labels -->
   <div class="details">
-    <div class="detail-cell">
-      <div class="detail-label">${L.event_label}</div>
-      <div class="detail-value">${escHtml(eventTitle)}</div>
+    <div class="dc">
+      <div class="dl">${P.event_label} / ${S.event_label}</div>
+      <div class="dv">${escHtml(eventTitle)}</div>
     </div>
-    <div class="detail-cell">
-      <div class="detail-label">${L.date_label}</div>
-      <div class="detail-value">${escHtml(eventDate)}</div>
+    <div class="dc">
+      <div class="dl">${P.date_label} / ${S.date_label}</div>
+      <div class="dv">${escHtml(eventDate)}</div>
     </div>
-    <div class="detail-cell">
-      <div class="detail-label">${L.location}</div>
-      <div class="detail-value">${escHtml(eventLocation || L.online)}</div>
+    <div class="dc">
+      <div class="dl">${P.location} / ${S.location}</div>
+      <div class="dv">${escHtml(eventLocation || P.online)}</div>
     </div>
     ${hoursCell}
   </div>
 
+  <!-- Appreciation text — both languages -->
+  <div class="appreciation">
+    <p class="appr-p">${P.appreciation}</p>
+    <p class="appr-s">${S.appreciation}</p>
+  </div>
+
   <!-- Footer -->
   <div class="footer">
-    <div class="footer-cell">
-      <div class="footer-label">${L.issued_by}</div>
-      <div class="footer-value">${escHtml(orgName)}</div>
-      ${contactPerson ? `<div class="footer-label" style="margin-top:4px;">${L.contact}</div><div class="footer-value">${escHtml(contactPerson)}</div>` : ''}
+    <div class="fc">
+      <div class="fl">${P.issued_by}</div>
+      <div class="fv">${escHtml(orgName)}</div>
+      ${contactPerson ? `<div class="fl" style="margin-top:4px;">${P.contact}</div><div class="fv">${escHtml(contactPerson)}</div><div class="fvs">${escHtml(contactPerson)}</div>` : ''}
     </div>
-    <div class="footer-cell mid">
+    <div class="fc mid">
       <div style="display:block;"><div class="sig-line"></div></div>
-      <div class="footer-label">${L.signature}</div>
+      <div class="fl">${P.signature}</div>
     </div>
-    <div class="footer-cell right">
-      <div class="footer-label">${L.issue_date}</div>
-      <div class="footer-value">${issueDate}</div>
+    <div class="fc right">
+      <div class="fl">${P.issue_date}</div>
+      <div class="fv">${issueDate}</div>
     </div>
   </div>
 
 </div>
 <script>
-  // Wait for all images to load before printing so the logo appears in the PDF
-  function triggerPrint() {
-    window.focus();
-    window.print();
-  }
-  var images = document.querySelectorAll('img');
-  if (images.length === 0) {
-    window.onload = triggerPrint;
-  } else {
-    var loaded = 0;
-    var total = images.length;
-    function onLoad() {
-      loaded++;
-      if (loaded >= total) triggerPrint();
-    }
-    images.forEach(function(img) {
-      if (img.complete) { onLoad(); }
-      else { img.onload = onLoad; img.onerror = onLoad; }
+  function triggerPrint() { window.focus(); window.print(); }
+  var imgs = document.querySelectorAll('img');
+  if (!imgs.length) { window.onload = triggerPrint; }
+  else {
+    var done = 0;
+    imgs.forEach(function(img) {
+      function cb() { if (++done >= imgs.length) triggerPrint(); }
+      if (img.complete) cb(); else { img.onload = cb; img.onerror = cb; }
     });
-    // Fallback: print after 2.5s even if images fail
     setTimeout(triggerPrint, 2500);
   }
 </script>
 </body>
 </html>`
 
-  // Open tab immediately (must be synchronous / in user gesture context)
+  // Open blank tab (no size args = no popup block), then write HTML
   const win = window.open('', '_blank')
   if (!win) {
-    // Popup was blocked — fallback: create a Blob URL and navigate
+    // Fallback: Blob URL
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-    const url  = URL.createObjectURL(blob)
-    const a    = document.createElement('a')
-    a.href     = url
-    a.target   = '_blank'
-    a.rel      = 'noopener'
-    a.click()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.click()
     setTimeout(() => URL.revokeObjectURL(url), 10000)
     return
   }
@@ -378,8 +303,6 @@ export function generateCertificate(data) {
 
 function escHtml(str) {
   return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
