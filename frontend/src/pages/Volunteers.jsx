@@ -94,17 +94,17 @@ export default function Volunteers() {
             <div key={v.id} className="card flex flex-col gap-3">
               {/* Header: avatar + name + location + ranking */}
               <div className="flex items-center gap-3">
-                <div className="relative shrink-0">
+                <div className="relative shrink-0" style={{ width: 52, height: 52 }}>
                   <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-semibold text-lg overflow-hidden">
                     {v.avatar_url
                       ? <img src={v.avatar_url} alt={name} className="w-full h-full object-cover" />
                       : initials}
                   </div>
                   {v.ranking_type && (
-                    <div className="absolute -bottom-1 -right-1">
+                    <div style={{ position: 'absolute', bottom: 0, right: 0 }}>
                       <img src={v.ranking_icon_url || `/badges/${v.ranking_type.toLowerCase()}.png`}
                         alt={v.ranking_type} title={lang === 'bg' ? v.ranking_type_bg : v.ranking_type}
-                        className="w-7 h-7 object-contain drop-shadow" />
+                        style={{ width: 28, height: 28, objectFit: 'contain', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' }} />
                     </div>
                   )}
                 </div>
