@@ -91,18 +91,14 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="py-16 px-4" style={{ background: 'var(--bg)', backgroundImage: 'var(--hero-gradient)' }}>
-        <div className="max-w-3xl mx-auto text-center">
-          <span className="inline-flex items-center gap-2 bg-brand-50 text-brand-600 text-xs font-medium px-3 py-1.5 rounded-full mb-5">
-            <span className="w-1.5 h-1.5 bg-brand-400 rounded-full" />
-            {t('hero.badge')}
-          </span>
-          <h1 className="text-4xl sm:text-5xl font-medium leading-tight mb-4" style={{ color: 'var(--text)' }}>
+      <section className="py-6 px-4" style={{ background: 'var(--bg)', backgroundImage: 'var(--hero-gradient)' }}>
+        <div className="max-w-5xl mx-auto text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-4 sm:whitespace-nowrap" style={{ color: 'var(--text)' }}>
             {t('hero.title').split('Volunteer.').map((part, i) => i === 0
               ? <span key={i}>{part}<span className="text-brand-400">Volunteer.</span></span>
               : <span key={i}>{part}</span>)}
           </h1>
-          <p className="text-gray-500 text-lg leading-relaxed mb-8 max-w-xl mx-auto">{t('hero.subtitle')}</p>
+          <p className="text-gray-500 text-base leading-relaxed mb-6 max-w-xl mx-auto">{t('hero.subtitle')}</p>
           <div className="flex gap-3 justify-center flex-wrap">
             <Link to="/projects" className="btn-primary">{t('hero.cta_explore')}</Link>
             <Link to="/register" className="btn-secondary">{t('hero.cta_register')}</Link>
