@@ -358,11 +358,22 @@ export function generateCertificate(data) {
 </body>
 </html>`
 
-  const win = window.open('', '_blank', 'width=1240,height=900')
-  if (win) {
-    win.document.write(html)
-    win.document.close()
+  // Open tab immediately (must be synchronous / in user gesture context)
+  const win = window.open('', '_blank')
+  if (!win) {
+    // Popup was blocked — fallback: create a Blob URL and navigate
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.target   = '_blank'
+    a.rel      = 'noopener'
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(url), 10000)
+    return
   }
+  win.document.write(html)
+  win.document.close()
 }
 
 function escHtml(str) {
