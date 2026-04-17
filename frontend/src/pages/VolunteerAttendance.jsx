@@ -15,7 +15,7 @@ const STATUS_CONFIG = {
 }
 
 export default function VolunteerAttendance() {
-  const { user } = useAuthStore()
+  const { user, profile } = useAuthStore()
   const { i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const now = new Date()
