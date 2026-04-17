@@ -153,12 +153,16 @@ export default function VolunteerAttendance() {
               const isCompleted = reg.event_status === 'completed'
 
               return (
-                <div key={reg.reg_id} className={
-                  'card flex flex-col gap-3 ' +
-                  (reg.reg_status === 'confirmed' ? 'border-green-200 bg-green-50/30' :
-                   reg.reg_status === 'rejected'  ? 'border-red-100 bg-red-50/20'    :
-                   isCompleted && canMarkAttended  ? 'border-brand-100'               : '')
-                }>
+                <div key={reg.reg_id} className="card flex flex-col gap-3"
+                  style={{
+                    borderColor: reg.reg_status === 'confirmed' ? 'rgba(34,197,94,0.35)' :
+                                 reg.reg_status === 'rejected'  ? 'rgba(239,68,68,0.3)'  :
+                                 isCompleted && canMarkAttended ? 'rgba(29,158,117,0.35)' :
+                                 'var(--border)',
+                    background:  reg.reg_status === 'confirmed' ? 'rgba(34,197,94,0.07)'  :
+                                 reg.reg_status === 'rejected'  ? 'rgba(239,68,68,0.06)'  :
+                                 'var(--bg-card)',
+                  }}>
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
