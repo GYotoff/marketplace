@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
+import RankingBadge from '@/components/ui/RankingBadge'
 
 const AVAILABILITY_LABEL = {
   weekdays: { en: 'Weekdays',  bg: 'Делнични' },
@@ -79,6 +80,7 @@ export default function ViewProfile() {
 
   const [stats, setStats]   = useState({ applications: 0, events: 0, hours: 0 })
   const [corp,  setCorp]    = useState(null)
+  const [ranking, setRanking] = useState(null)
   const [slideIdx, setSlide] = useState(0)
   const [loading, setLoading] = useState(true)
 
@@ -95,11 +97,15 @@ export default function ViewProfile() {
       profile?.corporation_id
         ? supabase.from('corporations').select('id,name,slug,logo_url').eq('id', profile.corporation_id).single()
         : null,
-    ]).then(([apps, evs, corpRes]) => {
+      profile?.ranking_id
+        ? supabase.from('rankings').select('id,type,type_bg,icon_url,message,message_bg').eq('id', profile.ranking_id).single()
+        : null,
+    ]).then(([apps, evs, corpRes, rankingRes]) => {
       const evH  = (evs.data  || []).reduce((s, r) => s + (Number(r.hours_logged) || 0), 0)
       const appH = (apps.data || []).reduce((s, r) => s + (Number(r.hours_logged) || 0), 0)
       setStats({ applications: apps.count || 0, events: evs.data?.length || 0, hours: Math.round((evH + appH) * 10) / 10 })
       if (corpRes?.data) setCorp(corpRes.data)
+      if (rankingRes?.data) setRanking(rankingRes.data)
       setLoading(false)
     })
   }, [user?.id])
@@ -209,6 +215,32 @@ export default function ViewProfile() {
           </div>
         </div>
       </div>
+
+      {/* ── Ranking ── */}
+      {isVolunteer && ranking && (
+        <div className="card mb-4 flex items-center gap-5">
+          <RankingBadge
+            rankingType={ranking.type}
+            rankingTypeBg={ranking.type_bg}
+            iconUrl={ranking.icon_url}
+            lang={lang}
+            size="lg"
+          />
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-faint)' }}>
+              {lang === 'bg' ? 'Ранг' : 'Ranking'}
+            </p>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              {lang === 'bg' ? (ranking.message_bg || ranking.message) : ranking.message}
+            </p>
+            {profile.ranking_date && (
+              <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
+                {lang === 'bg' ? 'От' : 'Since'}: {new Date(profile.ranking_date).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB')}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Stats (volunteers only) ── */}
       {isVolunteer && !loading && (
