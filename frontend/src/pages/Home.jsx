@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 
-// ── Stat bar card ─────────────────────────────────────────────────────────────
 function StatCard({ num, label, border }) {
   return (
     <div className="text-center py-5" style={border ? { borderRight: '1px solid var(--border)' } : {}}>
@@ -13,12 +12,10 @@ function StatCard({ num, label, border }) {
   )
 }
 
-// ── Spotlight card ────────────────────────────────────────────────────────────
 function SpotlightCard({ accent, badge, badgeStyle, avatar, title, sub, detail, stat, link }) {
   const inner = (
     <div className="card flex flex-col gap-3 h-full hover:shadow-sm transition-all" style={{ borderTop: `3px solid ${accent}` }}>
       <span className="badge self-start text-xs" style={badgeStyle}>{badge}</span>
-      {/* Avatar / logo */}
       <div className="w-11 h-11 rounded-full overflow-hidden flex items-center justify-center shrink-0 font-semibold text-base"
         style={{ background: `${accent}20`, color: accent }}>
         {avatar?.src
@@ -30,82 +27,87 @@ function SpotlightCard({ accent, badge, badgeStyle, avatar, title, sub, detail, 
         {sub && <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{sub}</p>}
         {detail && <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--text-faint)' }}>{detail}</p>}
       </div>
-      {stat && (
-        <p className="text-xs font-semibold" style={{ color: accent }}>{stat}</p>
-      )}
+      {stat && <p className="text-xs font-semibold" style={{ color: accent }}>{stat}</p>}
     </div>
   )
-  return link ? <Link to={link} className="block">{inner}</Link> : inner
+  return link ? <Link to={link} className="block h-full">{inner}</Link> : inner
 }
 
-// ── Role card ─────────────────────────────────────────────────────────────────
 function RoleCard({ icon, title, desc, cta, to, colorClass }) {
   return (
     <Link to={to} className="card flex flex-col items-center text-center gap-3 hover:shadow-sm transition-all group">
       <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${colorClass}`}>{icon}</div>
       <h3 className="font-medium" style={{ color: 'var(--text)' }}>{title}</h3>
       <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{desc}</p>
-      <span className="text-sm text-brand-400 group-hover:text-brand-600">{cta}</span>
+      <span className="text-sm text-brand-400 group-hover:text-brand-600 mt-auto">{cta}</span>
     </Link>
   )
 }
+
+// Shared section header — left title + right link, matching width of all content
+function SectionHeader({ title, linkTo, linkLabel }) {
+  return (
+    <div className="flex items-baseline justify-between mb-5">
+      <h2 className="text-xl font-medium" style={{ color: 'var(--text)' }}>{title}</h2>
+      {linkTo && <Link to={linkTo} className="text-sm text-brand-400 hover:text-brand-600">{linkLabel}</Link>}
+    </div>
+  )
+}
+
+const RANK_COLOR = { Standard:'#6b7280', Bronze:'#cd7f32', Silver:'#708090', Gold:'#c9a200', Platinum:'#4a90a4' }
+const MAX_W = 'max-w-7xl mx-auto px-4'
 
 export default function Home() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
 
   const [events,   setEvents]   = useState([])
-  const [stats,    setStats]    = useState({ orgs: 0, volunteers: 0, corps: 0, events: 0, projects: 0, hours: 0 })
+  const [stats,    setStats]    = useState({ orgs:0, volunteers:0, corps:0, events:0, projects:0, hours:0 })
   const [spotVol,  setSpotVol]  = useState(null)
   const [spotInit, setSpotInit] = useState(null)
   const [spotOrg,  setSpotOrg]  = useState(null)
 
   useEffect(() => {
-    const now  = new Date()
-    const yr   = now.getFullYear()
-    const mo   = now.getMonth() + 1
+    const now = new Date()
+    const yr  = now.getFullYear()
+    const mo  = now.getMonth() + 1
 
-    // Upcoming events — richer select
     supabase.from('events')
       .select('id,title,title_bg,description,description_bg,city,city_bg,event_date,volunteers_needed,volunteers_enrolled,is_online,event_type,organizations(name,logo_url)')
       .eq('status','published').gte('event_date', now.toISOString()).order('event_date').limit(5)
       .then(({ data }) => data && setEvents(data))
 
-    // Stats — single RPC to avoid JS client filter quirks
     supabase.rpc('get_home_stats').then(({ data }) => {
       if (data) setStats({
-        orgs:       data.orgs       || 0,
-        corps:      data.corps      || 0,
-        volunteers: data.volunteers || 0,
-        events:     data.events     || 0,
-        projects:   data.projects   || 0,
-        hours:      Math.round(data.hours || 0),
+        orgs: data.orgs||0, corps: data.corps||0, volunteers: data.volunteers||0,
+        events: data.events||0, projects: data.projects||0, hours: Math.round(data.hours||0),
       })
     })
 
-    // Spotlights — live data
-    supabase.rpc('get_spotlight_volunteer',   { p_year: yr, p_month: mo }).then(({ data }) => data?.[0] && setSpotVol(data[0]))
-    supabase.rpc('get_spotlight_initiative',  { p_year: yr, p_month: mo }).then(({ data }) => data?.[0] && setSpotInit(data[0]))
-    supabase.rpc('get_spotlight_organization',{ p_year: yr, p_month: mo }).then(({ data }) => data?.[0] && setSpotOrg(data[0]))
+    supabase.rpc('get_spotlight_volunteer',   { p_year:yr, p_month:mo }).then(({ data }) => data?.[0] && setSpotVol(data[0]))
+    supabase.rpc('get_spotlight_initiative',  { p_year:yr, p_month:mo }).then(({ data }) => data?.[0] && setSpotInit(data[0]))
+    supabase.rpc('get_spotlight_organization',{ p_year:yr, p_month:mo }).then(({ data }) => data?.[0] && setSpotOrg(data[0]))
   }, [])
 
   const fmtDate = (d) => {
     const dt = new Date(d)
-    return { day: dt.getDate(), month: dt.toLocaleString(lang === 'bg' ? 'bg-BG' : 'en', { month: 'short' }), year: dt.getFullYear() }
+    return { day: dt.getDate(), month: dt.toLocaleString(lang==='bg'?'bg-BG':'en',{month:'short'}), year: dt.getFullYear() }
   }
 
   const L = {
-    activeProjects: lang === 'bg' ? 'Проекти тази година' : 'Projects this year',
-    hoursYear:      lang === 'bg' ? 'Часове тази година' : 'Hours this year',
-    volunteer:      lang === 'bg' ? 'Доброволец на месеца'   : 'Volunteer of the month',
-    initiative:     lang === 'bg' ? 'Инициатива на месеца'   : 'Initiative of the month',
-    organization:   lang === 'bg' ? 'Организация на месеца'  : 'Organization of the month',
-    hours_logged:   lang === 'bg' ? 'часа доброволчество'     : 'volunteer hours',
-    confirmed:      lang === 'bg' ? 'потвърдени доброволци'   : 'confirmed volunteers',
-    events_org:     lang === 'bg' ? 'събитие(я) този месец'   : 'event(s) this month',
-    online:         lang === 'bg' ? 'Онлайн'                  : 'Online',
-    spots_left:     lang === 'bg' ? 'свободни места'          : 'spots left',
-    no_data:        lang === 'bg' ? 'Все още няма данни за този месец' : 'No data for this month yet',
+    activeProjects: lang==='bg' ? 'Проекти тази година' : 'Projects this year',
+    hoursYear:      lang==='bg' ? 'Часове тази година'  : 'Hours this year',
+    volunteer:      lang==='bg' ? 'Доброволец на месеца'  : 'Volunteer of the month',
+    initiative:     lang==='bg' ? 'Инициатива на месеца'  : 'Initiative of the month',
+    organization:   lang==='bg' ? 'Организация на месеца' : 'Organization of the month',
+    hours_logged:   lang==='bg' ? 'часа доброволчество'    : 'volunteer hours',
+    confirmed:      lang==='bg' ? 'потвърдени доброволци'  : 'confirmed volunteers',
+    events_org:     lang==='bg' ? 'събитие(я) този месец'  : 'event(s) this month',
+    online:         lang==='bg' ? 'Онлайн'                 : 'Online',
+    spots_left:     lang==='bg' ? 'свободни места'         : 'spots left',
+    no_data:        lang==='bg' ? 'Все още няма данни за този месец' : 'No data for this month yet',
+    see_all:        lang==='bg' ? 'Виж всички →'           : 'See all →',
+    see_events:     lang==='bg' ? 'Виж всички →'           : 'View all →',
   }
 
   const statItems = [
@@ -119,20 +121,20 @@ export default function Home() {
 
   return (
     <div>
-      {/* ── Hero ── */}
-      <section className="py-6 px-4" style={{ background: 'var(--bg)', backgroundImage: 'var(--hero-gradient)' }}>
+
+      {/* ══ Hero ══════════════════════════════════════════════════════════════ */}
+      <section className="py-6 px-4" style={{ background:'var(--bg)', backgroundImage:'var(--hero-gradient)' }}>
         <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-3 sm:whitespace-nowrap" style={{ color: 'var(--text)' }}>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-3 sm:whitespace-nowrap" style={{ color:'var(--text)' }}>
             {(() => {
               const title = t('hero.title')
-              const highlight = lang === 'bg' ? 'Доброволствай.' : 'Volunteer.'
+              const highlight = lang==='bg' ? 'Доброволствай.' : 'Volunteer.'
               const idx = title.indexOf(highlight)
-              if (idx === -1) return <span>{title}</span>
-              return <><span>{title.slice(0, idx)}</span><span className="text-brand-400">{highlight}</span><span>{title.slice(idx + highlight.length)}</span></>
+              if (idx===-1) return <span>{title}</span>
+              return <><span>{title.slice(0,idx)}</span><span className="text-brand-400">{highlight}</span><span>{title.slice(idx+highlight.length)}</span></>
             })()}
           </h1>
-          {/* Subtitle — 90% width, larger max-width so it fits on fewer lines */}
-          <p className="text-base leading-relaxed mb-5 mx-auto" style={{ color: 'var(--text-muted)', maxWidth: '90%' }}>
+          <p className="text-base leading-relaxed mb-5 mx-auto" style={{ color:'var(--text-muted)', maxWidth:'90%' }}>
             {t('hero.subtitle')}
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
@@ -142,119 +144,105 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Stats — 6 items ── */}
-      <section style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-3 md:grid-cols-6">
-          {statItems.map((s, i) => (
-            <StatCard key={i} num={s.num} label={s.label} border={i < statItems.length - 1} />
-          ))}
+      {/* ══ Stats ════════════════════════════════════════════════════════════ */}
+      <section style={{ borderTop:'1px solid var(--border)', borderBottom:'1px solid var(--border)' }}>
+        <div className={`${MAX_W} grid grid-cols-3 md:grid-cols-6`}>
+          {statItems.map((s,i) => <StatCard key={i} num={s.num} label={s.label} border={i<statItems.length-1} />)}
         </div>
       </section>
 
-      {/* ── Monthly spotlight ── */}
-      <section className="max-w-7xl mx-auto px-4 py-10">
-        <h2 className="text-xl font-medium mb-5" style={{ color: 'var(--text)' }}>{t('spotlight.title')}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {/* ══ Monthly spotlight ════════════════════════════════════════════════ */}
+      <section className="py-10">
+        <div className={MAX_W}>
+          <SectionHeader title={t('spotlight.title')} linkTo="/volunteers" linkLabel={L.see_all} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-          {/* Volunteer of the month */}
-          {/* Volunteer of the month */}
-          <div className="card flex flex-col gap-3 h-full" style={{ borderTop: '3px solid #1D9E75' }}>
-            <span className="badge self-start text-xs" style={{ background: 'rgba(29,158,117,0.12)', color: '#1D9E75' }}>{L.volunteer}</span>
-            {spotVol ? (
-              <>
-                {/* Avatar + ranking icon */}
-                <div className="relative w-14 h-14 shrink-0">
-                  <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center font-semibold text-lg"
-                    style={{ background: 'rgba(29,158,117,0.12)', color: '#1D9E75' }}>
-                    {spotVol.avatar_url
-                      ? <img src={spotVol.avatar_url} alt="" className="w-full h-full object-cover" />
-                      : (spotVol.full_name || '?').slice(0,2).toUpperCase()}
+            {/* Volunteer of the month — custom card with ranking + achievements */}
+            <div className="card flex flex-col gap-3" style={{ borderTop:'3px solid #1D9E75' }}>
+              <span className="badge self-start text-xs" style={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}>{L.volunteer}</span>
+              {spotVol ? (
+                <>
+                  <div className="relative w-14 h-14 shrink-0">
+                    <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center font-semibold text-lg"
+                      style={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}>
+                      {spotVol.avatar_url
+                        ? <img src={spotVol.avatar_url} alt="" className="w-full h-full object-cover" />
+                        : (spotVol.full_name||'?').slice(0,2).toUpperCase()}
+                    </div>
+                    {spotVol.ranking_icon_url && (
+                      <img src={spotVol.ranking_icon_url} alt={spotVol.ranking_type}
+                        style={{ position:'absolute', bottom:0, right:0, width:22, height:22, objectFit:'contain' }} />
+                    )}
                   </div>
-                  {spotVol.ranking_icon_url && (
-                    <img src={spotVol.ranking_icon_url} alt={spotVol.ranking_type}
-                      style={{ position: 'absolute', bottom: 0, right: 0, width: 22, height: 22, objectFit: 'contain' }} />
-                  )}
-                </div>
-                {/* Name + city */}
-                <div>
-                  <h3 className="font-semibold text-sm" style={{ color: 'var(--text)' }}>
-                    {lang === 'bg' ? (spotVol.full_name_bg || spotVol.full_name) : spotVol.full_name}
-                  </h3>
-                  {(spotVol.city || spotVol.city_bg) && (
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      {lang === 'bg' ? (spotVol.city_bg || spotVol.city) : spotVol.city}
-                    </p>
-                  )}
-                  {/* Ranking label */}
-                  {spotVol.ranking_type && (
-                    <span className="text-xs font-semibold" style={{ color:
-                      spotVol.ranking_type === 'Platinum' ? '#4a90a4' :
-                      spotVol.ranking_type === 'Gold'     ? '#c9a200' :
-                      spotVol.ranking_type === 'Silver'   ? '#708090' :
-                      spotVol.ranking_type === 'Bronze'   ? '#cd7f32' : '#6b7280' }}>
-                      {lang === 'bg' ? (spotVol.ranking_type_bg || spotVol.ranking_type) : spotVol.ranking_type}
-                    </span>
-                  )}
-                </div>
-                {/* Hours stat */}
-                <p className="text-xs font-semibold text-brand-400">⏱ {spotVol.hours} {L.hours_logged}</p>
-                {/* Achievement badges */}
-                {spotVol.achievements?.length > 0 && (
-                  <div className="flex flex-wrap gap-1 pt-1" style={{ borderTop: '1px solid var(--border)' }}>
-                    {spotVol.achievements.slice(0, 6).map((a, i) => (
-                      <span key={i} title={lang === 'bg' ? (a.name_bg || a.name) : a.name}
-                        className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0"
-                        style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-mid)' }}>
-                        {a.badge_url
-                          ? <img src={a.badge_url} alt="" className="w-full h-full object-contain p-0.5" />
-                          : <span className="text-xs">🎖️</span>}
-                      </span>
-                    ))}
-                    {spotVol.achievements.length > 6 && (
-                      <span className="w-7 h-7 rounded-full flex items-center justify-center text-xs"
-                        style={{ background: 'var(--bg-subtle)', color: 'var(--text-faint)' }}>
-                        +{spotVol.achievements.length - 6}
+                  <div>
+                    <h3 className="font-semibold text-sm" style={{ color:'var(--text)' }}>
+                      {lang==='bg' ? (spotVol.full_name_bg||spotVol.full_name) : spotVol.full_name}
+                    </h3>
+                    {(spotVol.city||spotVol.city_bg) && (
+                      <p className="text-xs" style={{ color:'var(--text-muted)' }}>
+                        {lang==='bg' ? (spotVol.city_bg||spotVol.city) : spotVol.city}
+                      </p>
+                    )}
+                    {spotVol.ranking_type && (
+                      <span className="text-xs font-semibold" style={{ color: RANK_COLOR[spotVol.ranking_type]||'#6b7280' }}>
+                        {lang==='bg' ? (spotVol.ranking_type_bg||spotVol.ranking_type) : spotVol.ranking_type}
                       </span>
                     )}
                   </div>
-                )}
-              </>
-            ) : (
-              <p className="text-sm" style={{ color: 'var(--text-faint)' }}>{L.no_data}</p>
-            )}
+                  <p className="text-xs font-semibold text-brand-400">⏱ {spotVol.hours} {L.hours_logged}</p>
+                  {spotVol.achievements?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1" style={{ borderTop:'1px solid var(--border)' }}>
+                      {spotVol.achievements.slice(0,6).map((a,i) => (
+                        <span key={i} title={lang==='bg'?(a.name_bg||a.name):a.name}
+                          className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0"
+                          style={{ background:'var(--bg-subtle)', border:'1px solid var(--border-mid)' }}>
+                          {a.badge_url ? <img src={a.badge_url} alt="" className="w-full h-full object-contain p-0.5" /> : <span className="text-xs">🎖️</span>}
+                        </span>
+                      ))}
+                      {spotVol.achievements.length > 6 && (
+                        <span className="w-7 h-7 rounded-full flex items-center justify-center text-xs"
+                          style={{ background:'var(--bg-subtle)', color:'var(--text-faint)' }}>
+                          +{spotVol.achievements.length-6}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : <p className="text-sm" style={{ color:'var(--text-faint)' }}>{L.no_data}</p>}
+            </div>
+
+            {/* Initiative of the month */}
+            <SpotlightCard
+              accent="#378ADD"
+              badge={L.initiative}
+              badgeStyle={{ background:'rgba(55,138,221,0.12)', color:'#378ADD' }}
+              avatar={spotInit ? { src:spotInit.org_logo_url, initials:(spotInit.title||'?').slice(0,2).toUpperCase() } : { initials:'?' }}
+              title={spotInit ? (lang==='bg'?(spotInit.title_bg||spotInit.title):spotInit.title) : L.no_data}
+              sub={spotInit ? (spotInit.is_online ? L.online : (lang==='bg'?(spotInit.city_bg||spotInit.city):spotInit.city)) : null}
+              detail={spotInit?.org_name||null}
+              stat={spotInit ? `👥 ${spotInit.confirmed_count} ${L.confirmed}` : null}
+              link={spotInit ? `/events/${spotInit.id}` : null}
+            />
+
+            {/* Organization of the month */}
+            <SpotlightCard
+              accent="#1D9E75"
+              badge={L.organization}
+              badgeStyle={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}
+              avatar={spotOrg ? { src:spotOrg.logo_url, initials:(spotOrg.name||'?').slice(0,2).toUpperCase() } : { initials:'?' }}
+              title={spotOrg?.name||L.no_data}
+              sub={spotOrg?.city||null}
+              stat={spotOrg ? `📅 ${spotOrg.event_count} ${L.events_org}` : null}
+              link={spotOrg ? `/organizations/${spotOrg.slug}` : null}
+            />
           </div>
-
-          {/* Initiative of the month */}
-          <SpotlightCard
-            accent="#378ADD"
-            badge={L.initiative}
-            badgeStyle={{ background: 'rgba(55,138,221,0.12)', color: '#378ADD' }}
-            avatar={spotInit ? { src: spotInit.org_logo_url, initials: (spotInit.title || '?').slice(0,2).toUpperCase() } : { initials: '?' }}
-            title={spotInit ? (lang === 'bg' ? (spotInit.title_bg || spotInit.title) : spotInit.title) : L.no_data}
-            sub={spotInit ? (spotInit.is_online ? L.online : (lang === 'bg' ? (spotInit.city_bg || spotInit.city) : spotInit.city)) : null}
-            detail={spotInit?.org_name || null}
-            stat={spotInit ? `👥 ${spotInit.confirmed_count} ${L.confirmed}` : null}
-            link={spotInit ? `/events/${spotInit.id}` : null}
-          />
-
-          {/* Organization of the month */}
-          <SpotlightCard
-            accent="#1D9E75"
-            badge={L.organization}
-            badgeStyle={{ background: 'rgba(29,158,117,0.12)', color: '#1D9E75' }}
-            avatar={spotOrg ? { src: spotOrg.logo_url, initials: (spotOrg.name || '?').slice(0,2).toUpperCase() } : { initials: '?' }}
-            title={spotOrg?.name || L.no_data}
-            sub={spotOrg?.city || null}
-            stat={spotOrg ? `📅 ${spotOrg.event_count} ${L.events_org}` : null}
-            link={spotOrg ? `/organizations/${spotOrg.slug}` : null}
-          />
         </div>
       </section>
 
-      {/* ── Roles ── */}
-      <section className="py-8 px-4" style={{ background: 'var(--bg-subtle)' }}>
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-xl font-medium mb-4" style={{ color: 'var(--text)' }}>{t('roles.title')}</h2>
+      {/* ══ Who is it for ════════════════════════════════════════════════════ */}
+      <section className="py-8" style={{ background:'var(--bg-subtle)' }}>
+        <div className={MAX_W}>
+          <SectionHeader title={t('roles.title')} />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <RoleCard to="/projects"
               icon={<svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>}
@@ -269,54 +257,44 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Upcoming events — richer cards ── */}
-      <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="flex items-baseline justify-between mb-5">
-          <h2 className="text-xl font-medium" style={{ color: 'var(--text)' }}>{t('events.title')}</h2>
-          <Link to="/events" className="text-sm text-brand-400 hover:text-brand-600">{t('events.see_all')}</Link>
-        </div>
-        <div className="flex flex-col gap-3">
-          {events.length === 0 && <p className="text-sm" style={{ color: 'var(--text-faint)' }}>{t('events.no_events')}</p>}
-          {events.map(ev => {
-            const { day, month, year } = fmtDate(ev.event_date)
-            const title = (lang === 'bg' && ev.title_bg) ? ev.title_bg : ev.title
-            const desc  = (lang === 'bg' && ev.description_bg) ? ev.description_bg : ev.description
-            const city  = (lang === 'bg' && ev.city_bg) ? ev.city_bg : ev.city
-            const isOnline = ev.is_online || ev.event_type === 'online'
-            const spots = Math.max(0, (ev.volunteers_needed || 0) - (ev.volunteers_enrolled || 0))
-            const org   = ev.organizations
-            return (
-              <Link key={ev.id} to={`/events/${ev.id}`}
-                className="card flex gap-4 hover:shadow-sm transition-all">
-                {/* Date box */}
-                <div className="min-w-14 text-center rounded-xl py-3 shrink-0 bg-brand-50">
-                  <p className="text-2xl font-bold text-brand-400 leading-none">{day}</p>
-                  <p className="text-xs text-brand-600 uppercase mt-0.5">{month}</p>
-                  <p className="text-xs text-brand-500 mt-0.5">{year}</p>
-                </div>
-                {/* Body */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="font-semibold text-sm leading-tight" style={{ color: 'var(--text)' }}>{title}</p>
-                    <span className="text-xs font-medium whitespace-nowrap text-brand-400 shrink-0">
-                      {spots} {L.spots_left}
-                    </span>
+      {/* ══ Upcoming events ══════════════════════════════════════════════════ */}
+      <section className="py-10">
+        <div className={MAX_W}>
+          <SectionHeader title={t('events.title')} linkTo="/events" linkLabel={L.see_events} />
+          <div className="flex flex-col gap-3">
+            {events.length === 0 && <p className="text-sm" style={{ color:'var(--text-faint)' }}>{t('events.no_events')}</p>}
+            {events.map(ev => {
+              const { day, month, year } = fmtDate(ev.event_date)
+              const title   = (lang==='bg' && ev.title_bg)       ? ev.title_bg       : ev.title
+              const desc    = (lang==='bg' && ev.description_bg) ? ev.description_bg : ev.description
+              const city    = (lang==='bg' && ev.city_bg)        ? ev.city_bg        : ev.city
+              const isOnline = ev.is_online || ev.event_type === 'online'
+              const spots   = Math.max(0, (ev.volunteers_needed||0) - (ev.volunteers_enrolled||0))
+              const org     = ev.organizations
+              return (
+                <Link key={ev.id} to={`/events/${ev.id}`} className="card flex gap-4 hover:shadow-sm transition-all">
+                  <div className="min-w-14 text-center rounded-xl py-3 shrink-0 bg-brand-50">
+                    <p className="text-2xl font-bold text-brand-400 leading-none">{day}</p>
+                    <p className="text-xs text-brand-600 uppercase mt-0.5">{month}</p>
+                    <p className="text-xs text-brand-500 mt-0.5">{year}</p>
                   </div>
-                  {/* Org + location row */}
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    {org?.logo_url && <img src={org.logo_url} alt="" className="w-3.5 h-3.5 rounded object-cover" />}
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      {org?.name}{org?.name && (isOnline ? ' · ' : city ? ' · ' : '')}{isOnline ? L.online : city}
-                    </p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-semibold text-sm leading-tight" style={{ color:'var(--text)' }}>{title}</p>
+                      <span className="text-xs font-medium whitespace-nowrap text-brand-400 shrink-0">{spots} {L.spots_left}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      {org?.logo_url && <img src={org.logo_url} alt="" className="w-3.5 h-3.5 rounded object-cover" />}
+                      <p className="text-xs" style={{ color:'var(--text-muted)' }}>
+                        {org?.name}{org?.name && (isOnline||city) ? ' · ' : ''}{isOnline ? L.online : city}
+                      </p>
+                    </div>
+                    {desc && <p className="text-xs mt-1 line-clamp-1" style={{ color:'var(--text-faint)' }}>{desc}</p>}
                   </div>
-                  {/* Description */}
-                  {desc && (
-                    <p className="text-xs mt-1 line-clamp-1" style={{ color: 'var(--text-faint)' }}>{desc}</p>
-                  )}
-                </div>
-              </Link>
-            )
-          })}
+                </Link>
+              )
+            })}
+          </div>
         </div>
       </section>
 
