@@ -100,23 +100,27 @@ export default function Navbar() {
               onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-subtle)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              {/* Show flag of the language we'll switch TO, so user knows what clicking does */}
+              {/* Show flag of the language we'll switch TO */}
               {lang === 'en' ? (
-                /* Bulgarian flag — click to switch to BG */
-                <svg width="22" height="15" viewBox="0 0 22 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{borderRadius:2,display:'block'}}>
-                  <rect width="22" height="15" fill="white"/>
-                  <rect y="5" width="22" height="5" fill="#00966E"/>
-                  <rect y="10" width="22" height="5" fill="#D62612"/>
-                </svg>
+                /* Bulgarian flag: white / green / red */
+                <span style={{ display:'inline-block', width:22, height:15, borderRadius:3, overflow:'hidden', border:'1px solid var(--border-mid)', flexShrink:0 }}>
+                  <svg width="22" height="15" viewBox="0 0 22 15" xmlns="http://www.w3.org/2000/svg" style={{display:'block'}}>
+                    <rect width="22" height="5" fill="#FFFFFF"/>
+                    <rect y="5" width="22" height="5" fill="#00966E"/>
+                    <rect y="10" width="22" height="5" fill="#D62612"/>
+                  </svg>
+                </span>
               ) : (
-                /* UK flag — click to switch to EN */
-                <svg width="22" height="15" viewBox="0 0 22 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{borderRadius:2,display:'block'}}>
-                  <rect width="22" height="15" rx="2" fill="#012169"/>
-                  <path d="M0 0L22 15M22 0L0 15" stroke="white" strokeWidth="3"/>
-                  <path d="M0 0L22 15M22 0L0 15" stroke="#C8102E" strokeWidth="1.8"/>
-                  <path d="M11 0V15M0 7.5H22" stroke="white" strokeWidth="4"/>
-                  <path d="M11 0V15M0 7.5H22" stroke="#C8102E" strokeWidth="2.2"/>
-                </svg>
+                /* UK flag: Union Jack */
+                <span style={{ display:'inline-block', width:22, height:15, borderRadius:3, overflow:'hidden', border:'1px solid var(--border-mid)', flexShrink:0 }}>
+                  <svg width="22" height="15" viewBox="0 0 22 15" xmlns="http://www.w3.org/2000/svg" style={{display:'block'}}>
+                    <rect width="22" height="15" fill="#012169"/>
+                    <path d="M0 0L22 15M22 0L0 15" stroke="white" strokeWidth="3"/>
+                    <path d="M0 0L22 15M22 0L0 15" stroke="#C8102E" strokeWidth="1.8"/>
+                    <path d="M11 0V15M0 7.5H22" stroke="white" strokeWidth="4.5"/>
+                    <path d="M11 0V15M0 7.5H22" stroke="#C8102E" strokeWidth="2.5"/>
+                  </svg>
+                </span>
               )}
               <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
                 {lang === 'en' ? 'БГ' : 'EN'}
