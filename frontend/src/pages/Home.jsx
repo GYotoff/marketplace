@@ -72,12 +72,15 @@ export default function Home() {
       .then(({ data }) => data && setEvents(data))
 
     // Stats
+    const yearStart = new Date(now.getFullYear(), 0, 1).toISOString()
     Promise.all([
       supabase.from('organizations').select('id',{count:'exact',head:true}).eq('is_active',true),
       supabase.from('corporations').select('id',{count:'exact',head:true}).eq('is_active',true),
       supabase.from('profiles').select('id',{count:'exact',head:true}).eq('role','volunteer').eq('is_active',true),
-      supabase.from('events').select('id',{count:'exact',head:true}).eq('status','published'),
-      supabase.from('projects').select('id',{count:'exact',head:true}).eq('is_active',true),
+      // All events this year (published + completed)
+      supabase.from('events').select('id',{count:'exact',head:true}).in('status',['published','completed']).gte('event_date', yearStart),
+      // All projects this year
+      supabase.from('projects').select('id',{count:'exact',head:true}).gte('created_at', yearStart),
       supabase.rpc('get_hours_this_year'),
     ]).then(([orgs, corps, vols, evts, projs, hrs]) => {
       setStats({
@@ -102,7 +105,7 @@ export default function Home() {
   }
 
   const L = {
-    activeProjects: lang === 'bg' ? 'Активни проекти'    : 'Active projects',
+    activeProjects: lang === 'bg' ? 'Проекти тази година' : 'Projects this year',
     hoursYear:      lang === 'bg' ? 'Часове тази година' : 'Hours this year',
     volunteer:      lang === 'bg' ? 'Доброволец на месеца'   : 'Volunteer of the month',
     initiative:     lang === 'bg' ? 'Инициатива на месеца'   : 'Initiative of the month',
@@ -203,9 +206,9 @@ export default function Home() {
       </section>
 
       {/* ── Roles ── */}
-      <section className="py-10 px-4" style={{ background: 'var(--bg-subtle)' }}>
+      <section className="py-8 px-4" style={{ background: 'var(--bg-subtle)' }}>
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-xl font-medium mb-5 text-center" style={{ color: 'var(--text)' }}>{t('roles.title')}</h2>
+          <h2 className="text-xl font-medium mb-4 text-center" style={{ color: 'var(--text)' }}>{t('roles.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <RoleCard to="/projects"
               icon={<svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>}
