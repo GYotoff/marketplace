@@ -36,14 +36,47 @@ export const useAuthStore = create((set, get) => ({
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         await get().fetchProfile(session.user)
+        // Start realtime subscription to keep profile in sync
+        // (DB triggers update ranking_id, achievements, pending_notifications)
+        get().subscribeToProfile(session.user.id)
       } else {
+        get().unsubscribeFromProfile()
         set({ user: null, profile: null })
-        // Reset to defaults on logout
         localStorage.setItem('i18nextLng', 'en')
         localStorage.setItem('gf_theme', 'light')
         document.documentElement.setAttribute('data-theme', 'light')
       }
     })
+  },
+
+  _profileChannel: null,
+
+  subscribeToProfile(userId) {
+    // Avoid duplicate subscriptions
+    const existing = get()._profileChannel
+    if (existing) supabase.removeChannel(existing)
+
+    const channel = supabase
+      .channel(`authstore-profile-${userId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${userId}` },
+        (payload) => {
+          // Merge updated fields into local profile state
+          const current = get().profile
+          if (current) {
+            set({ profile: { ...current, ...payload.new } })
+          }
+        }
+      )
+      .subscribe()
+
+    set({ _profileChannel: channel })
+  },
+
+  unsubscribeFromProfile() {
+    const ch = get()._profileChannel
+    if (ch) { supabase.removeChannel(ch); set({ _profileChannel: null }) }
   },
 
   fetchProfile: async (user) => {
@@ -106,6 +139,7 @@ export const useAuthStore = create((set, get) => ({
   },
 
   logout: async () => {
+    get().unsubscribeFromProfile()
     await supabase.auth.signOut()
     set({ user: null, profile: null })
     localStorage.setItem('i18nextLng', 'en')
