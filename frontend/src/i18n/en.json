@@ -28,7 +28,8 @@
     "see_all": "See all →",
     "volunteer": "Volunteer of the month",
     "initiative": "Initiative of the month",
-    "corporation": "Corporation of the month"
+    "corporation": "Corporation of the month",
+    "organization": "Organization of the month"
   },
   "roles": {
     "title": "Who is it for?",
