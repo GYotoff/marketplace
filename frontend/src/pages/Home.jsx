@@ -3,43 +3,48 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 
-function StatCard({ num, label }) {
+// ── Stat bar card ─────────────────────────────────────────────────────────────
+function StatCard({ num, label, border }) {
   return (
-    <div className="text-center py-6">
+    <div className="text-center py-5" style={border ? { borderRight: '1px solid var(--border)' } : {}}>
       <p className="text-2xl font-semibold text-brand-400">{num}</p>
-      <p className="text-sm text-gray-500 mt-1">{label}</p>
+      <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{label}</p>
     </div>
   )
 }
 
-function SpotlightCard({ badge, badgeClass, accentColor, initials, avatarClass, title, desc, tags, stat }) {
-  return (
-    <div className="card flex flex-col gap-3">
-      <div className={`h-1 -mx-5 -mt-5 mb-1 rounded-t-xl`} style={{ background: accentColor }} />
-      <span className={`badge ${badgeClass} self-start`}>{badge}</span>
-      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-medium text-lg ${avatarClass}`}>{initials}</div>
-      <div>
-        <h3 className="font-medium text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-500 mt-1 leading-relaxed">{desc}</p>
+// ── Spotlight card ────────────────────────────────────────────────────────────
+function SpotlightCard({ accent, badge, badgeStyle, avatar, title, sub, detail, stat, link }) {
+  const inner = (
+    <div className="card flex flex-col gap-3 h-full hover:shadow-sm transition-all" style={{ borderTop: `3px solid ${accent}` }}>
+      <span className="badge self-start text-xs" style={badgeStyle}>{badge}</span>
+      {/* Avatar / logo */}
+      <div className="w-11 h-11 rounded-full overflow-hidden flex items-center justify-center shrink-0 font-semibold text-base"
+        style={{ background: `${accent}20`, color: accent }}>
+        {avatar?.src
+          ? <img src={avatar.src} alt="" className="w-full h-full object-cover" />
+          : avatar?.initials || '?'}
       </div>
-      <div className="flex items-center justify-between mt-auto pt-2">
-        <div className="flex gap-1.5 flex-wrap">
-          {tags.map(t => <span key={t} className="text-xs px-2 py-0.5 rounded-full border border-gray-100 text-gray-500">{t}</span>)}
-        </div>
-        <span className="text-xs text-gray-400 whitespace-nowrap">{stat}</span>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold text-sm leading-tight" style={{ color: 'var(--text)' }}>{title || '—'}</h3>
+        {sub && <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{sub}</p>}
+        {detail && <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--text-faint)' }}>{detail}</p>}
       </div>
+      {stat && (
+        <p className="text-xs font-semibold" style={{ color: accent }}>{stat}</p>
+      )}
     </div>
   )
+  return link ? <Link to={link} className="block">{inner}</Link> : inner
 }
 
+// ── Role card ─────────────────────────────────────────────────────────────────
 function RoleCard({ icon, title, desc, cta, to, colorClass }) {
   return (
-    <Link to={to} className="card flex flex-col items-center text-center gap-3 hover:border-gray-200 hover:shadow-sm transition-all group">
-      <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${colorClass}`}>
-        {icon}
-      </div>
-      <h3 className="font-medium text-gray-900">{title}</h3>
-      <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+    <Link to={to} className="card flex flex-col items-center text-center gap-3 hover:shadow-sm transition-all group">
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${colorClass}`}>{icon}</div>
+      <h3 className="font-medium" style={{ color: 'var(--text)' }}>{title}</h3>
+      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{desc}</p>
       <span className="text-sm text-brand-400 group-hover:text-brand-600">{cta}</span>
     </Link>
   )
@@ -48,66 +53,95 @@ function RoleCard({ icon, title, desc, cta, to, colorClass }) {
 export default function Home() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
-  const [events, setEvents] = useState([])
-  const [spotlights, setSpotlights] = useState([])
-  const [stats, setStats] = useState({ orgs: 0, volunteers: 0, corps: 0, events: 0 })
+
+  const [events,   setEvents]   = useState([])
+  const [stats,    setStats]    = useState({ orgs: 0, volunteers: 0, corps: 0, events: 0, projects: 0, hours: 0 })
+  const [spotVol,  setSpotVol]  = useState(null)
+  const [spotInit, setSpotInit] = useState(null)
+  const [spotOrg,  setSpotOrg]  = useState(null)
 
   useEffect(() => {
-    const now = new Date()
+    const now  = new Date()
+    const yr   = now.getFullYear()
+    const mo   = now.getMonth() + 1
 
-    supabase.from('events').select('id,title,title_bg,city,event_date,volunteers_needed,volunteers_enrolled,is_online')
-      .eq('status', 'published').gte('event_date', now.toISOString()).order('event_date').limit(4)
+    // Upcoming events — richer select
+    supabase.from('events')
+      .select('id,title,title_bg,description,description_bg,city,city_bg,event_date,volunteers_needed,volunteers_enrolled,is_online,event_type,organizations(name,logo_url)')
+      .eq('status','published').gte('event_date', now.toISOString()).order('event_date').limit(5)
       .then(({ data }) => data && setEvents(data))
 
-    supabase.from('spotlights').select('*').eq('is_active', true)
-      .eq('month', now.getMonth() + 1).eq('year', now.getFullYear())
-      .then(({ data }) => data && setSpotlights(data))
-
+    // Stats
     Promise.all([
-      supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('is_active', true),
-      supabase.from('corporations').select('id', { count: 'exact', head: true }).eq('is_active', true),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'volunteer'),
-      supabase.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-    ]).then(([orgs, corps, vols, evts]) => {
+      supabase.from('organizations').select('id',{count:'exact',head:true}).eq('is_active',true),
+      supabase.from('corporations').select('id',{count:'exact',head:true}).eq('is_active',true),
+      supabase.from('profiles').select('id',{count:'exact',head:true}).eq('role','volunteer').eq('is_active',true),
+      supabase.from('events').select('id',{count:'exact',head:true}).eq('status','published'),
+      supabase.from('projects').select('id',{count:'exact',head:true}).eq('is_active',true),
+      supabase.rpc('get_hours_this_year'),
+    ]).then(([orgs, corps, vols, evts, projs, hrs]) => {
       setStats({
-        orgs: orgs.count || 0,
-        corps: corps.count || 0,
-        volunteers: vols.count || 0,
-        events: evts.count || 0
+        orgs:      orgs.count  || 0,
+        corps:     corps.count || 0,
+        volunteers:vols.count  || 0,
+        events:    evts.count  || 0,
+        projects:  projs.count || 0,
+        hours:     Math.round(hrs.data || 0),
       })
     })
+
+    // Spotlights — live data
+    supabase.rpc('get_spotlight_volunteer',   { p_year: yr, p_month: mo }).then(({ data }) => data?.[0] && setSpotVol(data[0]))
+    supabase.rpc('get_spotlight_initiative',  { p_year: yr, p_month: mo }).then(({ data }) => data?.[0] && setSpotInit(data[0]))
+    supabase.rpc('get_spotlight_organization',{ p_year: yr, p_month: mo }).then(({ data }) => data?.[0] && setSpotOrg(data[0]))
   }, [])
 
-  const formatDate = (d) => {
+  const fmtDate = (d) => {
     const dt = new Date(d)
-    return { day: dt.getDate(), month: dt.toLocaleString('en', { month: 'short' }), year: dt.getFullYear() }
+    return { day: dt.getDate(), month: dt.toLocaleString(lang === 'bg' ? 'bg-BG' : 'en', { month: 'short' }), year: dt.getFullYear() }
   }
 
-  const spotlightConfigs = {
-    volunteer: { badge: t('spotlight.volunteer'), badgeClass: 'bg-brand-50 text-brand-800', accentColor: '#1D9E75', avatarClass: 'bg-brand-50 text-brand-600' },
-    initiative: { badge: t('spotlight.initiative'), badgeClass: 'bg-blue-50 text-blue-800', accentColor: '#378ADD', avatarClass: 'bg-blue-50 text-blue-600' },
-    corporation: { badge: t('spotlight.corporation'), badgeClass: 'bg-amber-50 text-amber-800', accentColor: '#BA7517', avatarClass: 'bg-amber-50 text-amber-700' },
+  const L = {
+    activeProjects: lang === 'bg' ? 'Активни проекти'    : 'Active projects',
+    hoursYear:      lang === 'bg' ? 'Часове тази година' : 'Hours this year',
+    volunteer:      lang === 'bg' ? 'Доброволец на месеца'   : 'Volunteer of the month',
+    initiative:     lang === 'bg' ? 'Инициатива на месеца'   : 'Initiative of the month',
+    organization:   lang === 'bg' ? 'Организация на месеца'  : 'Organization of the month',
+    hours_logged:   lang === 'bg' ? 'часа доброволчество'     : 'volunteer hours',
+    confirmed:      lang === 'bg' ? 'потвърдени доброволци'   : 'confirmed volunteers',
+    events_org:     lang === 'bg' ? 'събитие(я) този месец'   : 'event(s) this month',
+    online:         lang === 'bg' ? 'Онлайн'                  : 'Online',
+    spots_left:     lang === 'bg' ? 'свободни места'          : 'spots left',
+    no_data:        lang === 'bg' ? 'Все още няма данни за този месец' : 'No data for this month yet',
   }
+
+  const statItems = [
+    { num: stats.orgs,       label: t('stats.organizations') },
+    { num: stats.volunteers, label: t('stats.volunteers')    },
+    { num: stats.corps,      label: t('stats.corporations')  },
+    { num: stats.projects,   label: L.activeProjects         },
+    { num: stats.events,     label: t('stats.events')        },
+    { num: stats.hours,      label: L.hoursYear              },
+  ]
 
   return (
     <div>
-      {/* Hero */}
+      {/* ── Hero ── */}
       <section className="py-6 px-4" style={{ background: 'var(--bg)', backgroundImage: 'var(--hero-gradient)' }}>
         <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-4 sm:whitespace-nowrap" style={{ color: 'var(--text)' }}>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-3 sm:whitespace-nowrap" style={{ color: 'var(--text)' }}>
             {(() => {
               const title = t('hero.title')
               const highlight = lang === 'bg' ? 'Доброволствай.' : 'Volunteer.'
               const idx = title.indexOf(highlight)
               if (idx === -1) return <span>{title}</span>
-              return <>
-                <span>{title.slice(0, idx)}</span>
-                <span className="text-brand-400">{highlight}</span>
-                <span>{title.slice(idx + highlight.length)}</span>
-              </>
+              return <><span>{title.slice(0, idx)}</span><span className="text-brand-400">{highlight}</span><span>{title.slice(idx + highlight.length)}</span></>
             })()}
           </h1>
-          <p className="text-gray-500 text-base leading-relaxed mb-6 max-w-xl mx-auto">{t('hero.subtitle')}</p>
+          {/* Subtitle — 90% width, larger max-width so it fits on fewer lines */}
+          <p className="text-base leading-relaxed mb-5 mx-auto" style={{ color: 'var(--text-muted)', maxWidth: '90%' }}>
+            {t('hero.subtitle')}
+          </p>
           <div className="flex gap-3 justify-center flex-wrap">
             <Link to="/projects" className="btn-primary">{t('hero.cta_explore')}</Link>
             <Link to="/register" className="btn-secondary">{t('hero.cta_register')}</Link>
@@ -115,102 +149,122 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="" style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
-          <StatCard num={stats.orgs} label={t('stats.organizations')} />
-          <StatCard num={stats.volunteers} label={t('stats.volunteers')} />
-          <StatCard num={stats.corps} label={t('stats.corporations')} />
-          <StatCard num={stats.events} label={t('stats.events')} />
+      {/* ── Stats — 6 items ── */}
+      <section style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+        <div className="max-w-7xl mx-auto px-4 grid grid-cols-3 md:grid-cols-6">
+          {statItems.map((s, i) => (
+            <StatCard key={i} num={s.num} label={s.label} border={i < statItems.length - 1} />
+          ))}
         </div>
       </section>
 
-      {/* Spotlight */}
-      <section className="max-w-7xl mx-auto px-4 py-14">
-        <div className="flex items-baseline justify-between mb-6">
-          <h2 className="text-xl font-medium">{t('spotlight.title')}</h2>
-          <Link to="/spotlights" className="text-sm text-brand-400 hover:text-brand-600">{t('spotlight.see_all')}</Link>
-        </div>
+      {/* ── Monthly spotlight ── */}
+      <section className="max-w-7xl mx-auto px-4 py-10">
+        <h2 className="text-xl font-medium mb-5" style={{ color: 'var(--text)' }}>{t('spotlight.title')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {['volunteer','initiative','corporation'].map(type => {
-            const cfg = spotlightConfigs[type]
-            const s = spotlights.find(x => x.type === type)
-            return (
-              <SpotlightCard
-                key={type}
-                badge={cfg.badge}
-                badgeClass={cfg.badgeClass}
-                accentColor={cfg.accentColor}
-                avatarClass={cfg.avatarClass}
-                initials={s ? s.title?.slice(0,2).toUpperCase() : '??'}
-                title={s?.title || '—'}
-                desc={s?.description || ''}
-                tags={[]}
-                stat=""
-              />
-            )
-          })}
+
+          {/* Volunteer of the month */}
+          <SpotlightCard
+            accent="#1D9E75"
+            badge={L.volunteer}
+            badgeStyle={{ background: 'rgba(29,158,117,0.12)', color: '#1D9E75' }}
+            avatar={spotVol ? { src: spotVol.avatar_url, initials: (spotVol.full_name || '?').slice(0,2).toUpperCase() } : { initials: '?' }}
+            title={spotVol ? (lang === 'bg' ? (spotVol.full_name_bg || spotVol.full_name) : spotVol.full_name) : L.no_data}
+            sub={spotVol ? (lang === 'bg' ? (spotVol.city_bg || spotVol.city) : spotVol.city) : null}
+            stat={spotVol ? `⏱ ${spotVol.hours} ${L.hours_logged}` : null}
+            link={null}
+          />
+
+          {/* Initiative of the month */}
+          <SpotlightCard
+            accent="#378ADD"
+            badge={L.initiative}
+            badgeStyle={{ background: 'rgba(55,138,221,0.12)', color: '#378ADD' }}
+            avatar={spotInit ? { src: spotInit.org_logo_url, initials: (spotInit.title || '?').slice(0,2).toUpperCase() } : { initials: '?' }}
+            title={spotInit ? (lang === 'bg' ? (spotInit.title_bg || spotInit.title) : spotInit.title) : L.no_data}
+            sub={spotInit ? (spotInit.is_online ? L.online : (lang === 'bg' ? (spotInit.city_bg || spotInit.city) : spotInit.city)) : null}
+            detail={spotInit?.org_name || null}
+            stat={spotInit ? `👥 ${spotInit.confirmed_count} ${L.confirmed}` : null}
+            link={spotInit ? `/events/${spotInit.id}` : null}
+          />
+
+          {/* Organization of the month */}
+          <SpotlightCard
+            accent="#1D9E75"
+            badge={L.organization}
+            badgeStyle={{ background: 'rgba(29,158,117,0.12)', color: '#1D9E75' }}
+            avatar={spotOrg ? { src: spotOrg.logo_url, initials: (spotOrg.name || '?').slice(0,2).toUpperCase() } : { initials: '?' }}
+            title={spotOrg?.name || L.no_data}
+            sub={spotOrg?.city || null}
+            stat={spotOrg ? `📅 ${spotOrg.event_count} ${L.events_org}` : null}
+            link={spotOrg ? `/organizations/${spotOrg.slug}` : null}
+          />
         </div>
       </section>
 
-      {/* Roles */}
-      <section className="py-14 px-4" style={{ background: 'var(--bg-subtle)' }}>
+      {/* ── Roles ── */}
+      <section className="py-10 px-4" style={{ background: 'var(--bg-subtle)' }}>
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-xl font-medium mb-6 text-center">{t('roles.title')}</h2>
+          <h2 className="text-xl font-medium mb-5 text-center" style={{ color: 'var(--text)' }}>{t('roles.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <RoleCard
-              to="/projects"
+            <RoleCard to="/projects"
               icon={<svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>}
-              colorClass="bg-brand-50"
-              title={t('roles.volunteer.title')}
-              desc={t('roles.volunteer.desc')}
-              cta={t('roles.volunteer.cta')}
-            />
-            <RoleCard
-              to="/organizations"
+              colorClass="bg-brand-50" title={t('roles.volunteer.title')} desc={t('roles.volunteer.desc')} cta={t('roles.volunteer.cta')} />
+            <RoleCard to="/organizations"
               icon={<svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>}
-              colorClass="bg-blue-50"
-              title={t('roles.organization.title')}
-              desc={t('roles.organization.desc')}
-              cta={t('roles.organization.cta')}
-            />
-            <RoleCard
-              to="/corporations"
+              colorClass="bg-blue-50" title={t('roles.organization.title')} desc={t('roles.organization.desc')} cta={t('roles.organization.cta')} />
+            <RoleCard to="/corporations"
               icon={<svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>}
-              colorClass="bg-amber-50"
-              title={t('roles.corporation.title')}
-              desc={t('roles.corporation.desc')}
-              cta={t('roles.corporation.cta')}
-            />
+              colorClass="bg-amber-50" title={t('roles.corporation.title')} desc={t('roles.corporation.desc')} cta={t('roles.corporation.cta')} />
           </div>
         </div>
       </section>
 
-      {/* Upcoming events */}
-      <section className="max-w-7xl mx-auto px-4 py-14">
-        <div className="flex items-baseline justify-between mb-6">
-          <h2 className="text-xl font-medium">{t('events.title')}</h2>
+      {/* ── Upcoming events — richer cards ── */}
+      <section className="max-w-7xl mx-auto px-4 py-10">
+        <div className="flex items-baseline justify-between mb-5">
+          <h2 className="text-xl font-medium" style={{ color: 'var(--text)' }}>{t('events.title')}</h2>
           <Link to="/events" className="text-sm text-brand-400 hover:text-brand-600">{t('events.see_all')}</Link>
         </div>
         <div className="flex flex-col gap-3">
-          {events.length === 0 && <p className="text-gray-400 text-sm">{t('events.no_events')}</p>}
+          {events.length === 0 && <p className="text-sm" style={{ color: 'var(--text-faint)' }}>{t('events.no_events')}</p>}
           {events.map(ev => {
-            const { day, month, year } = formatDate(ev.event_date)
-            const spots = ev.volunteers_needed - ev.volunteers_enrolled
+            const { day, month, year } = fmtDate(ev.event_date)
+            const title = (lang === 'bg' && ev.title_bg) ? ev.title_bg : ev.title
+            const desc  = (lang === 'bg' && ev.description_bg) ? ev.description_bg : ev.description
+            const city  = (lang === 'bg' && ev.city_bg) ? ev.city_bg : ev.city
+            const isOnline = ev.is_online || ev.event_type === 'online'
+            const spots = Math.max(0, (ev.volunteers_needed || 0) - (ev.volunteers_enrolled || 0))
+            const org   = ev.organizations
             return (
-              <Link key={ev.id} to={`/events/${ev.id}`} className="flex items-center gap-4 card hover:border-gray-200 hover:shadow-sm transition-all">
-                <div className="min-w-12 text-center bg-brand-50 rounded-lg py-2 px-1">
-                  <p className="text-xl font-semibold text-brand-400 leading-none">{day}</p>
-                  <p className="text-xs text-brand-600 uppercase">{month}</p>
-                  <p className="text-xs text-brand-500">{year}</p>
+              <Link key={ev.id} to={`/events/${ev.id}`}
+                className="card flex gap-4 hover:shadow-sm transition-all">
+                {/* Date box */}
+                <div className="min-w-14 text-center rounded-xl py-3 shrink-0 bg-brand-50">
+                  <p className="text-2xl font-bold text-brand-400 leading-none">{day}</p>
+                  <p className="text-xs text-brand-600 uppercase mt-0.5">{month}</p>
+                  <p className="text-xs text-brand-500 mt-0.5">{year}</p>
                 </div>
+                {/* Body */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{ev.title}</p>
-                  <p className="text-sm text-gray-500">{ev.is_online ? t('events.online') : ev.city}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-semibold text-sm leading-tight" style={{ color: 'var(--text)' }}>{title}</p>
+                    <span className="text-xs font-medium whitespace-nowrap text-brand-400 shrink-0">
+                      {spots} {L.spots_left}
+                    </span>
+                  </div>
+                  {/* Org + location row */}
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {org?.logo_url && <img src={org.logo_url} alt="" className="w-3.5 h-3.5 rounded object-cover" />}
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {org?.name}{org?.name && (isOnline ? ' · ' : city ? ' · ' : '')}{isOnline ? L.online : city}
+                    </p>
+                  </div>
+                  {/* Description */}
+                  {desc && (
+                    <p className="text-xs mt-1 line-clamp-1" style={{ color: 'var(--text-faint)' }}>{desc}</p>
+                  )}
                 </div>
-                <span className="text-sm text-brand-400 font-medium whitespace-nowrap">
-                  {t('events.spots_left', { count: Math.max(0, spots) })}
-                </span>
               </Link>
             )
           })}
