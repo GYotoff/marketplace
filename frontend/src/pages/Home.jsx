@@ -240,7 +240,7 @@ export default function Home() {
       </section>
 
       {/* ══ Who is it for ════════════════════════════════════════════════════ */}
-      <section className="py-6" style={{ background:'var(--bg-subtle)' }}>
+      <section className="py-5" style={{ background:'var(--bg-subtle)' }}>
         <div className={MAX_W}>
           <h2 className="text-xl font-medium mb-3" style={{ color:'var(--text)' }}>{t('roles.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
