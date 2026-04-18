@@ -71,24 +71,15 @@ export default function Home() {
       .eq('status','published').gte('event_date', now.toISOString()).order('event_date').limit(5)
       .then(({ data }) => data && setEvents(data))
 
-    // Stats — all counters, no date filter needed (all data is current)
-    Promise.all([
-      supabase.from('organizations').select('id',{count:'exact',head:true}).eq('is_active',true),
-      supabase.from('corporations').select('id',{count:'exact',head:true}).eq('is_active',true),
-      supabase.from('profiles').select('id',{count:'exact',head:true}).eq('role','volunteer').eq('is_active',true),
-      // All events (published + completed)
-      supabase.from('events').select('id',{count:'exact',head:true}).in('status',['published','completed']),
-      // All projects ever created
-      supabase.from('projects').select('id',{count:'exact',head:true}),
-      supabase.rpc('get_hours_this_year'),
-    ]).then(([orgs, corps, vols, evts, projs, hrs]) => {
-      setStats({
-        orgs:      orgs.count  || 0,
-        corps:     corps.count || 0,
-        volunteers:vols.count  || 0,
-        events:    evts.count  || 0,
-        projects:  projs.count || 0,
-        hours:     Math.round(hrs.data || 0),
+    // Stats — single RPC to avoid JS client filter quirks
+    supabase.rpc('get_home_stats').then(({ data }) => {
+      if (data) setStats({
+        orgs:       data.orgs       || 0,
+        corps:      data.corps      || 0,
+        volunteers: data.volunteers || 0,
+        events:     data.events     || 0,
+        projects:   data.projects   || 0,
+        hours:      Math.round(data.hours || 0),
       })
     })
 
