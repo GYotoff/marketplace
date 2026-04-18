@@ -1,49 +1,85 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 
 /**
  * ProgressionPopup
- * Reads profile.pending_notifications on mount (and when profile changes).
- * If there are notifications, shows a single combined modal, then clears them.
- * Should be rendered once in Layout.jsx so it's always present.
+ * - On mount: checks profile.pending_notifications (catches login-time notifications)
+ * - Realtime subscription: listens for DB-pushed updates to pending_notifications
+ *   so the popup fires immediately when an org admin confirms attendance,
+ *   without requiring a page refresh.
  */
 export default function ProgressionPopup() {
   const { profile, user, updateProfile } = useAuthStore()
-  const [items,    setItems]   = useState([])
-  const [visible,  setVisible] = useState(false)
+  const [items,   setItems]   = useState([])
+  const [visible, setVisible] = useState(false)
+  const shownRef = useRef(new Set())   // track notification IDs already shown
+
   const lang = typeof window !== 'undefined'
     ? (localStorage.getItem('i18nextLng') === 'bg' ? 'bg' : 'en')
     : 'en'
 
-  useEffect(() => {
-    if (!profile?.pending_notifications) return
-    const notifs = profile.pending_notifications
+  // ── Show notifications and clear from DB ────────────────────────────────────
+  const handleNotifications = async (notifs) => {
     if (!Array.isArray(notifs) || notifs.length === 0) return
 
-    setItems(notifs)
+    // Filter out already-shown ones (guard against duplicate fires)
+    const fresh = notifs.filter(n => !shownRef.current.has(n.id))
+    if (fresh.length === 0) return
+
+    fresh.forEach(n => shownRef.current.add(n.id))
+    setItems(fresh)
     setVisible(true)
 
-    // Clear from DB immediately (fire and forget)
-    supabase.rpc('clear_pending_notifications').then(() => {
-      // Also clear in local store so we don't re-show
-      updateProfile({ pending_notifications: [] }).catch(() => {})
-    })
-  }, [profile?.pending_notifications?.length]) // eslint-disable-line
+    // Clear from DB and local store
+    await supabase.rpc('clear_pending_notifications')
+    updateProfile({ pending_notifications: [] }).catch(() => {})
+  }
+
+  // ── On mount / profile load: check existing pending notifications ────────────
+  useEffect(() => {
+    if (!profile?.pending_notifications?.length) return
+    handleNotifications(profile.pending_notifications)
+  }, [profile?.id]) // Only on profile load, not every render
+
+  // ── Realtime: subscribe to profile row changes ─────────────────────────────
+  useEffect(() => {
+    if (!user?.id) return
+
+    const channel = supabase
+      .channel(`profile-progress-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event:  'UPDATE',
+          schema: 'public',
+          table:  'profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          const notifs = payload.new?.pending_notifications
+          if (notifs?.length > 0) {
+            handleNotifications(notifs)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [user?.id])
 
   const dismiss = () => setVisible(false)
-
   if (!visible || items.length === 0) return null
 
-  // Separate rankings from achievements
   const rankings     = items.filter(i => i.type === 'ranking')
   const achievements = items.filter(i => i.type === 'achievement')
 
   const L = {
-    title:       lang === 'bg' ? '🎉 Нови постижения!' : '🎉 New achievements!',
-    newRanking:  lang === 'bg' ? 'Нов ранг'           : 'New ranking',
-    newAchieve:  lang === 'bg' ? 'Ново постижение'    : 'New achievement',
-    dismiss:     lang === 'bg' ? 'Затвори'             : 'Dismiss',
+    title:      lang === 'bg' ? '🎉 Нови постижения!'  : '🎉 New achievements!',
+    newRanking: lang === 'bg' ? 'Нов ранг'             : 'New ranking',
+    newAchieve: lang === 'bg' ? 'Ново постижение'      : 'New achievement',
+    dismiss:    lang === 'bg' ? 'Затвори'               : 'Dismiss',
+    subtitle:   lang === 'bg' ? 'Вашите усилия дадоха плод!' : 'Your hard work is paying off!',
   }
 
   return (
@@ -59,11 +95,7 @@ export default function ProgressionPopup() {
           style={{ borderBottom: '1px solid var(--border)' }}>
           <p className="text-2xl mb-1">🏆</p>
           <h2 className="text-lg font-bold" style={{ color: 'var(--text)' }}>{L.title}</h2>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-            {lang === 'bg'
-              ? 'Вашите усилия дадоха плод!'
-              : 'Your hard work is paying off!'}
-          </p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{L.subtitle}</p>
         </div>
 
         {/* Items */}
@@ -77,7 +109,9 @@ export default function ProgressionPopup() {
                 ? <img src={item.icon_url} alt={item.name} className="w-14 h-14 object-contain shrink-0" />
                 : <span className="text-4xl">🥇</span>}
               <div className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-widest text-brand-400 mb-0.5">{L.newRanking}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-400 mb-0.5">
+                  {L.newRanking}
+                </p>
                 <p className="font-bold text-base" style={{ color: 'var(--text)' }}>
                   {lang === 'bg' ? (item.name_bg || item.name) : item.name}
                 </p>
@@ -93,7 +127,8 @@ export default function ProgressionPopup() {
             <div key={i} className="flex items-center gap-4 rounded-xl p-3"
               style={{ background: 'rgba(251,191,36,0.07)', border: '1px solid rgba(251,191,36,0.25)' }}>
               {item.icon_url
-                ? <img src={item.icon_url} alt={item.name} className="w-12 h-12 object-contain rounded-lg shrink-0"
+                ? <img src={item.icon_url} alt={item.name}
+                    className="w-12 h-12 object-contain rounded-lg shrink-0"
                     style={{ background: 'var(--bg-subtle)' }} />
                 : <span className="text-4xl shrink-0">🎖️</span>}
               <div className="min-w-0">
