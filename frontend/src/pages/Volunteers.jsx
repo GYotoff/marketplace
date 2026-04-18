@@ -196,7 +196,7 @@ export default function Volunteers() {
                   {achievements.slice(0, 2).map((a, i) => (
                     <div key={i} className="flex items-center gap-1.5">
                       <span>{a.icon || '⭐'}</span>
-                      <span>{lang === 'bg' ? (a.title_bg || a.title) : a.title}</span>
+                      <span>{lang === 'bg' ? (a.name_bg || a.name) : a.name}</span>
                     </div>
                   ))}
                   {achievements.length > 2 && (
