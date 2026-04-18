@@ -5,17 +5,17 @@
 /* ── Theme variables ───────────────────────────────────────────────────────── */
 :root,
 [data-theme="light"] {
-  --bg:           #ffffff;
-  --bg-subtle:    #f9fafb;
+  --bg:           #f8f9fa;
+  --bg-subtle:    #f1f3f5;
   --bg-card:      #ffffff;
-  --border:       #f3f4f6;
-  --border-mid:   #e5e7eb;
+  --border:       #e9ecef;
+  --border-mid:   #dee2e6;
   --text:         #111827;
   --text-muted:   #6b7280;
   --text-faint:   #9ca3af;
   --input-bg:     #ffffff;
-  --shadow:       0 1px 3px rgba(0,0,0,0.08);
-  --hero-gradient: linear-gradient(135deg, #E1F5EE 0%, #ffffff 60%, #ffffff 100%);
+  --shadow:       0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+  --hero-gradient: linear-gradient(135deg, #E1F5EE 0%, #f8f9fa 60%, #f8f9fa 100%);
 }
 
 [data-theme="dark"] {
@@ -35,12 +35,18 @@
 @layer base {
   html {
     background-color: var(--bg);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
   body {
     background-color: var(--bg);
     color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     @apply antialiased;
     transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  /* Enforce Inter on ALL form elements (browsers override these by default) */
+  input, textarea, select, button {
+    font-family: inherit;
   }
 
   /* ── Global dark mode overrides for Tailwind classes ── */
@@ -148,6 +154,7 @@
   .card {
     background-color: var(--bg-card);
     border: 1px solid var(--border);
+    box-shadow: var(--shadow);
     @apply rounded-xl p-5;
   }
   .input {
