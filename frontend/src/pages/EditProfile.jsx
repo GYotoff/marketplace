@@ -96,7 +96,7 @@ export default function EditProfile() {
   const handleSaveProfile = async () => {
     setSaving(true)
     try {
-      await updateProfile({
+      const updates = {
         full_name: form.full_name,
         full_name_bg: form.full_name_bg || null,
         phone: form.phone || null,
@@ -113,7 +113,18 @@ export default function EditProfile() {
         facebook_url: form.facebook_url || null,
         instagram_url: form.instagram_url || null,
         linkedin_url: form.linkedin_url || null,
-      })
+        updated_at: new Date().toISOString(),
+      }
+      // Direct update without relying on .select().single() which can fail when
+      // DB triggers also update the profile row simultaneously
+      const { error: upErr } = await supabase.from('profiles').update(updates).eq('id', user.id)
+      if (upErr) throw upErr
+      // Fresh fetch to sync local state
+      const { data: fresh, error: fetchErr } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      if (!fetchErr && fresh) {
+        const { updateProfile: up } = useAuthStore.getState()
+        useAuthStore.setState({ profile: fresh })
+      }
       flash(lang === 'bg' ? 'Профилът е запазен' : 'Profile saved')
     } catch (e) {
       flash(e.message, 'error')
@@ -185,7 +196,7 @@ export default function EditProfile() {
 
       {/* Header card */}
       <div className="card flex items-center gap-4 mb-6">
-        <AvatarUpload />
+        <AvatarUpload lang={lang} />
         <div className="min-w-0">
           <p className="font-medium text-gray-900 truncate">{displayName}</p>
           <p className="text-sm text-gray-500 truncate">{profile.email}</p>
