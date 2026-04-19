@@ -50,9 +50,16 @@ export default function Corporations() {
 
   useEffect(() => {
     supabase.from('corporations')
-      .select('id, name, slug, description, description_bg, tagline, tagline_bg, logo_url, city, industry, size, is_verified, status')
+      .select('id, name, slug, description, description_bg, tagline, tagline_bg, logo_url, city, website, industry, size, is_verified, status, corporation_members(count)')
       .eq('is_active', true).eq('status', 'approved')
-      .then(({ data }) => { setCorps(data || []); setLoading(false) })
+      .then(({ data }) => {
+        const normalized = (data || []).map(c => ({
+          ...c,
+          member_count: c.corporation_members?.[0]?.count ?? 0,
+        }))
+        setCorps(normalized)
+        setLoading(false)
+      })
   }, [])
 
   const sorted = useMemo(() => {
@@ -105,13 +112,25 @@ export default function Corporations() {
                 <div className="min-w-0">
                   <p className="font-semibold text-sm truncate" style={{ color: 'var(--text)' }}>{corp.name}</p>
                   {corp.city && <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{corp.city}</p>}
+                  {corp.website && (
+                    <a href={corp.website} target="_blank" rel="noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      className="text-xs text-brand-400 hover:text-brand-600 truncate block" style={{ maxWidth: 160 }}>
+                      {corp.website.replace(/^https?:\/\//, '')}
+                    </a>
+                  )}
                 </div>
               </div>
               {tag && <p className="text-xs italic" style={{ color: 'var(--text-muted)' }}>{tag}</p>}
               {desc && <p className="text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--text-muted)' }}>{desc}</p>}
-              <div className="flex gap-1.5 flex-wrap mt-auto">
-                {corp.industry && <span className="badge bg-amber-50 text-amber-700 text-xs">{corp.industry}</span>}
-                {corp.size     && <span className="badge bg-gray-50 text-gray-600 border border-gray-200 text-xs">{SIZE_LABEL[corp.size] || corp.size}</span>}
+              <div className="flex items-center justify-between mt-auto pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+                <div className="flex gap-1.5 flex-wrap">
+                  {corp.industry && <span className="badge bg-amber-50 text-amber-700 text-xs">{corp.industry}</span>}
+                  {corp.size     && <span className="badge bg-gray-50 text-gray-600 border border-gray-200 text-xs">{SIZE_LABEL[corp.size] || corp.size}</span>}
+                </div>
+                {corp.member_count > 0 && (
+                  <span className="text-xs" style={{ color: 'var(--text-faint)' }}>👥 {corp.member_count}</span>
+                )}
               </div>
             </Link>
           )
