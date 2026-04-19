@@ -5,8 +5,8 @@ export default function Footer() {
   const { t } = useTranslation()
   return (
     <footer style={{ background: 'var(--bg-subtle)', borderTop: '1px solid var(--border)', marginTop: '2rem' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <img src="/logo.png" alt="Dataverte" className="h-7 w-7 object-contain rounded-lg" />
