@@ -298,23 +298,26 @@ function CorpDashboard({ profile }) {
 
 
 function SuperAdminDashboard({ profile }) {
-  const { t } = useTranslation()
-  const [counts, setCounts] = useState({ orgPending: 0, orgApproved: 0, corpPending: 0, users: 0, events: 0 })
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
+  const [counts, setCounts] = useState({ orgPending: 0, orgApproved: 0, corpPending: 0, users: 0, volunteers: 0, orgAdmins: 0, corpAdmins: 0 })
 
   useEffect(() => {
     Promise.all([
       supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
       supabase.from('corporations').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-    ]).then(([orgPending, orgApproved, corpPending, users, events]) => {
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'volunteer').eq('is_active', true),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'org_admin').eq('is_active', true),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'corp_admin').eq('is_active', true),
+    ]).then(([orgPending, orgApproved, corpPending, vols, orgAdmins, corpAdmins]) => {
       setCounts({
-        orgPending: orgPending.count || 0,
-        orgApproved: orgApproved.count || 0,
-        corpPending: corpPending.count || 0,
-        users: users.count || 0,
-        events: events.count || 0,
+        orgPending:  orgPending.count   || 0,
+        orgApproved: orgApproved.count  || 0,
+        corpPending: corpPending.count  || 0,
+        volunteers:  vols.count         || 0,
+        orgAdmins:   orgAdmins.count    || 0,
+        corpAdmins:  corpAdmins.count   || 0,
       })
     })
   }, [])
@@ -324,58 +327,63 @@ function SuperAdminDashboard({ profile }) {
   const actions = [
     {
       label: t('dashboard.org_approvals'),
-      desc: counts.orgPending > 0 ? counts.orgPending + ' pending review' : 'No pending requests',
+      desc: counts.orgPending > 0 ? counts.orgPending + (lang === 'bg' ? ' чакат преглед' : ' pending review') : (lang === 'bg' ? 'Няма чакащи заявки' : 'No pending requests'),
       to: '/admin/organizations',
       urgent: counts.orgPending > 0,
       icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
     },
     {
       label: t('dashboard.corp_approvals'),
-      desc: counts.corpPending > 0 ? counts.corpPending + ' pending review' : 'No pending requests',
+      desc: counts.corpPending > 0 ? counts.corpPending + (lang === 'bg' ? ' чакат преглед' : ' pending review') : (lang === 'bg' ? 'Няма чакащи заявки' : 'No pending requests'),
       to: '/admin/corporations',
       urgent: counts.corpPending > 0,
       icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
     },
     {
       label: t('dashboard.entity_management'),
-      desc: counts.users + ' registered',
+      desc: counts.volunteers + (lang === 'bg' ? ' регистрирани' : ' registered'),
       to: '/admin/entities',
       icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
     },
-    {
-      label: t('dashboard.all_events'),
-      desc: counts.events + ' published',
-      to: '/events',
-      icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-    },
+
   ]
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="Pending orgs" value={counts.orgPending} color="amber" />
-        <StatCard label="Pending corps" value={counts.corpPending} color="amber" />
-        <StatCard label="Total users" value={counts.users} color="blue" />
-        <StatCard label="Live events" value={counts.events} color="brand" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <StatCard label={lang === 'bg' ? 'Чакащи организации' : 'Pending orgs'} value={counts.orgPending} color="amber" />
+        <StatCard label={lang === 'bg' ? 'Чакащи корпорации' : 'Pending corps'} value={counts.corpPending} color="amber" />
+        <StatCard label={lang === 'bg' ? 'Общо доброволци' : 'Total volunteers'} value={counts.volunteers} color="brand" />
+        <StatCard label={lang === 'bg' ? 'Админи организации' : 'Org admins'} value={counts.orgAdmins} color="blue" />
+        <StatCard label={lang === 'bg' ? 'Админи корпорации' : 'Corp admins'} value={counts.corpAdmins} color="blue" />
       </div>
 
       {totalPending > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between">
           <p className="text-sm text-amber-700 font-medium">
-            {counts.orgPending > 0 && counts.orgPending + ' org' + (counts.orgPending > 1 ? 's' : '')}
-            {counts.orgPending > 0 && counts.corpPending > 0 && ' and '}
-            {counts.corpPending > 0 && counts.corpPending + ' corporation' + (counts.corpPending > 1 ? 's' : '')}
-            {' waiting for approval'}
+            {lang === 'bg'
+              ? <>
+                  {counts.orgPending > 0 && counts.orgPending + ' организации'}
+                  {counts.orgPending > 0 && counts.corpPending > 0 && ' и '}
+                  {counts.corpPending > 0 && counts.corpPending + ' корпорации'}
+                  {' чакат одобрение'}
+                </>
+              : <>
+                  {counts.orgPending > 0 && counts.orgPending + ' org' + (counts.orgPending > 1 ? 's' : '')}
+                  {counts.orgPending > 0 && counts.corpPending > 0 && ' and '}
+                  {counts.corpPending > 0 && counts.corpPending + ' corporation' + (counts.corpPending > 1 ? 's' : '')}
+                  {' waiting for approval'}
+                </>}
           </p>
           <div className="flex gap-2">
             {counts.orgPending > 0 && (
               <Link to="/admin/organizations" className="text-xs bg-amber-500 text-white px-3 py-1.5 rounded-lg hover:bg-amber-600">
-                Orgs
+                {lang === 'bg' ? 'Организации' : 'Orgs'}
               </Link>
             )}
             {counts.corpPending > 0 && (
               <Link to="/admin/corporations" className="text-xs bg-amber-500 text-white px-3 py-1.5 rounded-lg hover:bg-amber-600">
-                Corps
+                {lang === 'bg' ? 'Корпорации' : 'Corps'}
               </Link>
             )}
           </div>
@@ -383,7 +391,7 @@ function SuperAdminDashboard({ profile }) {
       )}
 
       <div>
-        <h2 className="text-sm font-medium text-gray-700 mb-3">Quick actions</h2>
+        <h2 className="text-sm font-medium text-gray-700 mb-3">{lang === 'bg' ? 'Бързи действия' : 'Quick actions'}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {actions.map(a => (
             <Link key={a.to} to={a.to}
