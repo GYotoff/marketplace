@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useTranslation } from 'react-i18next'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 /** Inline badge upload — picks file, uploads to achievement-badges bucket, returns public URL */
@@ -59,7 +60,7 @@ function BadgeUpload({ currentUrl, onUploaded }) {
           <button type="button" onClick={() => inputRef.current?.click()}
             disabled={uploading}
             className="btn-secondary text-xs py-1.5 px-3 disabled:opacity-50">
-            {uploading ? 'Uploading…' : preview ? 'Change badge' : 'Upload badge'}
+            {uploading ? 'Uploading…' : preview ? lang === 'bg' ? 'Смени значката' : 'Change badge' : lang === 'bg' ? 'Качи значка' : 'Upload badge'}
           </button>
           {preview && (
             <button type="button" onClick={handleRemove}
@@ -88,7 +89,7 @@ function AchievementForm({ initial = EMPTY, onSave, onCancel, saving }) {
   return (
     <div className="card flex flex-col gap-4" style={{ borderColor: 'rgba(29,158,117,0.4)' }}>
       <h4 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-        {initial.id ? 'Edit achievement' : 'New achievement'}
+        {initial.id ? 'Edit achievement' : lang === 'bg' ? 'Ново постижение' : 'New achievement'}
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
@@ -126,7 +127,7 @@ function AchievementForm({ initial = EMPTY, onSave, onCancel, saving }) {
         <button type="button" disabled={!form.name || !form.name_bg || saving}
           onClick={() => onSave(form)}
           className="btn-primary text-sm px-4 disabled:opacity-50">
-          {saving ? 'Saving…' : 'Save achievement'}
+          {saving ? lang === 'bg' ? 'Запазване…' : 'Saving…' : 'Save achievement'}
         </button>
       </div>
     </div>
@@ -134,6 +135,8 @@ function AchievementForm({ initial = EMPTY, onSave, onCancel, saving }) {
 }
 
 export default function AdminAchievements() {
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const { user } = useAuthStore()
   const [rows, setRows]       = useState([])
   const [loading, setLoading] = useState(true)
@@ -174,7 +177,7 @@ export default function AdminAchievements() {
       ;({ error } = await supabase.from('achievements').insert(payload))
     }
     if (error) flash(error.message, 'error')
-    else { flash('Saved!'); setEditing(null); await load() }
+    else { flash(lang === 'bg' ? 'Запазено!' : 'Saved!'); setEditing(null); await load() }
     setSaving(false)
   }
 
@@ -182,12 +185,12 @@ export default function AdminAchievements() {
     setConfirm({
       title: `Delete "${row.name}"?`,
       message: 'This will remove the achievement definition. Volunteers who have this achievement will still have the ID stored on their profile.',
-      confirmLabel: 'Delete',
+      confirmLabel: lang === 'bg' ? 'Изтрий' : 'Delete',
       variant: 'danger',
       onConfirm: async () => {
         const { error } = await supabase.from('achievements').delete().eq('id', row.id)
         if (error) flash(error.message, 'error')
-        else { flash('Deleted'); await load() }
+        else { flash(lang === 'bg' ? 'Изтрито' : 'Deleted'); await load() }
       },
     })
   }
