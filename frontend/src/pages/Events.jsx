@@ -7,7 +7,8 @@ function EventCard({ ev, lang, type }) {
   const title = (lang === 'bg' && ev.title_bg) ? ev.title_bg : ev.title
   const desc  = (lang === 'bg' && ev.description_bg) ? ev.description_bg : ev.description
   const city  = (lang === 'bg' && ev.city_bg) ? ev.city_bg : ev.city
-  const orgName = ev.org_name || ev.organizations?.name
+  const orgName    = ev.org_name || ev.organizations?.name
+  const orgLogoUrl = ev.org_logo_url || ev.organizations?.logo_url
   const dt    = new Date(ev.event_date)
   const isOnline = ev.is_online || ev.event_type === 'online' || ev.event_type === 'hybrid'
 
@@ -51,8 +52,8 @@ function EventCard({ ev, lang, type }) {
             )}
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
-            {ev.organizations?.logo_url && (
-              <img src={ev.organizations.logo_url} alt={orgName} className="w-4 h-4 rounded object-cover shrink-0" />
+            {orgLogoUrl && (
+              <img src={orgLogoUrl} alt={orgName} className="w-4 h-4 rounded object-cover shrink-0" />
             )}
             <p className="text-sm text-gray-500 truncate">
               {orgName}{(orgName && (isOnline ? L.online : city)) ? ' · ' : ''}{isOnline ? L.online : city}
