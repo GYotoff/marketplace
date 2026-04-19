@@ -50,7 +50,16 @@ export default function RegisterCorporation() {
   const [done, setDone] = useState(false)
 
   const [account, setAccount] = useState({ full_name: '', email: '', password: '', confirm: '' })
-  const [corp, setCorp] = useState({ name: '', industry: '', tagline: '', description: '', description_bg: '', founded_year: '', registration_number: '', website: '' })
+  const CORP_SIZES = [
+  { value: 'micro',             label: 'Micro (1–10 employees)' },
+  { value: 'small',             label: 'Small (11–50 employees)' },
+  { value: 'medium',            label: 'Medium (51–200 employees)' },
+  { value: 'large',             label: 'Large (501–1 000 employees)' },
+  { value: 'enterprise',        label: 'Enterprise (1 001–5 000 employees)' },
+  { value: 'global_enterprise', label: 'Global Enterprise (5 000+)' },
+]
+
+const [corp, setCorp] = useState({ name: '', industry: '', size: '', tagline: '', description: '', description_bg: '', founded_year: '', registration_number: '', website: '' })
   const [contact, setContact] = useState({ city: '', address: '', email: '', phone: '', facebook_url: '', instagram_url: '', linkedin_url: '' })
 
   const setA = (k, v) => setAccount(p => ({ ...p, [k]: v }))
@@ -98,6 +107,7 @@ export default function RegisterCorporation() {
         p_name: corp.name,
         p_slug: slugify(corp.name),
         p_industry: corp.industry || null,
+        p_size: corp.size || null,
         p_description: corp.description,
         p_description_bg: corp.description_bg || null,
         p_tagline: corp.tagline || null,
@@ -221,6 +231,13 @@ export default function RegisterCorporation() {
                 </div>
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Company size</label>
+                <select className="input" value={corp.size} onChange={e => setC('size', e.target.value)}>
+                  <option value="">Select size</option>
+                  {CORP_SIZES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Tagline</label>
                 <input type="text" className="input" placeholder="A short slogan or mission" value={corp.tagline} onChange={e => setC('tagline', e.target.value)} />
               </div>
@@ -302,6 +319,7 @@ export default function RegisterCorporation() {
                 {[
                   { label: 'Corporation', value: corp.name },
                   { label: 'Industry', value: corp.industry || '-' },
+                  { label: 'Size', value: corp.size ? CORP_SIZES.find(s => s.value === corp.size)?.label || corp.size : '-' },
                   { label: 'City', value: contact.city },
                   { label: 'Contact email', value: contact.email },
                   { label: 'Website', value: corp.website || '-' },
