@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useTranslation } from 'react-i18next'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 const METRICS = [
@@ -22,7 +23,7 @@ function RuleForm({ initial = EMPTY_FORM, rankings, achievements, onSave, onCanc
   return (
     <div className="card flex flex-col gap-4" style={{ borderColor: 'rgba(29,158,117,0.4)' }}>
       <h4 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-        {initial.id ? 'Edit rule' : 'New rule'}
+        {initial.id ? lang === 'bg' ? 'Редактирай правило' : 'Edit rule' : lang === 'bg' ? 'Ново правило' : 'New rule'}
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
@@ -77,7 +78,7 @@ function RuleForm({ initial = EMPTY_FORM, rankings, achievements, onSave, onCanc
           disabled={!form.entity_id || form.threshold === '' || saving}
           onClick={() => onSave(form)}
           className="btn-primary text-sm px-4 disabled:opacity-50">
-          {saving ? 'Saving…' : 'Save rule'}
+          {saving ? lang === 'bg' ? 'Запазване…' : 'Saving…' : lang === 'bg' ? 'Запази правило' : 'Save rule'}
         </button>
       </div>
     </div>
@@ -85,6 +86,8 @@ function RuleForm({ initial = EMPTY_FORM, rankings, achievements, onSave, onCanc
 }
 
 export default function AdminProgressionRules() {
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const { user } = useAuthStore()
   const [rules,        setRules]    = useState([])
   const [rankings,     setRankings] = useState([])
@@ -132,7 +135,7 @@ export default function AdminProgressionRules() {
       ? await supabase.from('progression_rules').update(payload).eq('id', form.id)
       : await supabase.from('progression_rules').insert(payload)
     if (error) flash(error.message, 'error')
-    else { flash('Saved!'); setEditing(null); await load() }
+    else { flash(lang === 'bg' ? 'Запазено!' : 'Saved!'); setEditing(null); await load() }
     setSaving(false)
   }
 
@@ -143,13 +146,13 @@ export default function AdminProgressionRules() {
 
   const deleteRule = (rule) => {
     setConfirm({
-      title: 'Delete rule?',
+      title: lang === 'bg' ? 'Изтрий правило?' : 'Delete rule?',
       message: `Remove the rule for "${rule.entity_type}" threshold ${rule.operator} ${rule.threshold}?`,
-      confirmLabel: 'Delete',
+      confirmLabel: lang === 'bg' ? 'Изтрий' : 'Delete',
       variant: 'danger',
       onConfirm: async () => {
         await supabase.from('progression_rules').delete().eq('id', rule.id)
-        flash('Deleted')
+        flash(lang === 'bg' ? 'Изтрито' : 'Deleted')
         await load()
       },
     })
@@ -263,7 +266,7 @@ export default function AdminProgressionRules() {
                       <button type="button" onClick={() => toggleActive(rule)}
                         className="text-xs px-2.5 py-1.5 rounded-lg border transition-colors"
                         style={{ borderColor: 'var(--border-mid)', color: 'var(--text-muted)' }}>
-                        {rule.is_active ? 'Pause' : 'Activate'}
+                        {rule.is_active ? lang === 'bg' ? 'Пауза' : 'Pause' : lang === 'bg' ? 'Активирай' : 'Activate'}
                       </button>
                       <button type="button" onClick={() => setEditing(rule)}
                         className="btn-secondary text-xs py-1.5 px-3">Edit</button>
@@ -316,7 +319,7 @@ export default function AdminProgressionRules() {
                       <button type="button" onClick={() => toggleActive(rule)}
                         className="text-xs px-2.5 py-1.5 rounded-lg border transition-colors"
                         style={{ borderColor: 'var(--border-mid)', color: 'var(--text-muted)' }}>
-                        {rule.is_active ? 'Pause' : 'Activate'}
+                        {rule.is_active ? lang === 'bg' ? 'Пауза' : 'Pause' : lang === 'bg' ? 'Активирай' : 'Activate'}
                       </button>
                       <button type="button" onClick={() => setEditing(rule)}
                         className="btn-secondary text-xs py-1.5 px-3">Edit</button>
