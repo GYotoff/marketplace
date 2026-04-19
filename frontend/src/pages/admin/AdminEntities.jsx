@@ -1,5 +1,6 @@
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -37,7 +38,7 @@ async function safeCount(queryFn) {
   }
 }
 
-function VolunteerRow({ user, onToggle, loading }) {
+function VolunteerRow({ user, onToggle, loading, lang }) {
   const initials = (user.full_name?.[0] || user.email?.[0] || '?').toUpperCase()
   return (
     <div className="card flex items-center gap-4 flex-wrap">
@@ -52,21 +53,21 @@ function VolunteerRow({ user, onToggle, loading }) {
       <div className="flex items-center gap-2 shrink-0 flex-wrap">
         <span className="text-xs text-gray-400">{new Date(user.created_at).toLocaleDateString('en-GB')}</span>
         <span className={`badge text-xs px-2 py-0.5 ${user.is_active ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-          {user.is_active ? 'Active' : 'Inactive'}
+          {user.is_active ? (lang === 'bg' ? 'Активен' : 'Active') : (lang === 'bg' ? 'Неактивен' : 'Inactive')}
         </span>
         <span className="badge bg-gray-50 text-gray-500 border border-gray-100 text-xs">
           {ROLE_LABEL[user.role] || user.role}
         </span>
         <button onClick={() => onToggle(user)} disabled={loading === user.id || user.role === 'super_admin'}
           className={`text-xs px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-40 ${user.is_active ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-brand-200 text-brand-600 hover:bg-brand-50'}`}>
-          {loading === user.id ? '…' : user.is_active === true ? 'Deactivate' : 'Activate'}
+          {loading === user.id ? '…' : user.is_active === true ? (lang === 'bg' ? 'Деактивирай' : 'Deactivate') : (lang === 'bg' ? 'Активирай' : 'Activate')}
         </button>
       </div>
     </div>
   )
 }
 
-function EntityRow({ entity, kind, onToggle, loading }) {
+function EntityRow({ entity, kind, onToggle, loading, lang }) {
   const initials = ((entity.name || '?').split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase()) || '?'
   return (
     <div className="card flex items-center gap-4 flex-wrap">
@@ -167,9 +168,9 @@ export default function AdminEntities() {
   const toggleVolunteer = (u) => {
     const newActive = !u.is_active
     setConfirm({
-      title: newActive ? 'Activate volunteer?' : 'Deactivate volunteer?',
+      title: lang === 'bg' ? (newActive ? 'Активирай доброволец?' : 'Деактивирай доброволец?') : (newActive ? 'Activate volunteer?' : 'Deactivate volunteer?'),
       message: u.full_name || u.email,
-      confirmLabel: newActive ? 'Activate' : 'Deactivate',
+      confirmLabel: lang === 'bg' ? (newActive ? 'Активирай' : 'Деактивирай') : (newActive ? 'Activate' : 'Deactivate'),
       variant: newActive ? 'default' : 'danger',
       onConfirm: () => _execToggleVolunteer(u),
     })
@@ -198,9 +199,9 @@ export default function AdminEntities() {
   const toggleEntity = (entity, table) => {
     const newActive = !entity.is_active
     setConfirm({
-      title: newActive ? 'Activate?' : 'Deactivate?',
+      title: lang === 'bg' ? (newActive ? 'Активирай?' : 'Деактивирай?') : (newActive ? 'Activate?' : 'Deactivate?'),
       message: entity.name,
-      confirmLabel: newActive ? 'Activate' : 'Deactivate',
+      confirmLabel: lang === 'bg' ? (newActive ? 'Активирай' : 'Деактивирай') : (newActive ? 'Activate' : 'Deactivate'),
       variant: newActive ? 'default' : 'danger',
       onConfirm: () => _execToggleEntity(entity, table),
     })
@@ -232,9 +233,9 @@ export default function AdminEntities() {
   })
 
   const TABS = [
-    { key: 'volunteers', label: 'Volunteers', count: counts.volunteers },
-    { key: 'organizations', label: 'Organizations', count: counts.organizations },
-    { key: 'corporations', label: 'Corporations', count: counts.corporations },
+    { key: 'volunteers', label: lang === 'bg' ? 'Доброволци' : 'Volunteers', count: counts.volunteers },
+    { key: 'organizations', label: lang === 'bg' ? 'Организации' : 'Organizations', count: counts.organizations },
+    { key: 'corporations', label: lang === 'bg' ? 'Корпорации' : 'Corporations', count: counts.corporations },
   ]
 
   return (
@@ -249,10 +250,10 @@ export default function AdminEntities() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-medium text-gray-900">Entity management</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage access for all platform entities</p>
+          <h1 className="text-2xl font-medium text-gray-900">{lang === 'bg' ? 'Управление на субекти' : 'Entity management'}</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{lang === 'bg' ? 'Управлявай достъпа на всички субекти в платформата' : 'Manage access for all platform entities'}</p>
         </div>
-        <input type="search" placeholder="Search..." className="input sm:w-64"
+        <input type="search" placeholder={lang === 'bg' ? 'Търси...' : 'Search...'} className="input sm:w-64"
           value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
@@ -269,11 +270,11 @@ export default function AdminEntities() {
       <div className="flex gap-2 mb-5">
         {['all', 'active', 'inactive'].map(f => (
           <button key={f} onClick={() => setFilter(f)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors capitalize ${filter === f ? 'bg-brand-400 text-white border-brand-400' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
-            {f}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filter === f ? 'bg-brand-400 text-white border-brand-400' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+            {f === 'all' ? (lang === 'bg' ? 'Всички' : 'All') : f === 'active' ? (lang === 'bg' ? 'Активни' : 'Active') : (lang === 'bg' ? 'Неактивни' : 'Inactive')}
           </button>
         ))}
-        <span className="ml-auto text-xs text-gray-400 self-center">{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
+        <span className="ml-auto text-xs text-gray-400 self-center">{filtered.length} {lang === 'bg' ? 'резултата' : (filtered.length !== 1 ? 'results' : 'result')}</span>
       </div>
 
       {error && (
@@ -285,17 +286,17 @@ export default function AdminEntities() {
           <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 text-sm">No {tab} found{search ? ` matching "${search}"` : ''}.</div>
+        <div className="text-center py-16 text-gray-400 text-sm">{lang === 'bg' ? 'Няма намерени резултати' : `No ${tab} found${search ? ` matching "${search}"` : ''}.`}</div>
       ) : (
         <div className="flex flex-col gap-3">
           {tab === 'volunteers' && filtered.map(u => (
-            <VolunteerRow key={u.id} user={u} onToggle={toggleVolunteer} loading={actionLoading} />
+            <VolunteerRow key={u.id} user={u} onToggle={toggleVolunteer} loading={actionLoading} lang={lang} />
           ))}
           {tab === 'organizations' && filtered.map(e => (
-            <EntityRow key={e.id} entity={e} kind="org" onToggle={e => toggleEntity(e, 'organizations')} loading={actionLoading} />
+            <EntityRow key={e.id} entity={e} kind="org" onToggle={e => toggleEntity(e, 'organizations')} loading={actionLoading} lang={lang} />
           ))}
           {tab === 'corporations' && filtered.map(e => (
-            <EntityRow key={e.id} entity={e} kind="corp" onToggle={e => toggleEntity(e, 'corporations')} loading={actionLoading} />
+            <EntityRow key={e.id} entity={e} kind="corp" onToggle={e => toggleEntity(e, 'corporations')} loading={actionLoading} lang={lang} />
           ))}
         </div>
       )}
