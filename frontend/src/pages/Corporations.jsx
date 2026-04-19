@@ -12,7 +12,7 @@ export default function Corporations() {
   useEffect(() => {
     supabase
       .from('corporations')
-      .select('id, name, slug, description, description_bg, tagline, tagline_bg, logo_url, city, industry, is_verified, status')
+      .select('id, name, slug, description, description_bg, tagline, tagline_bg, logo_url, city, industry, size, is_verified, status')
       .eq('is_active', true)
       .eq('status', 'approved')
       .order('name')
@@ -82,6 +82,12 @@ export default function Corporations() {
               </p>
               {corp.industry && (
                 <span className="badge bg-amber-50 text-amber-700 self-start">{corp.industry}</span>
+              )}
+              {corp.size && (
+                <span className="badge bg-gray-50 text-gray-600 border border-gray-200 self-start text-xs">{{
+                  micro: 'Micro', small: 'Small', medium: 'Medium',
+                  large: 'Large', enterprise: 'Enterprise', global_enterprise: 'Global Enterprise'
+                }[corp.size] || corp.size}</span>
               )}
             </Link>
           )
