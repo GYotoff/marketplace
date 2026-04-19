@@ -97,7 +97,7 @@ export default function Volunteers() {
 
       {/* Sort bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{sorted.length} {lang === 'bg' ? 'доброволци' : 'volunteers'}</p>
+
         <div className="flex gap-1.5 flex-wrap">
           {VOL_SORTS.map(s => (
             <button key={s.key} type="button" onClick={() => setSort(s.key)}
