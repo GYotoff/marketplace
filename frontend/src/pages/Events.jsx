@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -92,6 +92,12 @@ function EventCard({ ev, lang, type }) {
   )
 }
 
+const EVT_SORTS = [
+  { key: 'date',   en: 'By date',       bg: 'По дата' },
+  { key: 'spots',  en: 'Most spots',    bg: 'Повече места' },
+  { key: 'az',     en: 'A → Z',         bg: 'А → Я' },
+]
+
 export default function Events() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
@@ -124,8 +130,13 @@ export default function Events() {
     return title?.toLowerCase().includes(s) || city?.toLowerCase().includes(s) || org.toLowerCase().includes(s)
   }
 
-  const filteredUpcoming = upcoming.filter(filterFn)
-  const filteredPast     = past.filter(filterFn)
+  const applySortFn = (list) => {
+    if (sort === 'spots') return [...list].sort((a,b) => ((b.volunteers_needed||0)-(b.volunteers_enrolled||0)) - ((a.volunteers_needed||0)-(a.volunteers_enrolled||0)))
+    if (sort === 'az')    return [...list].sort((a,b) => (a.title||'').localeCompare(b.title||''))
+    return [...list].sort((a,b) => (a.event_date||'').localeCompare(b.event_date||''))
+  }
+  const filteredUpcoming = applySortFn(upcoming.filter(filterFn))
+  const filteredPast     = applySortFn(past.filter(filterFn))
 
   const L = {
     title:       lang === 'bg' ? 'Събития'             : 'Events',
@@ -137,7 +148,7 @@ export default function Events() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="max-w-7xl mx-auto px-4 py-10">
 
       {/* Page header + single search */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
