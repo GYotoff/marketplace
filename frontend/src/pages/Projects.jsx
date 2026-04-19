@@ -48,7 +48,7 @@ export default function Projects() {
   useEffect(() => {
     supabase
       .from('projects')
-      .select('id, title, title_bg, description, description_bg, cover_url, city, start_date, end_date, volunteers_needed, volunteers_enrolled, status, created_at, organizations(name, slug, logo_url)')
+      .select('id, title, title_bg, description, description_bg, goals, goals_bg, deliverables, deliverables_bg, cover_url, city, start_date, end_date, volunteers_needed, volunteers_enrolled, status, created_at, organizations(name, slug, logo_url)')
       .eq('status', 'published')
       .then(({ data }) => { setProjects(data || []); setLoading(false) })
   }, [])
@@ -73,6 +73,8 @@ export default function Projects() {
     none:     lang === 'bg' ? 'Няма намерени проекти' : 'No projects found',
     projects: lang === 'bg' ? (sorted.length === 1 ? 'проект' : 'проекта') : (sorted.length === 1 ? 'project' : 'projects'),
     spots:    lang === 'bg' ? 'свободни места'     : 'spots left',
+    goals_label: lang === 'bg' ? 'Цели'              : 'Goals',
+    deliv_label: lang === 'bg' ? 'Резултати'         : 'Deliverables',
     org:      lang === 'bg' ? 'Организация'        : 'Organization',
   }
 
@@ -94,10 +96,12 @@ export default function Projects() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {sorted.map(p => {
-          const title = (lang === 'bg' && p.title_bg) ? p.title_bg : p.title
-          const desc  = (lang === 'bg' && p.description_bg) ? p.description_bg : p.description
-          const spots = Math.max(0, (p.volunteers_needed || 0) - (p.volunteers_enrolled || 0))
-          const org   = p.organizations
+          const title       = (lang === 'bg' && p.title_bg)         ? p.title_bg         : p.title
+          const desc        = (lang === 'bg' && p.description_bg)  ? p.description_bg  : p.description
+          const goals       = (lang === 'bg' && p.goals_bg)        ? p.goals_bg        : p.goals
+          const deliverables= (lang === 'bg' && p.deliverables_bg) ? p.deliverables_bg : p.deliverables
+          const spots       = Math.max(0, (p.volunteers_needed || 0) - (p.volunteers_enrolled || 0))
+          const org         = p.organizations
           return (
             <Link key={p.id} to={`/projects/${p.id}`}
               className="card hover:shadow-sm transition-all flex flex-col gap-3">
@@ -112,6 +116,18 @@ export default function Projects() {
               </div>
               <p className="font-semibold text-sm leading-tight" style={{ color: 'var(--text)' }}>{title}</p>
               {desc && <p className="text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--text-muted)' }}>{desc}</p>}
+              {goals && (
+                <div className="flex gap-1.5 items-start">
+                  <span className="text-xs shrink-0" style={{ color: 'var(--text-faint)' }}>🎯</span>
+                  <p className="text-xs line-clamp-2 leading-relaxed" style={{ color: 'var(--text-muted)' }}>{goals}</p>
+                </div>
+              )}
+              {deliverables && (
+                <div className="flex gap-1.5 items-start">
+                  <span className="text-xs shrink-0" style={{ color: 'var(--text-faint)' }}>📦</span>
+                  <p className="text-xs line-clamp-2 leading-relaxed" style={{ color: 'var(--text-muted)' }}>{deliverables}</p>
+                </div>
+              )}
               <div className="flex items-center justify-between mt-auto pt-2" style={{ borderTop: '1px solid var(--border)' }}>
                 <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{p.city || ''}</span>
                 {p.volunteers_needed > 0 && (
