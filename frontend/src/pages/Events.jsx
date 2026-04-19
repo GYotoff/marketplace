@@ -107,6 +107,7 @@ export default function Events() {
   const [loading,      setLoading]     = useState(true)
   const [loadingPast,  setLoadingPast] = useState(true)
   const [search,       setSearch]      = useState('')
+  const [sort,         setSort]        = useState('date')
 
   useEffect(() => {
     supabase.from('events')
