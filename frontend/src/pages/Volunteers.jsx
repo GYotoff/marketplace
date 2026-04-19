@@ -68,9 +68,7 @@ export default function Volunteers() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-medium">{t('nav.volunteers')}</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {sorted.length} {lang === 'bg' ? (sorted.length === 1 ? 'доброволец' : 'доброволци') : (sorted.length === 1 ? 'volunteer' : 'volunteers')}
-          </p>
+
         </div>
         <input
           type="search"
@@ -95,22 +93,31 @@ export default function Volunteers() {
       )}
 
 
-      {/* Sort bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-
-        <div className="flex gap-1.5 flex-wrap">
-          {VOL_SORTS.map(s => (
-            <button key={s.key} type="button" onClick={() => setSort(s.key)}
-              className="text-xs px-3 py-1.5 rounded-lg border transition-colors"
-              style={{
-                borderColor: sort === s.key ? '#1D9E75' : 'var(--border-mid)',
-                background:  sort === s.key ? 'rgba(29,158,117,0.1)' : 'transparent',
-                color:       sort === s.key ? '#1D9E75' : 'var(--text-muted)',
-                fontWeight:  sort === s.key ? 600 : 400,
-              }}>
-              {lang === 'bg' ? s.bg : s.en}
-            </button>
-          ))}
+      {/* Sort bar — matches Organizations page */}
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          {sorted.length} {lang === 'bg' ? (sorted.length === 1 ? 'доброволец' : 'доброволци') : (sorted.length === 1 ? 'volunteer' : 'volunteers')}
+        </p>
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium whitespace-nowrap" style={{ color: 'var(--text-faint)' }}>
+            {lang === 'bg' ? 'Сортирай:' : 'Sort by:'}
+          </label>
+          <select
+            value={sort}
+            onChange={e => setSort(e.target.value)}
+            className="text-xs rounded-lg border px-2.5 py-1.5 pr-7 appearance-none cursor-pointer transition-colors"
+            style={{
+              borderColor: 'var(--border-mid)',
+              background:  'var(--bg-card)',
+              color:       'var(--text)',
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 8px center',
+            }}>
+            {VOL_SORTS.map(s => (
+              <option key={s.key} value={s.key}>{lang === 'bg' ? s.bg : s.en}</option>
+            ))}
+          </select>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -224,17 +231,23 @@ export default function Volunteers() {
                 </div>
               )}
 
-              {/* Achievements */}
+              {/* Achievements — icon badges only */}
               {achievements.length > 0 && (
-                <div className="flex flex-col gap-1 text-xs text-gray-600">
-                  {achievements.slice(0, 2).map((a, i) => (
-                    <div key={i} className="flex items-center gap-1.5">
-                      <span>{a.icon || '⭐'}</span>
-                      <span>{lang === 'bg' ? (a.name_bg || a.name) : a.name}</span>
-                    </div>
+                <div className="flex gap-1.5 flex-wrap">
+                  {achievements.slice(0, 6).map((a, i) => (
+                    <span key={i} title={lang === 'bg' ? (a.name_bg || a.name) : a.name}
+                      className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0"
+                      style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-mid)' }}>
+                      {a.badge_url
+                        ? <img src={a.badge_url} alt="" className="w-full h-full object-contain p-0.5" />
+                        : <span className="text-xs">🎖️</span>}
+                    </span>
                   ))}
-                  {achievements.length > 2 && (
-                    <span className="text-gray-400">+{achievements.length - 2} {lang === 'bg' ? 'още' : 'more'}</span>
+                  {achievements.length > 6 && (
+                    <span className="w-7 h-7 rounded-full flex items-center justify-center text-xs"
+                      style={{ background: 'var(--bg-subtle)', color: 'var(--text-faint)', border: '1px solid var(--border-mid)' }}>
+                      +{achievements.length - 6}
+                    </span>
                   )}
                 </div>
               )}
