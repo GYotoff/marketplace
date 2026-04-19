@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useTranslation } from 'react-i18next'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 /** Inline ranking icon upload — uploads to ranking-icons bucket, returns public URL */
@@ -55,7 +56,7 @@ function RankingIconUpload({ currentUrl, onUploaded }) {
         <div className="flex gap-2">
           <button type="button" onClick={() => inputRef.current?.click()}
             disabled={uploading} className="btn-secondary text-xs py-1.5 px-3 disabled:opacity-50">
-            {uploading ? 'Uploading…' : preview ? 'Change icon' : 'Upload icon'}
+            {uploading ? 'Uploading…' : preview ? lang === 'bg' ? 'Смени иконата' : 'Change icon' : lang === 'bg' ? 'Качи икона' : 'Upload icon'}
           </button>
           {preview && (
             <button type="button" onClick={handleRemove}
@@ -84,7 +85,7 @@ function RankingForm({ initial = EMPTY, onSave, onCancel, saving }) {
   return (
     <div className="card flex flex-col gap-4 border-brand-200" style={{ borderColor: 'rgba(29,158,117,0.4)' }}>
       <h4 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-        {initial.id ? 'Edit ranking' : 'New ranking'}
+        {initial.id ? 'Edit ranking' : lang === 'bg' ? 'Нов ранг' : 'New ranking'}
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
@@ -116,7 +117,7 @@ function RankingForm({ initial = EMPTY, onSave, onCancel, saving }) {
         <button type="button" disabled={!form.type || !form.type_bg || saving}
           onClick={() => onSave(form)}
           className="btn-primary text-sm px-4 disabled:opacity-50">
-          {saving ? 'Saving…' : 'Save ranking'}
+          {saving ? lang === 'bg' ? 'Запазване…' : 'Saving…' : 'Save ranking'}
         </button>
       </div>
     </div>
@@ -124,6 +125,8 @@ function RankingForm({ initial = EMPTY, onSave, onCancel, saving }) {
 }
 
 export default function AdminRankings() {
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const { user } = useAuthStore()
   const [rows, setRows]       = useState([])
   const [loading, setLoading] = useState(true)
@@ -163,7 +166,7 @@ export default function AdminRankings() {
       ;({ error } = await supabase.from('rankings').insert(payload))
     }
     if (error) flash(error.message, 'error')
-    else { flash('Saved!'); setEditing(null); await load() }
+    else { flash(lang === 'bg' ? 'Запазено!' : 'Saved!'); setEditing(null); await load() }
     setSaving(false)
   }
 
@@ -171,12 +174,12 @@ export default function AdminRankings() {
     setConfirm({
       title: `Delete "${row.type}"?`,
       message: 'This will remove the ranking. Volunteers with this rank will keep the ID but it will show as missing.',
-      confirmLabel: 'Delete',
+      confirmLabel: lang === 'bg' ? 'Изтрий' : 'Delete',
       variant: 'danger',
       onConfirm: async () => {
         const { error } = await supabase.from('rankings').delete().eq('id', row.id)
         if (error) flash(error.message, 'error')
-        else { flash('Deleted'); await load() }
+        else { flash(lang === 'bg' ? 'Изтрито' : 'Deleted'); await load() }
       },
     })
   }
