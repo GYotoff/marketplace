@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
-export default function AvatarUpload({ size = 'lg' }) {
+export default function AvatarUpload({ size = 'lg', lang = 'en' }) {
   const { user, profile, updateProfile } = useAuthStore()
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
@@ -145,7 +145,7 @@ export default function AvatarUpload({ size = 'lg' }) {
           disabled={uploading}
           className="text-xs text-brand-400 hover:text-brand-600 font-medium transition-colors"
         >
-          {uploading ? 'Uploading...' : avatarUrl ? 'Change photo' : 'Upload photo'}
+          {uploading ? (lang === 'bg' ? 'Качване...' : 'Uploading...') : avatarUrl ? (lang === 'bg' ? 'Смени снимката' : 'Change photo') : (lang === 'bg' ? 'Качи снимка' : 'Upload photo')}
         </button>
         {avatarUrl && !uploading && (
           <>
@@ -155,7 +155,7 @@ export default function AvatarUpload({ size = 'lg' }) {
               onClick={handleRemove}
               className="text-xs text-red-400 hover:text-red-600 font-medium transition-colors"
             >
-              Remove
+              {lang === 'bg' ? 'Премахни' : 'Remove'}
             </button>
           </>
         )}
