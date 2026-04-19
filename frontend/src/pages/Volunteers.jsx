@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -19,12 +19,20 @@ const RANK_COLOR = {
   Platinum: '#4a90a4',
 }
 
+const VOL_SORTS = [
+  { key: 'az',    en: 'A → Z',          bg: 'А → Я' },
+  { key: 'za',    en: 'Z → A',          bg: 'Я → А' },
+  { key: 'hours', en: 'Most hours',      bg: 'Повече часове' },
+  { key: 'rank',  en: 'By rank',         bg: 'По ранг' },
+]
+
 export default function Volunteers() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [volunteers, setVolunteers] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [sort,    setSort]    = useState('az')
 
   useEffect(() => {
     supabase.rpc('get_public_volunteers')
@@ -35,7 +43,9 @@ export default function Volunteers() {
       })
   }, [])
 
-  const filtered = volunteers.filter(v => {
+  const sorted = useMemo(() => {
+    const RANK_ORDER = { Standard:0, Bronze:1, Silver:2, Gold:3, Platinum:4 }
+    let list = volunteers.filter(v => {
     if (!search) return true
     const s = search.toLowerCase()
     return (
@@ -47,6 +57,11 @@ export default function Volunteers() {
       (v.skills_bg || '').toLowerCase().includes(s)
     )
   })
+    if (sort === 'za')    return [...list].sort((a,b) => (b.full_name||'').localeCompare(a.full_name||''))
+    if (sort === 'hours') return [...list].sort((a,b) => (b.confirmed_hours||0) - (a.confirmed_hours||0))
+    if (sort === 'rank')  return [...list].sort((a,b) => (RANK_ORDER[b.ranking_type]||0) - (RANK_ORDER[a.ranking_type]||0))
+    return [...list].sort((a,b) => (a.full_name||'').localeCompare(b.full_name||''))
+  }, [volunteers, search, sort])
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
@@ -54,7 +69,7 @@ export default function Volunteers() {
         <div>
           <h1 className="text-2xl font-medium">{t('nav.volunteers')}</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {filtered.length} {lang === 'bg' ? (filtered.length === 1 ? 'доброволец' : 'доброволци') : (filtered.length === 1 ? 'volunteer' : 'volunteers')}
+            {sorted.length} {lang === 'bg' ? (sorted.length === 1 ? 'доброволец' : 'доброволци') : (sorted.length === 1 ? 'volunteer' : 'volunteers')}
           </p>
         </div>
         <input
@@ -68,7 +83,7 @@ export default function Volunteers() {
 
       {loading && <p className="text-gray-400">{t('common.loading')}</p>}
 
-      {!loading && filtered.length === 0 && (
+      {!loading && sorted.length === 0 && (
         <div className="text-center py-16">
           <p className="text-gray-400 text-sm mb-4">
             {search
@@ -79,8 +94,27 @@ export default function Volunteers() {
         </div>
       )}
 
+
+      {/* Sort bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{sorted.length} {lang === 'bg' ? 'доброволци' : 'volunteers'}</p>
+        <div className="flex gap-1.5 flex-wrap">
+          {VOL_SORTS.map(s => (
+            <button key={s.key} type="button" onClick={() => setSort(s.key)}
+              className="text-xs px-3 py-1.5 rounded-lg border transition-colors"
+              style={{
+                borderColor: sort === s.key ? '#1D9E75' : 'var(--border-mid)',
+                background:  sort === s.key ? 'rgba(29,158,117,0.1)' : 'transparent',
+                color:       sort === s.key ? '#1D9E75' : 'var(--text-muted)',
+                fontWeight:  sort === s.key ? 600 : 400,
+              }}>
+              {lang === 'bg' ? s.bg : s.en}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filtered.map(v => {
+        {sorted.map(v => {
           const name = (lang === 'bg' ? (v.full_name_bg || v.full_name) : v.full_name) || (lang === 'bg' ? 'Доброволец' : 'Volunteer')
           const city = (lang === 'bg' ? (v.city_bg || v.city) : v.city)
           const country = (lang === 'bg' ? (v.country_bg || v.country) : v.country) || 'Bulgaria'
