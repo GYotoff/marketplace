@@ -47,7 +47,7 @@ export default function About() {
   const c = i18n.language === 'bg' ? CONTENT.bg : CONTENT.en
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-16">
+    <div className="max-w-7xl mx-auto px-4 py-10">
       <div className="text-center mb-12">
         <h1 className="text-3xl font-medium text-gray-900 mb-4">{c.title}</h1>
         <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">{c.subtitle}</p>
