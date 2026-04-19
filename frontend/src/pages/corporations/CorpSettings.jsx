@@ -96,7 +96,16 @@ function SaveBtn({ saving, onSave }) {
   )
 }
 
-const EMPTY = { name: '', industry: '', tagline: '', description: '', description_bg: '', founded_year: '', registration_number: '', city: '', address: '', email: '', phone: '', website: '', facebook_url: '', instagram_url: '', linkedin_url: '', logo_url: '', cover_url: '' }
+const CORP_SIZES = [
+  { value: 'micro',             label: 'Micro (1–10 employees)',             label_bg: 'Микро (1–10 служители)' },
+  { value: 'small',             label: 'Small (11–50 employees)',            label_bg: 'Малка (11–50 служители)' },
+  { value: 'medium',            label: 'Medium (51–200 employees)',          label_bg: 'Средна (51–200 служители)' },
+  { value: 'large',             label: 'Large (501–1 000 employees)',        label_bg: 'Голяма (501–1 000 служители)' },
+  { value: 'enterprise',        label: 'Enterprise (1 001–5 000 employees)', label_bg: 'Корпорация (1 001–5 000 служители)' },
+  { value: 'global_enterprise', label: 'Global Enterprise (5 000+)',         label_bg: 'Глобална корпорация (5 000+)' },
+]
+
+const EMPTY = { name: '', industry: '', size: '', tagline: '', description: '', description_bg: '', founded_year: '', registration_number: '', city: '', address: '', email: '', phone: '', website: '', facebook_url: '', instagram_url: '', linkedin_url: '', logo_url: '', cover_url: '' }
 
 export default function CorpSettings() {
   const { user } = useAuthStore()
@@ -126,7 +135,7 @@ export default function CorpSettings() {
     if (data) {
       setCorp(data)
       setForm({
-        name: data.name || '', industry: data.industry || '', tagline: data.tagline || '',
+        name: data.name || '', industry: data.industry || '', size: data.size || '', tagline: data.tagline || '',
         description: data.description || '', description_bg: data.description_bg || '',
         founded_year: data.founded_year || '', registration_number: data.registration_number || '',
         city: data.city || '', address: data.address || '', email: data.email || '',
@@ -143,7 +152,7 @@ export default function CorpSettings() {
   const save = async () => {
     setSaving(true)
     const { error } = await supabase.from('corporations').update({
-      name: form.name, industry: form.industry || null, tagline: form.tagline || null,
+      name: form.name, industry: form.industry || null, size: form.size || null, tagline: form.tagline || null,
       description: form.description, description_bg: form.description_bg || null,
       founded_year: form.founded_year ? parseInt(form.founded_year) : null,
       registration_number: form.registration_number || null,
@@ -206,6 +215,13 @@ export default function CorpSettings() {
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Founded year</label>
                 <input type="number" className="input" min="1900" max={new Date().getFullYear()} value={form.founded_year} onChange={e => set('founded_year', e.target.value)} />
               </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Company size</label>
+              <select className="input" value={form.size} onChange={e => set('size', e.target.value)}>
+                <option value="">Select size</option>
+                {CORP_SIZES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Tagline</label>
