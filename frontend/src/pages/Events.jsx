@@ -50,9 +50,14 @@ function EventCard({ ev, lang, type }) {
               <span className="badge text-xs bg-gray-100 text-gray-500 shrink-0">{L.completed}</span>
             )}
           </div>
-          <p className="text-sm text-gray-500 mt-0.5 truncate">
-            {orgName}{(orgName && (isOnline ? L.online : city)) ? ' · ' : ''}{isOnline ? L.online : city}
-          </p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            {ev.organizations?.logo_url && (
+              <img src={ev.organizations.logo_url} alt={orgName} className="w-4 h-4 rounded object-cover shrink-0" />
+            )}
+            <p className="text-sm text-gray-500 truncate">
+              {orgName}{(orgName && (isOnline ? L.online : city)) ? ' · ' : ''}{isOnline ? L.online : city}
+            </p>
+          </div>
           {desc && <p className="text-sm text-gray-400 mt-1 line-clamp-1">{desc}</p>}
         </div>
 
@@ -111,7 +116,7 @@ export default function Events() {
 
   useEffect(() => {
     supabase.from('events')
-      .select('id,title,title_bg,description,description_bg,city,city_bg,event_date,volunteers_needed,volunteers_enrolled,is_online,event_type,organizations(name,slug)')
+      .select('id,title,title_bg,description,description_bg,city,city_bg,event_date,volunteers_needed,volunteers_enrolled,is_online,event_type,organizations(name,slug,logo_url)')
       .eq('status', 'published')
       .eq('show_in_public', true)
       .gte('event_date', new Date().toISOString())
