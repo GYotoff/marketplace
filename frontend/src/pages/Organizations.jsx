@@ -10,24 +10,29 @@ const SORTS = [
   { key: 'verified',  en: 'Verified first',  bg: 'Верифицирани' },
 ]
 
-function SortBar({ sort, setSort, lang, total, label }) {
+function SortBar({ sorts, sort, setSort, lang }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{total} {label}</p>
-      <div className="flex gap-1.5 flex-wrap">
-        {SORTS.map(s => (
-          <button key={s.key} type="button" onClick={() => setSort(s.key)}
-            className="text-xs px-3 py-1.5 rounded-lg border transition-colors"
-            style={{
-              borderColor: sort === s.key ? '#1D9E75' : 'var(--border-mid)',
-              background:  sort === s.key ? 'rgba(29,158,117,0.1)' : 'transparent',
-              color:       sort === s.key ? '#1D9E75' : 'var(--text-muted)',
-              fontWeight:  sort === s.key ? 600 : 400,
-            }}>
-            {lang === 'bg' ? s.bg : s.en}
-          </button>
+    <div className="flex items-center gap-2">
+      <label className="text-xs font-medium whitespace-nowrap" style={{ color: 'var(--text-faint)' }}>
+        {lang === 'bg' ? 'Сортирай:' : 'Sort by:'}
+      </label>
+      <select
+        value={sort}
+        onChange={e => setSort(e.target.value)}
+        className="text-xs rounded-lg border px-2.5 py-1.5 pr-7 appearance-none cursor-pointer transition-colors"
+        style={{
+          borderColor: 'var(--border-mid)',
+          background:  'var(--bg-card)',
+          color:       'var(--text)',
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 8px center',
+        }}
+      >
+        {sorts.map(s => (
+          <option key={s.key} value={s.key}>{lang === 'bg' ? s.bg : s.en}</option>
         ))}
-      </div>
+      </select>
     </div>
   )
 }
@@ -75,7 +80,10 @@ export default function Organizations() {
           value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
-      <SortBar sort={sort} setSort={setSort} lang={lang} total={sorted.length} label={L.count} />
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{sorted.length} {L.count}</p>
+        <SortBar sorts={SORTS} sort={sort} setSort={setSort} lang={lang} />
+      </div>
 
       {loading && <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>}
       {!loading && sorted.length === 0 && <p className="text-sm py-8 text-center" style={{ color: 'var(--text-faint)' }}>{L.none}</p>}
