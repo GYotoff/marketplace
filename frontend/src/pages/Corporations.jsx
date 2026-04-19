@@ -129,7 +129,9 @@ export default function Corporations() {
                   {corp.size     && <span className="badge bg-gray-50 text-gray-600 border border-gray-200 text-xs">{SIZE_LABEL[corp.size] || corp.size}</span>}
                 </div>
                 {corp.member_count > 0 && (
-                  <span className="text-xs" style={{ color: 'var(--text-faint)' }}>👥 {corp.member_count}</span>
+                  <span className="text-xs font-medium flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                    👥 {corp.member_count}
+                  </span>
                 )}
               </div>
             </Link>
