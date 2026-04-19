@@ -58,7 +58,7 @@ export default function CorporationPage() {
 
   useEffect(() => {
     if (user && corp) checkMembership()
-  }, [user, corp])
+  }, [user?.id, corp])
 
   const fetchCorp = async () => {
     setLoading(true)
@@ -138,6 +138,14 @@ export default function CorporationPage() {
                 </svg>
               )}
               {corp.industry && <span className="badge bg-amber-50 text-amber-700 text-xs">{corp.industry}</span>}
+              {corp.size && <span className="badge bg-gray-50 text-gray-600 border border-gray-200 text-xs">{{
+                micro:             'Micro',
+                small:             'Small',
+                medium:            'Medium',
+                large:             'Large',
+                enterprise:        'Enterprise',
+                global_enterprise: 'Global Enterprise',
+              }[corp.size] || corp.size}</span>}
             </div>
             {tagline && <p className="text-gray-500 text-sm mb-2">{tagline}</p>}
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
@@ -210,6 +218,14 @@ export default function CorporationPage() {
             <div className="card">
               <h2 className="text-base font-medium text-gray-900 mb-3">Details</h2>
               <InfoRow label="Industry" value={corp.industry} />
+              <InfoRow label="Size" value={corp.size ? ({
+                micro:             'Micro (1–10 employees)',
+                small:             'Small (11–50 employees)',
+                medium:            'Medium (51–200 employees)',
+                large:             'Large (501–1 000 employees)',
+                enterprise:        'Enterprise (1 001–5 000 employees)',
+                global_enterprise: 'Global Enterprise (5 000+)',
+              }[corp.size] || corp.size) : null} />
               <InfoRow label="City" value={corp.city} />
               <InfoRow label="Address" value={corp.address} />
               <InfoRow label="Founded" value={corp.founded_year ? String(corp.founded_year) : null} />
