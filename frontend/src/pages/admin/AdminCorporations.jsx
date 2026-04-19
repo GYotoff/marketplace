@@ -12,7 +12,7 @@ const STATUS_BADGE = {
   suspended: 'bg-gray-100 text-gray-600 border border-gray-200',
 }
 
-function CorpRow({ corp, onAction }) {
+function CorpRow({ corp, onAction, lang = 'en' }) {
   const [note, setNote] = useState('')
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -20,9 +20,9 @@ function CorpRow({ corp, onAction }) {
 
   const confirmHandle = (status) => {
     const cfg = {
-      suspended: { title: 'Suspend?', variant: 'danger', confirm: 'Suspend' },
-      approved:  { title: 'Approve?', variant: 'default', confirm: 'Approve' },
-      declined:  { title: 'Decline?', variant: 'danger', confirm: 'Decline' },
+      suspended: { title: 'Suspend?', variant: 'danger', confirm: lang === 'bg' ? 'Спри' : 'Suspend' },
+      approved:  { title: 'Approve?', variant: 'default', confirm: lang === 'bg' ? 'Одобри' : 'Approve' },
+      declined:  { title: 'Decline?', variant: 'danger', confirm: lang === 'bg' ? 'Откажи' : 'Decline' },
     }[status] || { title: `Set to ${status}?`, variant: 'warning', confirm: 'Confirm' }
     setConfirm({ title: cfg.title, confirmLabel: cfg.confirm, variant: cfg.variant,
       onConfirm: () => handle(status) })
@@ -135,6 +135,8 @@ function CorpRow({ corp, onAction }) {
 }
 
 export default function AdminCorporations() {
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const { user } = useAuthStore()
   const { t } = useTranslation()
   const [corps, setCorps] = useState([])
@@ -219,7 +221,7 @@ export default function AdminCorporations() {
         </div>
         <input
           type="search"
-          placeholder={t('admin.search_placeholder')}
+          placeholder={lang === 'bg' ? 'Търси по име, град или имейл...' : t('admin.search_placeholder')}
           className="input sm:w-64"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -267,7 +269,7 @@ export default function AdminCorporations() {
       ) : (
         <div className="flex flex-col gap-4">
           {filtered.map(corp => (
-            <CorpRow key={corp.id} corp={corp} onAction={handleAction} />
+            <CorpRow lang={lang} key={corp.id} corp={corp} onAction={handleAction} />
           ))}
         </div>
       )}
