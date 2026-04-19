@@ -47,9 +47,17 @@ export default function Organizations() {
 
   useEffect(() => {
     supabase.from('organizations')
-      .select('id,name,slug,description,description_bg,logo_url,city,type,is_verified,created_at')
+      .select('id,name,slug,description,description_bg,tagline,tagline_bg,logo_url,city,website,type,is_verified,created_at,projects(count),events(count)')
       .eq('is_active', true)
-      .then(({ data }) => { setOrgs(data || []); setLoading(false) })
+      .then(({ data }) => {
+        const normalized = (data || []).map(o => ({
+          ...o,
+          project_count: o.projects?.[0]?.count ?? 0,
+          event_count:   o.events?.[0]?.count   ?? 0,
+        }))
+        setOrgs(normalized)
+        setLoading(false)
+      })
   }, [])
 
   const sorted = useMemo(() => {
@@ -94,6 +102,7 @@ export default function Organizations() {
           return (
             <Link key={org.id} to={`/organizations/${org.slug}`}
               className="card hover:shadow-sm transition-all flex flex-col gap-3">
+              {/* Header: logo + name + city + website */}
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 font-semibold text-lg overflow-hidden shrink-0">
                   {org.logo_url ? <img src={org.logo_url} alt={org.name} className="w-full h-full object-cover" /> : org.name[0]}
@@ -101,15 +110,32 @@ export default function Organizations() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="font-semibold text-sm truncate" style={{ color: 'var(--text)' }}>{org.name}</p>
-                    {org.is_verified && <span title="Verified">✓</span>}
+                    {org.is_verified && <span title="Verified" className="text-brand-400 text-xs">✓</span>}
                   </div>
                   {org.city && <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{org.city}</p>}
+                  {org.website && (
+                    <a href={org.website} target="_blank" rel="noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      className="text-xs text-brand-400 hover:text-brand-600 truncate block" style={{ maxWidth: 160 }}>
+                      {org.website.replace(/^https?:\/\//, '')}
+                    </a>
+                  )}
                 </div>
               </div>
+              {/* Tagline */}
+              {(() => { const tag = lang === 'bg' ? (org.tagline_bg || org.tagline) : org.tagline; return tag ? <p className="text-xs italic" style={{ color: 'var(--text-muted)' }}>{tag}</p> : null })()}
+              {/* Description */}
               {desc && <p className="text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--text-muted)' }}>{desc}</p>}
-              {org.type && (
-                <span className="badge bg-blue-50 text-blue-700 self-start text-xs">{org.type}</span>
-              )}
+              {/* Type + counters */}
+              <div className="flex items-center justify-between mt-auto pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+                {org.type
+                  ? <span className="badge bg-blue-50 text-blue-700 text-xs">{org.type}</span>
+                  : <span />}
+                <div className="flex gap-2 text-xs" style={{ color: 'var(--text-faint)' }}>
+                  {(org.project_count > 0) && <span>📋 {org.project_count}</span>}
+                  {(org.event_count > 0)   && <span>📅 {org.event_count}</span>}
+                </div>
+              </div>
             </Link>
           )
         })}
