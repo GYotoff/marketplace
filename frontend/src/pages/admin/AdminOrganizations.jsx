@@ -2,6 +2,7 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 
@@ -18,7 +19,7 @@ const STATUS_BADGE = {
   suspended: 'bg-gray-100 text-gray-600 border border-gray-200',
 }
 
-function OrgRow({ org, onAction }) {
+function OrgRow({ org, onAction, lang = 'en' }) {
   const [note, setNote] = useState('')
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -26,9 +27,9 @@ function OrgRow({ org, onAction }) {
 
   const confirmHandle = (status) => {
     const cfg = {
-      suspended: { title: 'Suspend?', variant: 'danger', confirm: 'Suspend' },
-      approved:  { title: 'Approve?', variant: 'default', confirm: 'Approve' },
-      declined:  { title: 'Decline?', variant: 'danger', confirm: 'Decline' },
+      suspended: { title: 'Suspend?', variant: 'danger', confirm: lang === 'bg' ? 'Спри' : 'Suspend' },
+      approved:  { title: 'Approve?', variant: 'default', confirm: lang === 'bg' ? 'Одобри' : 'Approve' },
+      declined:  { title: 'Decline?', variant: 'danger', confirm: lang === 'bg' ? 'Откажи' : 'Decline' },
     }[status] || { title: `Set to ${status}?`, variant: 'warning', confirm: 'Confirm' }
     setConfirm({ title: cfg.title, confirmLabel: cfg.confirm, variant: cfg.variant,
       onConfirm: () => handle(status) })
@@ -136,6 +137,8 @@ function OrgRow({ org, onAction }) {
 }
 
 export default function AdminOrganizations() {
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const { user, profile } = useAuthStore()
   const [orgs, setOrgs] = useState([])
   const [filter, setFilter] = useState('pending')
@@ -286,7 +289,7 @@ export default function AdminOrganizations() {
       ) : (
         <div className="flex flex-col gap-4">
           {filtered.map(org => (
-            <OrgRow key={org.id} org={org} onAction={handleAction} />
+            <OrgRow lang={lang} key={org.id} org={org} onAction={handleAction} />
           ))}
         </div>
       )}
