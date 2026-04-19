@@ -48,8 +48,10 @@ export default function CorporationPage() {
   const { user } = useAuthStore()
 
   const [corp, setCorp] = useState(null)
-  const [memberCount, setMemberCount] = useState(0)
-  const [memberStatus, setMemberStatus] = useState(null)
+  const [memberCount,    setMemberCount]    = useState(0)
+  const [volunteerHours, setVolunteerHours] = useState(0)
+  const [projectsJoined, setProjectsJoined] = useState(0)
+  const [memberStatus,   setMemberStatus]   = useState(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [tab, setTab] = useState('about')
@@ -67,6 +69,32 @@ export default function CorporationPage() {
     setCorp(data)
     const { count } = await supabase.from('corporation_members').select('id', { count: 'exact', head: true }).eq('corporation_id', data.id).eq('request_status', 'approved')
     setMemberCount(count || 0)
+
+    // Fetch total volunteer hours of all approved members
+    const { data: members } = await supabase
+      .from('corporation_members')
+      .select('profile_id')
+      .eq('corporation_id', data.id)
+      .eq('request_status', 'approved')
+    const memberIds = (members || []).map(m => m.profile_id)
+
+    if (memberIds.length > 0) {
+      const { data: hoursData } = await supabase
+        .from('event_registrations')
+        .select('hours_logged')
+        .in('profile_id', memberIds)
+        .eq('status', 'confirmed')
+      const totalHours = (hoursData || []).reduce((sum, r) => sum + (r.hours_logged || 0), 0)
+      setVolunteerHours(Math.round(totalHours))
+
+      const { count: projCount } = await supabase
+        .from('project_applications')
+        .select('project_id', { count: 'exact', head: true })
+        .in('profile_id', memberIds)
+        .eq('status', 'approved')
+      setProjectsJoined(projCount || 0)
+    }
+
     setLoading(false)
   }
 
@@ -176,9 +204,9 @@ export default function CorporationPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-5 pt-5 border-t border-gray-100">
           {[
-            { label: 'Enrolled members', value: memberCount },
-            { label: 'Volunteer hours', value: 0 },
-            { label: 'Projects joined', value: 0 },
+            { label: i18n.language === 'bg' ? 'Записани членове'        : 'Enrolled members',  value: memberCount    },
+            { label: i18n.language === 'bg' ? 'Доброволчески часове'    : 'Volunteer hours',    value: volunteerHours },
+            { label: i18n.language === 'bg' ? 'Присъединени проекти'    : 'Projects joined',    value: projectsJoined },
           ].map(s => (
             <div key={s.label} className="text-center">
               <p className="text-xl font-semibold text-amber-500">{s.value}</p>
