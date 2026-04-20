@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 
 const CITIES = ['Sofia', 'Plovdiv', 'Varna', 'Burgas', 'Ruse', 'Stara Zagora', 'Pleven', 'Sliven', 'Dobrich', 'Shumen', 'Pernik', 'Haskovo', 'Yambol', 'Pazardzhik', 'Blagoevgrad', 'Veliko Tarnovo', 'Vratsa', 'Gabrovo', 'Vidin', 'Montana', 'Other']
@@ -105,10 +106,12 @@ const CORP_SIZES = [
   { value: 'global_enterprise', label: 'Global Enterprise (5 000+)',         label_bg: 'Глобална корпорация (5 000+)' },
 ]
 
-const EMPTY = { name: '', industry: '', size: '', tagline: '', description: '', description_bg: '', founded_year: '', registration_number: '', city: '', address: '', email: '', phone: '', website: '', facebook_url: '', instagram_url: '', linkedin_url: '', logo_url: '', cover_url: '' }
+const EMPTY = { name: '', name_bg: '', industry: '', size: '', tagline: '', tagline_bg: '', description: '', description_bg: '', founded_year: '', registration_number: '', city: '', city_bg: '', address: '', address_bg: '', email: '', phone: '', website: '', facebook_url: '', instagram_url: '', linkedin_url: '', logo_url: '', cover_url: '' }
 
 export default function CorpSettings() {
   const { user } = useAuthStore()
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [corp, setCorp] = useState(null)
   const [form, setForm] = useState(EMPTY)
   const [loading, setLoading] = useState(true)
@@ -135,10 +138,10 @@ export default function CorpSettings() {
     if (data) {
       setCorp(data)
       setForm({
-        name: data.name || '', industry: data.industry || '', size: data.size || '', tagline: data.tagline || '',
+        name: data.name || '', name_bg: data.name_bg || '', industry: data.industry || '', size: data.size || '', tagline: data.tagline || '', tagline_bg: data.tagline_bg || '',
         description: data.description || '', description_bg: data.description_bg || '',
         founded_year: data.founded_year || '', registration_number: data.registration_number || '',
-        city: data.city || '', address: data.address || '', email: data.email || '',
+        city: data.city || '', city_bg: data.city_bg || '', address: data.address || '', address_bg: data.address_bg || '', email: data.email || '',
         phone: data.phone || '', website: data.website || '',
         facebook_url: data.facebook_url || '', instagram_url: data.instagram_url || '', linkedin_url: data.linkedin_url || '',
         logo_url: data.logo_url || '', cover_url: data.cover_url || '',
@@ -152,11 +155,11 @@ export default function CorpSettings() {
   const save = async () => {
     setSaving(true)
     const { error } = await supabase.from('corporations').update({
-      name: form.name, industry: form.industry || null, size: form.size || null, tagline: form.tagline || null,
+      name: form.name, name_bg: form.name_bg || null, industry: form.industry || null, size: form.size || null, tagline: form.tagline || null, tagline_bg: form.tagline_bg || null,
       description: form.description, description_bg: form.description_bg || null,
       founded_year: form.founded_year ? parseInt(form.founded_year) : null,
       registration_number: form.registration_number || null,
-      city: form.city, address: form.address || null, email: form.email,
+      city: form.city, city_bg: form.city_bg || null, address: form.address || null, address_bg: form.address_bg || null, email: form.email,
       phone: form.phone || null, website: form.website || null,
       facebook_url: form.facebook_url || null, instagram_url: form.instagram_url || null, linkedin_url: form.linkedin_url || null,
       logo_url: form.logo_url || null, cover_url: form.cover_url || null,
@@ -199,9 +202,16 @@ export default function CorpSettings() {
       <div>
         {tab === 'general' && (
           <div className="card flex flex-col gap-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Corporation name <span className="text-red-400">*</span></label>
-              <input type="text" required className="input" value={form.name} onChange={e => set('name', e.target.value)} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Ime на корпорацията (EN)' : 'Corporation name (EN)'} <span className="text-red-400">*</span></label>
+                <input type="text" required className="input" value={form.name} onChange={e => set('name', e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Ime на корпорацията (BG)' : 'Corporation name (BG)'}</label>
+                <input type="text" className="input" placeholder="напр. Мусала Софт"
+                  value={form.name_bg} onChange={e => set('name_bg', e.target.value)} />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -223,9 +233,17 @@ export default function CorpSettings() {
                 {CORP_SIZES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Tagline</label>
-              <input type="text" className="input" value={form.tagline} onChange={e => set('tagline', e.target.value)} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Мото (EN)' : 'Tagline (EN)'}</label>
+                <input type="text" className="input" placeholder="Short mission statement"
+                  value={form.tagline} onChange={e => set('tagline', e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Мото (BG)' : 'Tagline (BG)'}</label>
+                <input type="text" className="input" placeholder="Кратко мото на български"
+                  value={form.tagline_bg} onChange={e => set('tagline_bg', e.target.value)} />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Description (EN) <span className="text-red-400">*</span></label>
@@ -244,22 +262,53 @@ export default function CorpSettings() {
         )}
         {tab === 'contact' && (
           <div className="card flex flex-col gap-5">
-            <div className="grid grid-cols-2 gap-4">
+            {/* City bilingual */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">City</label>
-                <select className="input" value={form.city} onChange={e => set('city', e.target.value)}>
-                  <option value="">Select city</option>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (EN)' : 'City (EN)'}</label>
+                <select className="input" value={form.city}
+                  onChange={e => {
+                    const EN = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other'];
+                    const BG = ['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'];
+                    set('city', e.target.value);
+                    const idx = EN.indexOf(e.target.value);
+                    if (idx >= 0) set('city_bg', BG[idx]);
+                  }}>
+                  <option value="">{lang === 'bg' ? 'Избери' : 'Select city'}</option>
                   {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
-                <input type="tel" className="input" value={form.phone} onChange={e => set('phone', e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (BG)' : 'City (BG)'}</label>
+                <select className="input" value={form.city_bg}
+                  onChange={e => {
+                    const EN = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other'];
+                    const BG = ['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'];
+                    set('city_bg', e.target.value);
+                    const idx = BG.indexOf(e.target.value);
+                    if (idx >= 0) set('city', EN[idx]);
+                  }}>
+                  <option value="">{lang === 'bg' ? 'Избери' : 'Select city'}</option>
+                  {['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+            {/* Address bilingual */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Адрес (EN)' : 'Address (EN)'}</label>
+                <input type="text" className="input" placeholder="e.g. 15 Vitosha Blvd"
+                  value={form.address} onChange={e => set('address', e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Адрес (BG)' : 'Address (BG)'}</label>
+                <input type="text" className="input" placeholder="напр. бул. Витоша 15"
+                  value={form.address_bg} onChange={e => set('address_bg', e.target.value)} />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
-              <input type="text" className="input" value={form.address} onChange={e => set('address', e.target.value)} />
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Телефон' : 'Phone'}</label>
+              <input type="tel" className="input" value={form.phone} onChange={e => set('phone', e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact email <span className="text-red-400">*</span></label>
