@@ -6,8 +6,19 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
 const ROLE_LABEL = {
-  volunteer: 'Volunteer', org_admin: 'Org admin',
-  corp_admin: 'Corp admin', super_admin: 'Platform admin',
+  volunteer:   { en: 'Volunteer',     bg: 'Доброволец' },
+  org_admin:   { en: 'Org admin',     bg: 'Адм. организация' },
+  corp_admin:  { en: 'Corp admin',    bg: 'Адм. корпорация' },
+  super_admin: { en: 'Platform admin',bg: 'Адм. платформа' },
+}
+
+const STATUS_LABEL = {
+  approved:  { en: 'Approved',  bg: 'Одобрен' },
+  pending:   { en: 'Pending',   bg: 'Чакащ' },
+  declined:  { en: 'Declined',  bg: 'Отказан' },
+  suspended: { en: 'Спрян',    bg: 'Спрян' },
+  active:    { en: 'Active',    bg: 'Активен' },
+  inactive:  { en: 'Inactive',  bg: 'Неактивен' },
 }
 
 const TYPE_LABEL = {
@@ -51,12 +62,12 @@ function VolunteerRow({ user, onToggle, loading, lang }) {
         {user.city && <p className="text-xs text-gray-400">{user.city}</p>}
       </div>
       <div className="flex items-center gap-2 shrink-0 flex-wrap">
-        <span className="text-xs text-gray-400">{new Date(user.created_at).toLocaleDateString('en-GB')}</span>
+        <span className="text-xs text-gray-400">{new Date(user.created_at).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB')}</span>
         <span className={`badge text-xs px-2 py-0.5 ${user.is_active ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
           {user.is_active ? (lang === 'bg' ? 'Активен' : 'Active') : (lang === 'bg' ? 'Неактивен' : 'Inactive')}
         </span>
         <span className="badge bg-gray-50 text-gray-500 border border-gray-100 text-xs">
-          {ROLE_LABEL[user.role] || user.role}
+          {ROLE_LABEL[user.role]?.[lang] || user.role}
         </span>
         <button onClick={() => onToggle(user)} disabled={loading === user.id || user.role === 'super_admin'}
           className={`text-xs px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-40 ${user.is_active ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-brand-200 text-brand-600 hover:bg-brand-50'}`}>
@@ -80,19 +91,25 @@ function EntityRow({ entity, kind, onToggle, loading, lang }) {
         {entity.city && <p className="text-xs text-gray-400">{entity.city}</p>}
       </div>
       <div className="flex items-center gap-2 shrink-0 flex-wrap">
-        <span className="text-xs text-gray-400">{new Date(entity.created_at).toLocaleDateString('en-GB')}</span>
+        <span className="text-xs text-gray-400">{new Date(entity.created_at).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB')}</span>
         {entity.type && <span className="badge bg-gray-50 text-gray-500 border border-gray-100 text-xs">{TYPE_LABEL[entity.type] || entity.type}</span>}
-        <span className={`badge text-xs px-2 py-0.5 capitalize ${
+        <span className={`badge text-xs px-2 py-0.5 ${
           entity.status === 'approved' ? 'bg-brand-50 text-brand-700 border border-brand-200' :
           entity.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
           'bg-red-50 text-red-700 border border-red-200'
-        }`}>{entity.status || (entity.is_active ? 'Active' : 'Inactive')}</span>
+        }`}>
+          {entity.status
+            ? (STATUS_LABEL[entity.status]?.[lang] || entity.status)
+            : (entity.is_active ? (lang === 'bg' ? 'Активен' : 'Active') : (lang === 'bg' ? 'Неактивен' : 'Inactive'))}
+        </span>
         {kind === 'org' && entity.slug && (
-          <Link to={`/organizations/${entity.slug}`} className="text-xs text-gray-400 hover:text-brand-400 border border-gray-200 rounded-lg px-2.5 py-1.5">View</Link>
+          <Link to={`/organizations/${entity.slug}`} className="text-xs text-gray-400 hover:text-brand-400 border border-gray-200 rounded-lg px-2.5 py-1.5">
+            {lang === 'bg' ? 'Виж' : 'View'}
+          </Link>
         )}
         <button onClick={() => onToggle(entity)} disabled={loading === entity.id}
           className={`text-xs px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-40 ${entity.is_active ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-brand-200 text-brand-600 hover:bg-brand-50'}`}>
-          {loading === entity.id ? '...' : entity.is_active ? 'Deactivate' : 'Activate'}
+          {loading === entity.id ? '…' : entity.is_active ? (lang === 'bg' ? 'Деактивирай' : 'Deactivate') : (lang === 'bg' ? 'Активирай' : 'Activate')}
         </button>
       </div>
     </div>
@@ -190,7 +207,7 @@ export default function AdminEntities() {
         dataRef.current = next
         return next
       })
-      showToast(`${current.full_name || current.email} ${newActive ? 'activated' : 'deactivated'}`)
+      showToast(`${current.full_name || current.email} ${lang === 'bg' ? (newActive ? 'активиран' : 'деактивиран') : (newActive ? 'activated' : 'deactivated')}`)
       fetchCounts()
     } else {
       showToast(error.message, 'error')
@@ -219,7 +236,7 @@ export default function AdminEntities() {
         dataRef.current = next
         return next
       })
-      showToast(`${current.name} ${newActive ? 'activated' : 'deactivated'}`)
+      showToast(`${current.name} ${lang === 'bg' ? (newActive ? 'активирана' : 'деактивирана') : (newActive ? 'activated' : 'deactivated')}`)
       fetchCounts()
     } else {
       showToast(error.message, 'error')
