@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
+import { validatePhone } from '@/lib/validators'
 import AvatarUpload from '@/components/ui/AvatarUpload'
 
 const BULGARIAN_CITIES = [
@@ -62,6 +63,7 @@ export default function EditProfile() {
   })
   const [pwForm, setPwForm] = useState({ current: '', password: '', confirm: '' })
   const [saving, setSaving] = useState(false)
+  const [phoneError, setPhoneError] = useState(null)
   const [pwSaving, setPwSaving] = useState(false)
   const [mediaLibrary, setMediaLibrary] = useState([])
   const mediaRef = useRef()
@@ -111,7 +113,9 @@ export default function EditProfile() {
     }
     setSaving(true)
     try {
-      const updates = {
+          const phoneErr = validatePhone(form.phone, lang)
+    if (phoneErr) { flash(phoneErr, 'error'); return }
+    const updates = {
         full_name:     form.full_name     || null,
         full_name_bg:  form.full_name_bg  || null,
         phone:         form.phone         || null,
@@ -268,7 +272,9 @@ export default function EditProfile() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Телефон' : 'Phone'}</label>
             <input type="tel" className="input" placeholder="+359 88 123 4567"
-              value={form.phone} onChange={e => set('phone', e.target.value)} />
+              value={form.phone}
+              onChange={e => { set('phone', e.target.value); setPhoneError(validatePhone(e.target.value, lang)) }} />
+            {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
           </div>
 
           {/* City */}
