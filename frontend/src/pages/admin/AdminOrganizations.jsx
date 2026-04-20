@@ -27,9 +27,9 @@ function OrgRow({ org, onAction, lang = 'en' }) {
 
   const confirmHandle = (status) => {
     const cfg = {
-      suspended: { title: 'Suspend?', variant: 'danger', confirm: lang === 'bg' ? 'Спри' : 'Suspend' },
-      approved:  { title: 'Approve?', variant: 'default', confirm: lang === 'bg' ? 'Одобри' : 'Approve' },
-      declined:  { title: 'Decline?', variant: 'danger', confirm: lang === 'bg' ? 'Откажи' : 'Decline' },
+      suspended: { title: lang === 'bg' ? 'Спри организацията?' : 'Suspend?', variant: 'danger', confirm: lang === 'bg' ? 'Спри' : 'Suspend' },
+      approved:  { title: lang === 'bg' ? 'Одобри организацията?' : 'Approve?', variant: 'default', confirm: lang === 'bg' ? 'Одобри' : 'Approve' },
+      declined:  { title: lang === 'bg' ? 'Откажи организацията?' : 'Decline?', variant: 'danger', confirm: lang === 'bg' ? 'Откажи' : 'Decline' },
     }[status] || { title: `Set to ${status}?`, variant: 'warning', confirm: 'Confirm' }
     setConfirm({ title: cfg.title, confirmLabel: cfg.confirm, variant: cfg.variant,
       onConfirm: () => handle(status) })
@@ -63,13 +63,13 @@ function OrgRow({ org, onAction, lang = 'en' }) {
               className="text-xs text-brand-400 hover:underline">{org.website}</a>
           )}
           <p className="text-xs text-gray-400 mt-1">
-            Submitted {new Date(org.created_at).toLocaleDateString('en-GB', {
+            {lang === 'bg' ? 'Подадено' : 'Submitted'} {new Date(org.created_at).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', {
               day: 'numeric', month: 'short', year: 'numeric'
             })}
-            {org.admin_name && ` by ${org.admin_name} (${org.admin_email})`}
+            {org.admin_name && (lang === 'bg' ? ` от ${org.admin_name} (${org.admin_email})` : ` by ${org.admin_name} (${org.admin_email})`)}
           </p>
           {org.review_note && (
-            <p className="text-xs text-gray-500 mt-1 italic">Note: {org.review_note}</p>
+            <p className="text-xs text-gray-500 mt-1 italic">{lang === 'bg' ? 'Бележка' : 'Note'}: {org.review_note}</p>
           )}
         </div>
 
@@ -77,19 +77,19 @@ function OrgRow({ org, onAction, lang = 'en' }) {
           {org.status === 'pending' && (
             <button onClick={() => setOpen(!open)}
               className="btn-primary text-xs py-1.5">
-              {open ? 'Cancel' : 'Review'}
+              {open ? (lang === 'bg' ? 'Отказ' : 'Cancel') : (lang === 'bg' ? 'Преглед' : 'Review')}
             </button>
           )}
           {org.status === 'approved' && (
             <button onClick={() => confirmHandle('suspended')} disabled={loading}
               className="text-xs border border-red-200 text-red-600 hover:bg-red-50 rounded-lg px-3 py-1.5">
-              Suspend
+              {lang === 'bg' ? 'Спри' : 'Suspend'}
             </button>
           )}
           {(org.status === 'declined' || org.status === 'suspended') && (
             <button onClick={() => confirmHandle('approved')} disabled={loading}
               className="btn-primary text-xs py-1.5">
-              Re-approve
+              {lang === 'bg' ? 'Одобри отново' : 'Re-approve'}
             </button>
           )}
         </div>
@@ -104,7 +104,7 @@ function OrgRow({ org, onAction, lang = 'en' }) {
 
       {/* Registration number */}
       {org.registration_number && (
-        <p className="text-xs text-gray-400">Registration №: {org.registration_number}</p>
+        <p className="text-xs text-gray-400">{lang === 'bg' ? 'Рег. №' : 'Registration №'}: {org.registration_number}</p>
       )}
 
       {/* Review panel */}
@@ -112,7 +112,7 @@ function OrgRow({ org, onAction, lang = 'en' }) {
         <div className="border-t border-gray-100 pt-4 flex flex-col gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1.5">
-              Review note <span className="text-gray-400 font-normal">(optional — visible to org admin)</span>
+              {lang === 'bg' ? 'Бележка при преглед' : 'Review note'} <span className="text-gray-400 font-normal">{lang === 'bg' ? '(незадължително — видима за администратора на организацията)' : '(optional — visible to org admin)'}</span>
             </label>
             <textarea rows={2} className="input resize-none text-sm"
               placeholder="e.g. Registration approved. Welcome to Dataverte!"
@@ -122,11 +122,11 @@ function OrgRow({ org, onAction, lang = 'en' }) {
             <button onClick={() => confirmHandle('approved')} disabled={loading}
               className="btn-primary text-sm flex items-center gap-1.5">
               {loading && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-              ✓ Approve
+              ✓ {lang === 'bg' ? 'Одобри' : 'Approve'}
             </button>
             <button onClick={() => confirmHandle('declined')} disabled={loading}
               className="border border-red-200 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm">
-              ✗ Decline
+              ✗ {lang === 'bg' ? 'Откажи' : 'Decline'}
             </button>
           </div>
         </div>
@@ -215,11 +215,11 @@ export default function AdminOrganizations() {
   )
 
   const FILTERS = [
-    { key: 'pending', label: 'Pending' },
-    { key: 'approved', label: 'Approved' },
-    { key: 'declined', label: 'Declined' },
-    { key: 'suspended', label: 'Suspended' },
-    { key: 'all', label: 'All' },
+    { key: 'pending', label: lang === 'bg' ? 'Чакащи' : 'Pending' },
+    { key: 'approved', label: lang === 'bg' ? 'Одобрени' : 'Approved' },
+    { key: 'declined', label: lang === 'bg' ? 'Отказани' : 'Declined' },
+    { key: 'suspended', label: lang === 'bg' ? 'Спрени' : 'Suspended' },
+    { key: 'all', label: lang === 'bg' ? 'Всички' : 'All' },
   ]
 
   return (
@@ -228,14 +228,14 @@ export default function AdminOrganizations() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-medium text-gray-900">Organization approvals</h1>
+          <h1 className="text-2xl font-medium text-gray-900">{lang === 'bg' ? 'Одобрения на организации' : 'Organization approvals'}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Review and approve organization registration requests
+            {lang === 'bg' ? 'Преглед и одобрение на заявки за регистрация на организации' : 'Review and approve organization registration requests'}
           </p>
         </div>
         <input
           type="search"
-          placeholder="Search by name, city or email..."
+          placeholder={lang === 'bg' ? 'Търси по име, град или имейл...' : 'Search by name, city or email...'}
           className="input sm:w-64"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -246,7 +246,7 @@ export default function AdminOrganizations() {
       {(counts.pending || 0) > 0 && filter !== 'pending' && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5 flex items-center justify-between">
           <p className="text-sm text-amber-700">
-            <span className="font-medium">{counts.pending}</span> organization{counts.pending > 1 ? 's' : ''} waiting for approval
+            <span className="font-medium">{counts.pending}</span> {lang === 'bg' ? (counts.pending > 1 ? 'организации чакат одобрение' : 'организация чака одобрение') : (counts.pending > 1 ? 'organizations waiting for approval' : 'organization waiting for approval')}
           </p>
           <button onClick={() => setFilter('pending')} className="text-xs text-amber-700 font-medium underline">
             View pending →
@@ -283,7 +283,7 @@ export default function AdminOrganizations() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-gray-400 text-sm">
-            {search ? 'No results match your search.' : `No ${filter === 'all' ? '' : filter} organizations.`}
+            {search ? (lang === 'bg' ? 'Няма резултати.' : 'No results match your search.') : (lang === 'bg' ? 'Няма организации.' : `No ${filter === 'all' ? '' : filter} organizations.`)}
           </p>
         </div>
       ) : (
