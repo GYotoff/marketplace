@@ -127,6 +127,19 @@ const TABS = [
   { key: 'images', label: 'Logo & Cover' },
 ]
 
+
+const UIC_RE = /^(?:\d{9}|\d{13})$/
+
+const validateUIC = (val, lang) => {
+  if (!val) return null  // empty is allowed (optional field)
+  if (!UIC_RE.test(val.trim())) {
+    return lang === 'bg'
+      ? 'Невалиден ЕИК/Булстат. Трябва да съдържа 9 или 13 цифри.'
+      : 'Invalid UIC/Bulstat. Must be exactly 9 or 13 digits.'
+  }
+  return null
+}
+
 export default function OrgSettings() {
   const { user } = useAuthStore()
   const { i18n } = useTranslation()
@@ -136,6 +149,7 @@ export default function OrgSettings() {
   const [form, setForm] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uicError, setUicError] = useState(null)
   const [tab, setTab] = useState('general')
   const [toast, setToast] = useState(null)
   const [userRole, setUserRole] = useState(null)
@@ -201,6 +215,8 @@ export default function OrgSettings() {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const handleSave = async () => {
+    const uicErr = validateUIC(form.registration_number, lang)
+    if (uicErr) { showToast(uicErr, 'error'); return }
     setSaving(true)
     const { error } = await supabase
       .from('organizations')
@@ -365,7 +381,9 @@ export default function OrgSettings() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Registration number</label>
               <input type="text" className="input" placeholder="UIC / Булстат"
-                value={form.registration_number} onChange={e => set('registration_number', e.target.value)} />
+                value={form.registration_number}
+                onChange={e => { set('registration_number', e.target.value); setUicError(validateUIC(e.target.value, lang)) }} />
+              {uicError && <p className="text-xs text-red-500 mt-1">{uicError}</p>}
             </div>
 
             <SaveButton saving={saving} onSave={handleSave} />
