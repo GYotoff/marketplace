@@ -103,37 +103,47 @@ export default function EditProfile() {
 
   // ── Save personal info ─────────────────────────────────────────────────────
   const handleSaveProfile = async () => {
+    // Always read user id from store directly to avoid stale closures
+    const currentUser = useAuthStore.getState().user
+    if (!currentUser?.id) {
+      flash(lang === 'bg' ? 'Не сте влезли в профила си' : 'Not authenticated', 'error')
+      return
+    }
     setSaving(true)
     try {
       const updates = {
-        full_name: form.full_name,
-        full_name_bg: form.full_name_bg || null,
-        phone: form.phone || null,
-        bio: form.bio || null,
-        bio_bg: form.bio_bg || null,
-        city: form.city || null,
-        city_bg: form.city_bg || null,
-        country_bg: form.country_bg || null,
-        birth_year: form.birth_year ? parseInt(form.birth_year) : null,
-        gender: form.gender || null,
-        availability: form.availability,
-        skills: form.skills || null,
-        skills_bg: form.skills_bg || null,
-        facebook_url: form.facebook_url || null,
+        full_name:     form.full_name     || null,
+        full_name_bg:  form.full_name_bg  || null,
+        phone:         form.phone         || null,
+        bio:           form.bio           || null,
+        bio_bg:        form.bio_bg        || null,
+        city:          form.city          || null,
+        city_bg:       form.city_bg       || null,
+        country_bg:    form.country_bg    || null,
+        birth_year:    form.birth_year    ? parseInt(form.birth_year) : null,
+        gender:        form.gender        || null,
+        availability:  form.availability,
+        skills:        form.skills        || null,
+        skills_bg:     form.skills_bg     || null,
+        facebook_url:  form.facebook_url  || null,
         instagram_url: form.instagram_url || null,
-        linkedin_url: form.linkedin_url || null,
-        updated_at: new Date().toISOString(),
+        linkedin_url:  form.linkedin_url  || null,
       }
-      // Direct update without relying on .select().single() which can fail when
-      // DB triggers also update the profile row simultaneously
-      const { error: upErr } = await supabase.from('profiles').update(updates).eq('id', user.id)
+      const { error: upErr } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', currentUser.id)
       if (upErr) throw upErr
-      // Don't force-sync store here — the Supabase Realtime subscription
-      // in authStore will update profile automatically. Forcing setState
-      // here was triggering the useEffect form-reset loop.
+      // Fetch fresh data to sync ViewProfile without resetting the edit form
+      const { data: fresh } = await supabase
+        .from('profiles').select('*').eq('id', currentUser.id).single()
+      if (fresh) {
+        // Bypass formInitialized guard — update store directly
+        useAuthStore.setState({ profile: fresh })
+      }
       flash(lang === 'bg' ? 'Профилът е запазен' : 'Profile saved')
     } catch (e) {
-      flash(e.message, 'error')
+      flash(e.message || String(e), 'error')
     }
     setSaving(false)
   }
