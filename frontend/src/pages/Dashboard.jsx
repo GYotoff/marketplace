@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
+import RankingBadge from '@/components/ui/RankingBadge'
 
 function StatCard({ label, value, color = 'brand' }) {
   return (
@@ -19,6 +20,7 @@ function VolunteerDashboard({ profile }) {
   const [applications,   setApplications]   = useState([])
   const [registrations,  setRegistrations]  = useState([])
   const [corpMembership, setCorpMembership] = useState(null)
+  const [ranking,        setRanking]        = useState(null)
 
   useEffect(() => {
     supabase.from('project_applications').select('*, projects(title, organizations(name))').eq('profile_id', profile.id)
@@ -26,6 +28,11 @@ function VolunteerDashboard({ profile }) {
     // Use RPC to bypass RLS — fetches all registered events including completed ones
     supabase.rpc('get_volunteer_registered_events')
       .then(({ data }) => setRegistrations(data || []))
+    if (profile.ranking_id) {
+      supabase.from('rankings').select('id,type,type_bg,icon_url,message,message_bg')
+        .eq('id', profile.ranking_id).single()
+        .then(({ data }) => { if (data) setRanking(data) })
+    }
     supabase.from('corporation_members')
       .select('request_status, reviewed_at, corporations(id, name, slug, logo_url, city, industry)')
       .eq('profile_id', profile.id)
@@ -92,7 +99,38 @@ function VolunteerDashboard({ profile }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* ── Ranking card ── */}
+      {ranking && (
+        <div className="card flex items-center gap-4">
+          <RankingBadge
+            rankingType={ranking.type}
+            rankingTypeBg={ranking.type_bg}
+            iconUrl={ranking.icon_url}
+            size="lg"
+            lang={lang}
+          />
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-wide mb-0.5" style={{ color: 'var(--text-faint)' }}>
+              {lang === 'bg' ? 'Вашият ранг' : 'Your ranking'}
+            </p>
+            <p className="font-semibold text-base" style={{ color: 'var(--text)' }}>
+              {lang === 'bg' ? (ranking.type_bg || ranking.type) : ranking.type}
+            </p>
+            {(lang === 'bg' ? (ranking.message_bg || ranking.message) : ranking.message) && (
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                {lang === 'bg' ? (ranking.message_bg || ranking.message) : ranking.message}
+              </p>
+            )}
+            {profile.ranking_date && (
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
+                {lang === 'bg' ? 'От' : 'Since'}: {new Date(profile.ranking_date).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB')}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label={L.project_applications} value={applications.length} />
         <StatCard label={L.event_registrations}  value={registrations.length} />
         <StatCard label={L.hours_logged}          value={registrations.reduce((s, r) => s + (r.hours_logged || 0), 0)} />
