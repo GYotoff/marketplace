@@ -261,15 +261,12 @@ export default function ViewProfile() {
 
       {/* ── Personal Information ── */}
       <Section title={L.personal}>
-        <Row label={L.nameEN} value={nameEN} />
-        <Row label={L.nameBG} value={nameBG} />
+        <Row label={lang === 'bg' ? 'Пълно име' : 'Full name'} value={lang === 'bg' ? (nameBG || nameEN) : nameEN} />
         <Row label={L.birth_l} value={profile.birth_year} />
         <Row label={L.gender_l}>{profile.gender ? GENDER_LABEL[profile.gender]?.[lang] || profile.gender : null}</Row>
         <Row label={L.phone_l} value={profile.phone} />
-        <Row label={L.cityEN}   value={profile.city}     />
-        <Row label={L.cityBG}   value={profile.city_bg}  />
-        <Row label={L.countryEN} value={profile.country} />
-        <Row label={L.countryBG} value={profile.country_bg} />
+        <Row label={lang === 'bg' ? 'Град' : 'City'} value={lang === 'bg' ? (profile.city_bg || profile.city) : profile.city} />
+        <Row label={lang === 'bg' ? 'Държава' : 'Country'} value={lang === 'bg' ? (profile.country_bg || profile.country) : profile.country} />
         {isVolunteer && (
           <Row label={L.vol_type}>
             {profile.volunteer_type === 'corporate' ? L.corporate : L.freelancer}
@@ -314,13 +311,8 @@ export default function ViewProfile() {
       {/* ── About me ── */}
       <Section title={L.bio_section} empty={!profile.bio && !profile.bio_bg}>
         {profile.bio && (
-          <Row label={L.bioEN}>
-            <p className="leading-relaxed whitespace-pre-line">{profile.bio}</p>
-          </Row>
-        )}
-        {profile.bio_bg && (
-          <Row label={L.bioBG}>
-            <p className="leading-relaxed whitespace-pre-line">{profile.bio_bg}</p>
+          <Row label={lang === 'bg' ? 'За мен' : 'About me'}>
+            <p className="leading-relaxed whitespace-pre-line">{lang === 'bg' ? (profile.bio_bg || profile.bio) : profile.bio}</p>
           </Row>
         )}
       </Section>
@@ -328,16 +320,9 @@ export default function ViewProfile() {
       {/* ── Skills ── */}
       <Section title={L.skills_s} empty={!profile.skills && !profile.skills_bg}>
         {profile.skills && (
-          <Row label={L.skillsEN}>
+          <Row label={lang === 'bg' ? 'Умения' : 'Skills'}>
             <div className="flex flex-wrap gap-1">
-              {profile.skills.split(',').map(s => s.trim()).filter(Boolean).map((s, i) => <GrayChip key={i} label={s} />)}
-            </div>
-          </Row>
-        )}
-        {profile.skills_bg && (
-          <Row label={L.skillsBG}>
-            <div className="flex flex-wrap gap-1">
-              {profile.skills_bg.split(',').map(s => s.trim()).filter(Boolean).map((s, i) => <GrayChip key={i} label={s} />)}
+              {(lang === 'bg' ? (profile.skills_bg || profile.skills) : profile.skills).split(',').map(s => s.trim()).filter(Boolean).map((s, i) => <GrayChip key={i} label={s} />)}
             </div>
           </Row>
         )}
