@@ -48,7 +48,7 @@ export default function Projects() {
   useEffect(() => {
     supabase
       .from('projects')
-      .select('id, title, title_bg, description, description_bg, goals, goals_bg, deliverables, deliverables_bg, cover_url, city, start_date, end_date, volunteers_needed, volunteers_enrolled, status, created_at, organizations(name, slug, logo_url)')
+      .select('id, title, title_bg, description, description_bg, goals, goals_bg, deliverables, deliverables_bg, cover_url, city, city_bg, address, address_bg, start_date, end_date, volunteers_needed, volunteers_enrolled, status, created_at, organizations(name, slug, logo_url)')
       .eq('status', 'published')
       .then(({ data }) => { setProjects(data || []); setLoading(false) })
   }, [])
@@ -129,7 +129,7 @@ export default function Projects() {
                 </div>
               )}
               <div className="flex items-center justify-between mt-auto pt-2" style={{ borderTop: '1px solid var(--border)' }}>
-                <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{p.city || ''}</span>
+                <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{(lang === 'bg' ? (p.city_bg || p.city) : p.city) || ''}</span>
                 {p.volunteers_needed > 0 && (
                   <span className="text-xs font-medium text-brand-400">{spots} {L.spots}</span>
                 )}
