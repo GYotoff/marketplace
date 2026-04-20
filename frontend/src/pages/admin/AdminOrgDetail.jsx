@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { validatePhone } from '@/lib/validators'
 import { useAuthStore } from '@/store/authStore'
 
 const ORG_TYPES = [
@@ -66,6 +67,7 @@ export default function AdminOrgDetail() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uicError, setUicError] = useState(null)
+  const [phoneError, setPhoneError] = useState(null)
   const [tab, setTab] = useState('overview')
   const [toast, setToast] = useState(null)
 
@@ -440,7 +442,9 @@ export default function AdminOrgDetail() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
               <input type="tel" className="input"
-                value={form.phone} onChange={e => set('phone', e.target.value)} />
+                value={form.phone}
+                onChange={e => { set('phone', e.target.value); setPhoneError(validatePhone(e.target.value, 'en')) }} />
+              {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
