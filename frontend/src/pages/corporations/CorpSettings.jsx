@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { validatePhone } from '@/lib/validators'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 
@@ -130,6 +131,7 @@ export default function CorpSettings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uicError, setUicError] = useState(null)
+  const [phoneError, setPhoneError] = useState(null)
   const [tab, setTab] = useState('general')
   const [toast, setToast] = useState(null)
 
@@ -167,6 +169,8 @@ export default function CorpSettings() {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const save = async () => {
+        const phoneErr = validatePhone(form.phone, lang)
+    if (phoneErr) { flash(phoneErr, 'error'); return }
     const uicErr = validateUIC(form.registration_number, lang)
     if (uicErr) { flash(uicErr, 'error'); return }
     setSaving(true)
@@ -327,7 +331,9 @@ export default function CorpSettings() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Телефон' : 'Phone'}</label>
-              <input type="tel" className="input" value={form.phone} onChange={e => set('phone', e.target.value)} />
+              <input type="tel" className="input" value={form.phone}
+                onChange={e => { set('phone', e.target.value); setPhoneError(validatePhone(e.target.value, lang)) }} />
+              {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact email <span className="text-red-400">*</span></label>
