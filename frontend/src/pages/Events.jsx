@@ -7,7 +7,7 @@ function EventCard({ ev, lang, type }) {
   const title = (lang === 'bg' && ev.title_bg) ? ev.title_bg : ev.title
   const desc  = (lang === 'bg' && ev.description_bg) ? ev.description_bg : ev.description
   const city  = (lang === 'bg' && ev.city_bg) ? ev.city_bg : ev.city
-  const orgName    = ev.org_name || ev.organizations?.name
+  const orgName    = lang==='bg' ? (ev.org_name_bg||ev.org_name||ev.organizations?.name_bg||ev.organizations?.name) : (ev.org_name||ev.organizations?.name)
   const orgLogoUrl = ev.org_logo_url || ev.organizations?.logo_url
   const dt    = new Date(ev.event_date)
   const isOnline = ev.is_online || ev.event_type === 'online' || ev.event_type === 'hybrid'
@@ -117,7 +117,7 @@ export default function Events() {
 
   useEffect(() => {
     supabase.from('events')
-      .select('id,title,title_bg,description,description_bg,city,city_bg,event_date,volunteers_needed,volunteers_enrolled,is_online,event_type,organizations(name,slug,logo_url)')
+      .select('id,title,title_bg,description,description_bg,city,city_bg,event_date,volunteers_needed,volunteers_enrolled,is_online,event_type,organizations(name,name_bg,slug,logo_url)')
       .eq('status', 'published')
       .eq('show_in_public', true)
       .gte('event_date', new Date().toISOString())
