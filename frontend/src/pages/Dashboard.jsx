@@ -415,7 +415,8 @@ function SuperAdminDashboard({ profile }) {
 
 export default function Dashboard() {
   const { profile } = useAuthStore()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
 
   if (!profile) return null
 
@@ -437,7 +438,7 @@ export default function Dashboard() {
     <div className="max-w-5xl mx-auto px-4 py-10">
       <div className="mb-8">
         <h1 className="text-2xl font-medium text-gray-900">
-          {greeting()}, {profile.full_name?.split(' ')[0] || 'there'} 👋
+          {greeting()}, {(lang === 'bg' ? (profile.full_name_bg || profile.full_name) : profile.full_name)?.split(' ')[0] || (lang === 'bg' ? 'там' : 'there')} 👋
         </h1>
         <p className="text-gray-500 text-sm mt-1">
           {t('dashboard.signed_in_as')} <span className="font-medium text-gray-700">{ROLE_LABELS[profile.role] || profile.role}</span>
