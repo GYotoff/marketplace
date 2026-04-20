@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 /** Inline ranking icon upload — uploads to ranking-icons bucket, returns public URL */
-function RankingIconUpload({ currentUrl, onUploaded }) {
+function RankingIconUpload({ currentUrl, onUploaded, lang = 'en' }) {
   const { user } = useAuthStore()
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview]     = useState(currentUrl || null)
@@ -78,14 +78,14 @@ function RankingIconUpload({ currentUrl, onUploaded }) {
 
 const EMPTY = { type: '', type_bg: '', message: '', message_bg: '', icon_url: '' }
 
-function RankingForm({ initial = EMPTY, onSave, onCancel, saving }) {
+function RankingForm({ initial = EMPTY, onSave, onCancel, saving, lang = 'en' }) {
   const [form, setForm] = useState(initial)
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   return (
     <div className="card flex flex-col gap-4 border-brand-200" style={{ borderColor: 'rgba(29,158,117,0.4)' }}>
       <h4 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-        {initial.id ? 'Edit ranking' : lang === 'bg' ? 'Нов ранг' : 'New ranking'}
+        {initial.id ? (lang === 'bg' ? 'Редактирай ранг' : 'Edit ranking') : (lang === 'bg' ? 'Нов ранг' : 'New ranking')}
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
@@ -109,6 +109,7 @@ function RankingForm({ initial = EMPTY, onSave, onCancel, saving }) {
           <RankingIconUpload
             currentUrl={form.icon_url || ''}
             onUploaded={url => set('icon_url', url)}
+            lang={lang}
           />
         </div>
       </div>
@@ -117,7 +118,7 @@ function RankingForm({ initial = EMPTY, onSave, onCancel, saving }) {
         <button type="button" disabled={!form.type || !form.type_bg || saving}
           onClick={() => onSave(form)}
           className="btn-primary text-sm px-4 disabled:opacity-50">
-          {saving ? lang === 'bg' ? 'Запазване…' : 'Saving…' : 'Save ranking'}
+          {saving ? (lang === 'bg' ? 'Запазване…' : 'Saving…') : (lang === 'bg' ? 'Запази ранг' : 'Save ranking')}
         </button>
       </div>
     </div>
