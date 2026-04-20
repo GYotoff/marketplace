@@ -196,9 +196,9 @@ export default function AdminProgressionRules() {
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>Progression rules</h1>
+          <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Правила за прогрес' : 'Progression rules'}</h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Define when rankings and achievements are automatically awarded to volunteers
+            {lang === 'bg' ? 'Определя кога рангове и постижения се присъждат автоматично на доброволци' : 'Define when rankings and achievements are automatically awarded to volunteers'}
           </p>
         </div>
         {editing !== 'new' && (
@@ -210,12 +210,12 @@ export default function AdminProgressionRules() {
 
       {/* Metric legend */}
       <div className="card mb-6 mt-4 p-4">
-        <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-faint)' }}>Available metrics</p>
+        <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-faint)' }}>{lang === 'bg' ? 'Налични метрики' : 'Available metrics'}</p>
         <div className="grid grid-cols-2 gap-x-6 gap-y-1">
           {METRICS.map(m => (
             <div key={m.key} className="flex items-start gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
               <code className="font-mono text-brand-400">{m.key}</code>
-              <span>— {m.label}</span>
+              <span>— {lang === 'bg' ? m.labelBg : m.label}</span>
             </div>
           ))}
         </div>
@@ -229,13 +229,13 @@ export default function AdminProgressionRules() {
         </div>
       )}
 
-      {loading && <p className="text-sm" style={{ color: 'var(--text-faint)' }}>Loading…</p>}
+      {loading && <p className="text-sm" style={{ color: 'var(--text-faint)' }}>{lang === 'bg' ? 'Зареждане…' : 'Loading…'}</p>}
 
       {/* Ranking rules */}
       {rankingRules.length > 0 && (
         <section className="mb-6">
           <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-faint)' }}>
-            Ranking rules ({rankingRules.length})
+            {lang === 'bg' ? `Правила за рангове (${rankingRules.length})` : `Ranking rules (${rankingRules.length})`}
           </p>
           <div className="flex flex-col gap-2">
             {rankingRules.map(rule => (
@@ -269,7 +269,7 @@ export default function AdminProgressionRules() {
                         {rule.is_active ? lang === 'bg' ? 'Пауза' : 'Pause' : lang === 'bg' ? 'Активирай' : 'Activate'}
                       </button>
                       <button type="button" onClick={() => setEditing(rule)}
-                        className="btn-secondary text-xs py-1.5 px-3">Edit</button>
+                        className="btn-secondary text-xs py-1.5 px-3">{lang === 'bg' ? 'Редактирай' : 'Edit'}</button>
                       <button type="button" onClick={() => deleteRule(rule)}
                         className="text-xs px-2.5 py-1.5 rounded-lg border transition-colors"
                         style={{ borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
@@ -288,7 +288,7 @@ export default function AdminProgressionRules() {
       {achievementRules.length > 0 && (
         <section>
           <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-faint)' }}>
-            Achievement rules ({achievementRules.length})
+            {lang === 'bg' ? `Правила за постижения (${achievementRules.length})` : `Achievement rules (${achievementRules.length})`}
           </p>
           <div className="flex flex-col gap-2">
             {achievementRules.map(rule => (
@@ -322,7 +322,7 @@ export default function AdminProgressionRules() {
                         {rule.is_active ? lang === 'bg' ? 'Пауза' : 'Pause' : lang === 'bg' ? 'Активирай' : 'Activate'}
                       </button>
                       <button type="button" onClick={() => setEditing(rule)}
-                        className="btn-secondary text-xs py-1.5 px-3">Edit</button>
+                        className="btn-secondary text-xs py-1.5 px-3">{lang === 'bg' ? 'Редактирай' : 'Edit'}</button>
                       <button type="button" onClick={() => deleteRule(rule)}
                         className="text-xs px-2.5 py-1.5 rounded-lg border transition-colors"
                         style={{ borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
