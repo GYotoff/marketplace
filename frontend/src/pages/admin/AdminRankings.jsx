@@ -15,9 +15,9 @@ function RankingIconUpload({ currentUrl, onUploaded, lang = 'en' }) {
   const handleFile = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 2 * 1024 * 1024) { setError('Max 2 MB'); return }
+    if (file.size > 2 * 1024 * 1024) { setError(lang === 'bg' ? 'Макс. 2 МБ' : 'Max 2 MB'); return }
     if (!['image/png','image/jpeg','image/webp','image/svg+xml'].includes(file.type)) {
-      setError('PNG, JPG, WebP or SVG only'); return
+      setError(lang === 'bg' ? 'Само PNG, JPG, WebP или SVG' : 'PNG, JPG, WebP or SVG only'); return
     }
     setError('')
     setUploading(true)
@@ -174,7 +174,7 @@ export default function AdminRankings() {
   const deleteRow = (row) => {
     setConfirm({
       title: `Delete "${row.type}"?`,
-      message: 'This will remove the ranking. Volunteers with this rank will keep the ID but it will show as missing.',
+      message: lang === 'bg' ? 'Рангът ще бъде премахнат. Доброволците с този ранг ще запазят ID-то, но то ще се показва като липсващо.' : 'This will remove the ranking. Volunteers with this rank will keep the ID but it will show as missing.',
       confirmLabel: lang === 'bg' ? 'Изтрий' : 'Delete',
       variant: 'danger',
       onConfirm: async () => {
@@ -197,7 +197,7 @@ export default function AdminRankings() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>Rankings</h1>
+          <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Рангове' : 'Rankings'}</h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>Manage volunteer ranking tiers and their icons</p>
         </div>
         {editing !== 'new' && (
@@ -246,7 +246,7 @@ export default function AdminRankings() {
                 {/* Actions */}
                 <div className="flex gap-2 shrink-0">
                   <button type="button" onClick={() => setEditing(row)}
-                    className="btn-secondary text-xs py-1.5 px-3">Edit</button>
+                    className="btn-secondary text-xs py-1.5 px-3">{lang === 'bg' ? 'Редактирай' : 'Edit'}</button>
                   <button type="button" onClick={() => deleteRow(row)}
                     className="text-xs px-3 py-1.5 rounded-lg border transition-colors"
                     style={{ borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
