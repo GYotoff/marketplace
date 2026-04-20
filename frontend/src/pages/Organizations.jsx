@@ -47,7 +47,7 @@ export default function Organizations() {
 
   useEffect(() => {
     supabase.from('organizations')
-      .select('id,name,slug,description,description_bg,tagline,tagline_bg,logo_url,city,website,type,is_verified,created_at,projects(count),events(count)')
+      .select('id,name,name_bg,slug,description,description_bg,tagline,tagline_bg,logo_url,city,city_bg,website,type,is_verified,created_at,projects(count),events(count)')
       .eq('is_active', true)
       .then(({ data }) => {
         const normalized = (data || []).map(o => ({
@@ -109,10 +109,10 @@ export default function Organizations() {
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="font-semibold text-sm truncate" style={{ color: 'var(--text)' }}>{org.name}</p>
+                    <p className="font-semibold text-sm truncate" style={{ color: 'var(--text)' }}>{lang === 'bg' ? (org.name_bg || org.name) : org.name}</p>
                     {org.is_verified && <span title="Verified" className="text-brand-400 text-xs">✓</span>}
                   </div>
-                  {org.city && <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{org.city}</p>}
+                  {(org.city || org.city_bg) && <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{lang === 'bg' ? (org.city_bg || org.city) : org.city}</p>}
                   {org.website && (
                     <a href={org.website} target="_blank" rel="noreferrer"
                       onClick={e => e.stopPropagation()}
