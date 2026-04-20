@@ -15,9 +15,9 @@ function BadgeUpload({ currentUrl, onUploaded, lang = 'en' }) {
   const handleFile = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 2 * 1024 * 1024) { setError('Max 2 MB'); return }
+    if (file.size > 2 * 1024 * 1024) { setError(lang === 'bg' ? 'Макс. 2 МБ' : 'Max 2 MB'); return }
     if (!['image/png','image/jpeg','image/webp','image/svg+xml'].includes(file.type)) {
-      setError('PNG, JPG, WebP or SVG only'); return
+      setError(lang === 'bg' ? 'Само PNG, JPG, WebP или SVG' : 'PNG, JPG, WebP or SVG only'); return
     }
     setError('')
     setUploading(true)
@@ -185,7 +185,7 @@ export default function AdminAchievements() {
   const deleteRow = (row) => {
     setConfirm({
       title: `Delete "${row.name}"?`,
-      message: 'This will remove the achievement definition. Volunteers who have this achievement will still have the ID stored on their profile.',
+      message: lang === 'bg' ? 'Постижението ще бъде премахнато. Доброволците, които го имат, ще запазят ID-то в профила си.' : 'This will remove the achievement definition. Volunteers who have this achievement will still have the ID stored on their profile.',
       confirmLabel: lang === 'bg' ? 'Изтрий' : 'Delete',
       variant: 'danger',
       onConfirm: async () => {
@@ -213,7 +213,7 @@ export default function AdminAchievements() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>Achievements</h1>
+          <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Постижения' : 'Achievements'}</h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
             Define achievement badges that can be awarded to volunteers · {rows.length} total
           </p>
