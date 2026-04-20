@@ -108,6 +108,19 @@ const CORP_SIZES = [
 
 const EMPTY = { name: '', name_bg: '', industry: '', size: '', tagline: '', tagline_bg: '', description: '', description_bg: '', founded_year: '', registration_number: '', city: '', city_bg: '', address: '', address_bg: '', email: '', phone: '', website: '', facebook_url: '', instagram_url: '', linkedin_url: '', logo_url: '', cover_url: '' }
 
+
+const UIC_RE = /^(?:\d{9}|\d{13})$/
+
+const validateUIC = (val, lang) => {
+  if (!val) return null  // empty is allowed (optional field)
+  if (!UIC_RE.test(val.trim())) {
+    return lang === 'bg'
+      ? 'Невалиден ЕИК/Булстат. Трябва да съдържа 9 или 13 цифри.'
+      : 'Invalid UIC/Bulstat. Must be exactly 9 or 13 digits.'
+  }
+  return null
+}
+
 export default function CorpSettings() {
   const { user } = useAuthStore()
   const { i18n } = useTranslation()
@@ -116,6 +129,7 @@ export default function CorpSettings() {
   const [form, setForm] = useState(EMPTY)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uicError, setUicError] = useState(null)
   const [tab, setTab] = useState('general')
   const [toast, setToast] = useState(null)
 
@@ -153,6 +167,8 @@ export default function CorpSettings() {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const save = async () => {
+    const uicErr = validateUIC(form.registration_number, lang)
+    if (uicErr) { flash(uicErr, 'error'); return }
     setSaving(true)
     const { error } = await supabase.from('corporations').update({
       name: form.name, name_bg: form.name_bg || null, industry: form.industry || null, size: form.size || null, tagline: form.tagline || null, tagline_bg: form.tagline_bg || null,
@@ -255,7 +271,10 @@ export default function CorpSettings() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Registration number</label>
-              <input type="text" className="input" placeholder="UIC / Bulstat" value={form.registration_number} onChange={e => set('registration_number', e.target.value)} />
+              <input type="text" className="input" placeholder="UIC / Булстат"
+                value={form.registration_number}
+                onChange={e => { set('registration_number', e.target.value); setUicError(validateUIC(e.target.value, lang)) }} />
+              {uicError && <p className="text-xs text-red-500 mt-1">{uicError}</p>}
             </div>
             <SaveBtn saving={saving} onSave={save} />
           </div>
