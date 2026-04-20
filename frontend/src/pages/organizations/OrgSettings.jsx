@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
+import { validatePhone } from '@/lib/validators'
 import { useAuthStore } from '@/store/authStore'
 
 const BULGARIAN_CITIES = [
@@ -150,6 +151,7 @@ export default function OrgSettings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uicError, setUicError] = useState(null)
+  const [phoneError, setPhoneError] = useState(null)
   const [tab, setTab] = useState('general')
   const [toast, setToast] = useState(null)
   const [userRole, setUserRole] = useState(null)
@@ -215,6 +217,8 @@ export default function OrgSettings() {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const handleSave = async () => {
+        const phoneErr = validatePhone(form.phone, lang)
+    if (phoneErr) { showToast(phoneErr, 'error'); return }
     const uicErr = validateUIC(form.registration_number, lang)
     if (uicErr) { showToast(uicErr, 'error'); return }
     setSaving(true)
@@ -442,7 +446,9 @@ export default function OrgSettings() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Телефон' : 'Phone'}</label>
               <input type="tel" className="input" placeholder="+359 2 123 4567"
-                value={form.phone} onChange={e => set('phone', e.target.value)} />
+                value={form.phone}
+                onChange={e => { set('phone', e.target.value); setPhoneError(validatePhone(e.target.value, lang)) }} />
+              {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
             </div>
 
             <div>
