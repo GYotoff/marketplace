@@ -284,7 +284,7 @@ export default function ProjectPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                {project.city}{project.address ? ', ' + project.address : ''}
+                {(lang === 'bg' ? (project.city_bg || project.city) : project.city)}{(lang === 'bg' ? (project.address_bg || project.address) : project.address) ? ', ' + (lang === 'bg' ? (project.address_bg || project.address) : project.address) : ''}
               </div>
             )}
             {project.start_date && (
