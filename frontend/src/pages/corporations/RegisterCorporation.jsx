@@ -59,8 +59,8 @@ export default function RegisterCorporation() {
   { value: 'global_enterprise', label: 'Global Enterprise (5 000+)' },
 ]
 
-const [corp, setCorp] = useState({ name: '', industry: '', size: '', tagline: '', description: '', description_bg: '', founded_year: '', registration_number: '', website: '' })
-  const [contact, setContact] = useState({ city: '', address: '', email: '', phone: '', facebook_url: '', instagram_url: '', linkedin_url: '' })
+const [corp, setCorp] = useState({ name: '', industry: '', size: '', tagline: '', tagline_bg: '', description: '', description_bg: '', founded_year: '', registration_number: '', website: '' })
+  const [contact, setContact] = useState({ city: '', city_bg: '', address: '', address_bg: '', email: '', phone: '', facebook_url: '', instagram_url: '', linkedin_url: '' })
 
   const setA = (k, v) => setAccount(p => ({ ...p, [k]: v }))
   const setC = (k, v) => setCorp(p => ({ ...p, [k]: v }))
@@ -105,16 +105,20 @@ const [corp, setCorp] = useState({ name: '', industry: '', size: '', tagline: ''
 
       const { error: rpcError } = await supabase.rpc('register_corporation', {
         p_name: corp.name,
+        p_name_bg: corp.name_bg || null,
         p_slug: slugify(corp.name),
         p_industry: corp.industry || null,
         p_size: corp.size || null,
         p_description: corp.description,
         p_description_bg: corp.description_bg || null,
         p_tagline: corp.tagline || null,
+        p_tagline_bg: corp.tagline_bg || null,
         p_founded_year: corp.founded_year ? parseInt(corp.founded_year) : null,
         p_registration_number: corp.registration_number || null,
         p_city: contact.city,
+        p_city_bg: contact.city_bg || null,
         p_address: contact.address || null,
+        p_address_bg: contact.address_bg || null,
         p_website: corp.website || null,
         p_email: contact.email,
         p_phone: contact.phone || null,
