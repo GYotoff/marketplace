@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
@@ -42,11 +43,27 @@ function StepIndicator({ current }) {
   )
 }
 
+
+const UIC_RE = /^(?:\d{9}|\d{13})$/
+
+const validateUIC = (val, lang) => {
+  if (!val) return null  // empty is allowed (optional field)
+  if (!UIC_RE.test(val.trim())) {
+    return lang === 'bg'
+      ? 'Невалиден ЕИК/Булстат. Трябва да съдържа 9 или 13 цифри.'
+      : 'Invalid UIC/Bulstat. Must be exactly 9 or 13 digits.'
+  }
+  return null
+}
+
 export default function RegisterCorporation() {
   const { user } = useAuthStore()
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [error, setError] = useState('')
+  const [uicCorpError, setUicCorpError] = useState(null)
   const [done, setDone] = useState(false)
 
   const [account, setAccount] = useState({ full_name: '', email: '', password: '', confirm: '' })
@@ -80,6 +97,8 @@ const [corp, setCorp] = useState({ name: '', industry: '', size: '', tagline: ''
     }
     if (step === 2) {
       if (!contact.city) { setError('City is required'); return false }
+      const uicErr = validateUIC(corp.registration_number, lang)
+      if (uicErr) { setError(uicErr); return false }
       if (!contact.email.trim()) { setError('Contact email is required'); return false }
     }
     return true
@@ -255,7 +274,10 @@ const [corp, setCorp] = useState({ name: '', industry: '', size: '', tagline: ''
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Registration number</label>
-                <input type="text" className="input" placeholder="UIC / Bulstat" value={corp.registration_number} onChange={e => setC('registration_number', e.target.value)} />
+                <input type="text" className="input" placeholder="UIC / Булстат"
+                  value={corp.registration_number}
+                  onChange={e => { setC('registration_number', e.target.value); setUicCorpError(validateUIC(e.target.value, lang)) }} />
+                {uicCorpError && <p className="text-xs text-red-500 mt-1">{uicCorpError}</p>}
               </div>
             </div>
           )}
