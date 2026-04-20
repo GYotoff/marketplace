@@ -128,12 +128,12 @@ export default function OrgDashboard() {
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 font-semibold text-xl shrink-0">
             {org.logo_url
-              ? <img src={org.logo_url} alt={org.name} className="w-14 h-14 rounded-xl object-cover" />
+              ? <img src={org.logo_url} alt={lang === 'bg' ? (org.name_bg || org.name) : org.name} className="w-14 h-14 rounded-xl object-cover" />
               : org.name[0]
             }
           </div>
           <div>
-            <h1 className="text-xl font-medium text-gray-900">{org.name}</h1>
+            <h1 className="text-xl font-medium text-gray-900">{lang === 'bg' ? (org.name_bg || org.name) : org.name}</h1>
             <p className={`text-sm font-medium capitalize ${statusColor[org.status]}`}>{org.status}</p>
             {org.status === 'pending' && (
               <p className="text-xs text-amber-600 mt-0.5">Awaiting portal admin approval before going live</p>
