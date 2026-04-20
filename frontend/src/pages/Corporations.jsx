@@ -50,7 +50,7 @@ export default function Corporations() {
 
   useEffect(() => {
     supabase.from('corporations')
-      .select('id, name, slug, description, description_bg, tagline, tagline_bg, logo_url, city, website, industry, size, is_verified, status, corporation_members(count)')
+      .select('id, name, name_bg, slug, description, description_bg, tagline, tagline_bg, logo_url, city, city_bg, website, industry, size, is_verified, status, corporation_members(count)')
       .eq('is_active', true).eq('status', 'approved')
       .then(({ data }) => {
         const normalized = (data || []).map(c => ({
@@ -110,8 +110,8 @@ export default function Corporations() {
                   {corp.logo_url ? <img src={corp.logo_url} alt={corp.name} className="w-full h-full object-cover" /> : corp.name[0]}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-sm truncate" style={{ color: 'var(--text)' }}>{corp.name}</p>
-                  {corp.city && <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{corp.city}</p>}
+                  <p className="font-semibold text-sm truncate" style={{ color: 'var(--text)' }}>{lang === 'bg' ? (corp.name_bg || corp.name) : corp.name}</p>
+                  {(corp.city || corp.city_bg) && <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{lang === 'bg' ? (corp.city_bg || corp.city) : corp.city}</p>}
                   {corp.website && (
                     <a href={corp.website} target="_blank" rel="noreferrer"
                       onClick={e => e.stopPropagation()}
