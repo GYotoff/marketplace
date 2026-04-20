@@ -292,7 +292,7 @@ export default function VolunteerCalendar() {
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">{L.past}</p>
               {pastRegs.slice(0, 5).map(reg => (
-                <div key={reg.id} className="card mb-2 opacity-60">
+                <div key={reg.id} className="card mb-2" style={{ borderLeft: '3px solid var(--border-mid)' }}>
                   <p className="text-sm text-gray-600 truncate">{reg.events?.title}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{reg.events?.event_date ? fmtShort(reg.events.event_date) : ''}</p>
                   {(reg.events?.city || reg.events?.address) && (
@@ -309,11 +309,11 @@ export default function VolunteerCalendar() {
       {detail && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setDetail(null)}>
           <div className="absolute inset-0 bg-black/40" />
-          <div className="relative rounded-2xl shadow-xl w-full max-w-md p-6 z-10" onClick={e => e.stopPropagation()}>
+          <div className="relative rounded-2xl shadow-xl w-full max-w-md p-6 z-10" onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-card)', color: 'var(--text)' }}>
             <div className="flex items-start justify-between mb-4">
               <div>
                 <Link to={'/events/' + detail.events?.id} onClick={() => setDetail(null)}
-                  className="text-lg font-medium text-gray-900 hover:text-brand-600 hover:underline pr-4 block">
+                  className="text-lg font-medium hover:text-brand-600 hover:underline pr-4 block" style={{ color: 'var(--text)' }}>
                   {detail.events?.title}
                 </Link>
                 {detail.events?.projects?.title && (
