@@ -43,6 +43,19 @@ function Field({ label, value }) {
   )
 }
 
+
+const UIC_RE = /^(?:\d{9}|\d{13})$/
+
+const validateUIC = (val, lang) => {
+  if (!val) return null  // empty is allowed (optional field)
+  if (!UIC_RE.test(val.trim())) {
+    return lang === 'bg'
+      ? 'Невалиден ЕИК/Булстат. Трябва да съдържа 9 или 13 цифри.'
+      : 'Invalid UIC/Bulstat. Must be exactly 9 or 13 digits.'
+  }
+  return null
+}
+
 export default function AdminOrgDetail() {
   const { id } = useParams()
   const { user } = useAuthStore()
@@ -52,6 +65,7 @@ export default function AdminOrgDetail() {
   const [auditLog, setAuditLog] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uicError, setUicError] = useState(null)
   const [tab, setTab] = useState('overview')
   const [toast, setToast] = useState(null)
 
@@ -388,7 +402,9 @@ export default function AdminOrgDetail() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Registration №</label>
               <input type="text" className="input"
-                value={form.registration_number} onChange={e => set('registration_number', e.target.value)} />
+                value={form.registration_number}
+                onChange={e => { set('registration_number', e.target.value); setUicError(validateUIC(e.target.value, 'en')) }} />
+              {uicError && <p className="text-xs text-red-500 mt-1">{uicError}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Tagline (EN)</label>
