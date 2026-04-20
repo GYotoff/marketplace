@@ -65,9 +65,9 @@ export default function RegisterOrganization() {
 
   // Organization data
   const [org, setOrg] = useState({
-    name: '', type: 'ngo', description: '', description_bg: '',
+    name: '', name_bg: '', type: 'ngo', description: '', description_bg: '',
     tagline: '', founded_year: '', registration_number: '',
-    city: '', address: '', website: '',
+    city: '', city_bg: '', address: '', address_bg: '', website: '',
     email: '', phone: '',
     facebook_url: '', instagram_url: '', linkedin_url: '',
   })
@@ -122,6 +122,7 @@ export default function RegisterOrganization() {
       // Step 2+3+4: Create org, add member, update role — all in one SECURITY DEFINER function
       const { data: orgId, error: rpcError } = await supabase.rpc('register_organization', {
         p_name: org.name,
+        p_name_bg: org.name_bg || null,
         p_slug: slugify(org.name),
         p_type: org.type,
         p_description: org.description,
@@ -130,7 +131,9 @@ export default function RegisterOrganization() {
         p_founded_year: org.founded_year ? parseInt(org.founded_year) : null,
         p_registration_number: org.registration_number || null,
         p_city: org.city,
+        p_city_bg: org.city_bg || null,
         p_address: org.address || null,
+        p_address_bg: org.address_bg || null,
         p_website: org.website || null,
         p_email: org.email,
         p_phone: org.phone || null,
@@ -247,6 +250,11 @@ export default function RegisterOrganization() {
                 <input type="text" required className="input" placeholder="Green Future Bulgaria"
                   value={org.name} onChange={e => setO('name', e.target.value)} />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Organization name (BG)</label>
+                <input type="text" className="input" placeholder="напр. Датаверт"
+                  value={org.name_bg} onChange={e => setO('name_bg', e.target.value)} />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Type <span className="text-red-400">*</span></label>
@@ -293,7 +301,14 @@ export default function RegisterOrganization() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">City <span className="text-red-400">*</span></label>
-                  <select className="input" value={org.city} onChange={e => setO('city', e.target.value)}>
+                  <select className="input" value={org.city}
+                    onChange={e => {
+                      const EN = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other'];
+                      const BG = ['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'];
+                      setO('city', e.target.value);
+                      const idx = EN.indexOf(e.target.value);
+                      if (idx >= 0) setO('city_bg', BG[idx]);
+                    }}>
                     <option value="">Select city</option>
                     {BULGARIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
@@ -306,8 +321,13 @@ export default function RegisterOrganization() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
-                <input type="text" className="input" placeholder="Street address"
+                <input type="text" className="input" placeholder="Street address (EN)"
                   value={org.address} onChange={e => setO('address', e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Address (BG)</label>
+                <input type="text" className="input" placeholder="напр. бул. Витоша 15"
+                  value={org.address_bg} onChange={e => setO('address_bg', e.target.value)} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact email <span className="text-red-400">*</span></label>
