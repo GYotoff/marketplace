@@ -366,23 +366,30 @@ export default function ViewProfile() {
 
       {/* ── Achievements ── */}
       <Section title={L.achieve_s} empty={achievements.length === 0}>
-        {achievements.map((a, i) => (
-          <Row key={i} label={a.icon || '⭐'}>
-            <div>
-              <p className="font-medium" style={{ color: 'var(--text)' }}>
-                {lang === 'bg' ? (a.title_bg || a.title) : a.title}
-              </p>
-              {(lang === 'bg' ? (a.desc_bg || a.desc) : a.desc) && (
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
-                  {lang === 'bg' ? (a.desc_bg || a.desc) : a.desc}
+        <div className="flex flex-col gap-3 pt-1">
+          {achievements.map((a, i) => (
+            <div key={i} className="flex items-start gap-3 py-2 border-b last:border-b-0" style={{ borderColor: 'var(--border)' }}>
+              {/* Badge icon */}
+              <div className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center overflow-hidden"
+                style={{ background: 'rgba(29,158,117,0.12)', border: '2px solid rgba(29,158,117,0.3)' }}>
+                {a.badge_url
+                  ? <img src={a.badge_url} alt="" className="w-full h-full object-contain p-1" />
+                  : <span className="text-xl">🎖️</span>}
+              </div>
+              {/* Name + message */}
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm" style={{ color: 'var(--text)' }}>
+                  {lang === 'bg' ? (a.name_bg || a.name) : a.name}
                 </p>
-              )}
-              {a.date && (
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>{fmtDate(a.date)}</p>
-              )}
+                {(lang === 'bg' ? (a.message_bg || a.message) : a.message) && (
+                  <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                    {lang === 'bg' ? (a.message_bg || a.message) : a.message}
+                  </p>
+                )}
+              </div>
             </div>
-          </Row>
-        ))}
+          ))}
+        </div>
       </Section>
 
       {/* ── Media library ── */}
