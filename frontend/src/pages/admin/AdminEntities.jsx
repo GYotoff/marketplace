@@ -102,6 +102,8 @@ function EntityRow({ entity, kind, onToggle, loading, lang }) {
 export default function AdminEntities() {
   const [confirm, setConfirm] = useState(null)
   const { user: adminUser } = useAuthStore()
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [tab, setTab] = useState('volunteers')
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
