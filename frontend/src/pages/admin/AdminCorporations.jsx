@@ -20,9 +20,9 @@ function CorpRow({ corp, onAction, lang = 'en' }) {
 
   const confirmHandle = (status) => {
     const cfg = {
-      suspended: { title: 'Suspend?', variant: 'danger', confirm: lang === 'bg' ? 'Спри' : 'Suspend' },
-      approved:  { title: 'Approve?', variant: 'default', confirm: lang === 'bg' ? 'Одобри' : 'Approve' },
-      declined:  { title: 'Decline?', variant: 'danger', confirm: lang === 'bg' ? 'Откажи' : 'Decline' },
+      suspended: { title: lang === 'bg' ? 'Спри корпорацията?' : 'Suspend?', variant: 'danger', confirm: lang === 'bg' ? 'Спри' : 'Suspend' },
+      approved:  { title: lang === 'bg' ? 'Одобри корпорацията?' : 'Approve?', variant: 'default', confirm: lang === 'bg' ? 'Одобри' : 'Approve' },
+      declined:  { title: lang === 'bg' ? 'Откажи корпорацията?' : 'Decline?', variant: 'danger', confirm: lang === 'bg' ? 'Откажи' : 'Decline' },
     }[status] || { title: `Set to ${status}?`, variant: 'warning', confirm: 'Confirm' }
     setConfirm({ title: cfg.title, confirmLabel: cfg.confirm, variant: cfg.variant,
       onConfirm: () => handle(status) })
@@ -59,29 +59,29 @@ function CorpRow({ corp, onAction, lang = 'en' }) {
             </a>
           )}
           <p className="text-xs text-gray-400 mt-1">
-            Submitted {new Date(corp.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-            {corp.admin_name && ' by ' + corp.admin_name + ' (' + corp.admin_email + ')'}
+            {lang === 'bg' ? 'Подадено' : 'Submitted'} {new Date(corp.created_at).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+            {corp.admin_name && (lang === 'bg' ? ` от ${corp.admin_name} (${corp.admin_email})` : ` by ${corp.admin_name} (${corp.admin_email})`)}
           </p>
           {corp.review_note && (
-            <p className="text-xs text-gray-500 mt-1 italic">Note: {corp.review_note}</p>
+            <p className="text-xs text-gray-500 mt-1 italic">{lang === 'bg' ? 'Бележка' : 'Note'}: {corp.review_note}</p>
           )}
         </div>
 
         <div className="flex gap-2 shrink-0 flex-wrap">
           {corp.status === 'pending' && (
             <button onClick={() => setOpen(!open)} className="btn-primary text-xs py-1.5">
-              {open ? 'Cancel' : 'Review'}
+              {open ? (lang === 'bg' ? 'Отказ' : 'Cancel') : (lang === 'bg' ? 'Преглед' : 'Review')}
             </button>
           )}
           {corp.status === 'approved' && (
             <button onClick={() => confirmHandle('suspended')} disabled={loading}
               className="text-xs border border-red-200 text-red-600 hover:bg-red-50 rounded-lg px-3 py-1.5">
-              Suspend
+              {lang === 'bg' ? 'Спри' : 'Suspend'}
             </button>
           )}
           {(corp.status === 'declined' || corp.status === 'suspended') && (
             <button onClick={() => confirmHandle('approved')} disabled={loading} className="btn-primary text-xs py-1.5">
-              Re-approve
+              {lang === 'bg' ? 'Одобри отново' : 'Re-approve'}
             </button>
           )}
           {corp.slug && (
@@ -106,7 +106,7 @@ function CorpRow({ corp, onAction, lang = 'en' }) {
         <div className="border-t border-gray-100 pt-4 flex flex-col gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1.5">
-              Review note <span className="text-gray-400 font-normal">(optional — visible to corp admin)</span>
+              {lang === 'bg' ? 'Бележка при преглед' : 'Review note'} <span className="text-gray-400 font-normal">{lang === 'bg' ? '(незадължително — видима за администратора на корпорацията)' : '(optional — visible to corp admin)'}</span>
             </label>
             <textarea
               rows={2}
@@ -120,11 +120,11 @@ function CorpRow({ corp, onAction, lang = 'en' }) {
             <button onClick={() => confirmHandle('approved')} disabled={loading}
               className="btn-primary text-sm flex items-center gap-1.5">
               {loading && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-              Approve
+              {lang === 'bg' ? 'Одобри' : 'Approve'}
             </button>
             <button onClick={() => confirmHandle('declined')} disabled={loading}
               className="border border-red-200 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 text-sm">
-              Decline
+              {lang === 'bg' ? 'Откажи' : 'Decline'}
             </button>
           </div>
         </div>
@@ -205,19 +205,19 @@ export default function AdminCorporations() {
   )
 
   const FILTERS = [
-    { key: 'pending', label: 'Pending' },
-    { key: 'approved', label: 'Approved' },
-    { key: 'declined', label: 'Declined' },
-    { key: 'suspended', label: 'Suspended' },
-    { key: 'all', label: 'All' },
+    { key: 'pending', label: lang === 'bg' ? 'Чакащи' : 'Pending' },
+    { key: 'approved', label: lang === 'bg' ? 'Одобрени' : 'Approved' },
+    { key: 'declined', label: lang === 'bg' ? 'Отказани' : 'Declined' },
+    { key: 'suspended', label: lang === 'bg' ? 'Спрени' : 'Suspended' },
+    { key: 'all', label: lang === 'bg' ? 'Всички' : 'All' },
   ]
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-medium text-gray-900">Corporation approvals</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Review and approve corporation registration requests</p>
+          <h1 className="text-2xl font-medium text-gray-900">{lang === 'bg' ? 'Одобрения на корпорации' : 'Corporation approvals'}</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{lang === 'bg' ? 'Преглед и одобрение на заявки за регистрация на корпорации' : 'Review and approve corporation registration requests'}</p>
         </div>
         <input
           type="search"
@@ -231,10 +231,10 @@ export default function AdminCorporations() {
       {(counts.pending || 0) > 0 && filter !== 'pending' && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5 flex items-center justify-between">
           <p className="text-sm text-amber-700">
-            <span className="font-medium">{counts.pending}</span> corporation{counts.pending > 1 ? 's' : ''} waiting for approval
+            <span className="font-medium">{counts.pending}</span> {lang === 'bg' ? (counts.pending > 1 ? 'корпорации чакат одобрение' : 'корпорация чака одобрение') : (counts.pending > 1 ? 'corporations waiting for approval' : 'corporation waiting for approval')}
           </p>
           <button onClick={() => setFilter('pending')} className="text-xs text-amber-700 font-medium underline">
-            View pending
+            {lang === 'bg' ? 'Виж чакащите →' : 'View pending →'}
           </button>
         </div>
       )}
@@ -263,7 +263,7 @@ export default function AdminCorporations() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-gray-400 text-sm">
-            {search ? 'No results match your search.' : 'No ' + (filter === 'all' ? '' : filter) + ' corporations.'}
+            {search ? (lang === 'bg' ? 'Няма резултати.' : 'No results match your search.') : lang === 'bg' ? 'Няма корпорации.' : lang === 'bg' ? 'Няма корпорации.' : 'No ' + (filter === 'all' ? '' : filter) + ' corporations.'}
           </p>
         </div>
       ) : (
