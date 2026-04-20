@@ -66,8 +66,14 @@ export default function EditProfile() {
   const [mediaLibrary, setMediaLibrary] = useState([])
   const mediaRef = useRef()
 
+  // Populate form ONLY on initial mount or user change.
+  // Using a ref guard prevents the Realtime subscription from resetting
+  // the form mid-edit (which caused the save loop).
+  const formInitialized = useRef(false)
   useEffect(() => {
     if (!profile) return
+    if (formInitialized.current) return   // already populated — don't overwrite edits
+    formInitialized.current = true
     setForm({
       full_name: profile.full_name || '', full_name_bg: profile.full_name_bg || '',
       phone: profile.phone || '',
@@ -80,9 +86,12 @@ export default function EditProfile() {
       facebook_url: profile.facebook_url || '',
       instagram_url: profile.instagram_url || '',
       linkedin_url: profile.linkedin_url || '',
-      })
+    })
     setMediaLibrary(profile.media_library || [])
   }, [profile?.id])
+
+  // Reset the guard when user changes (logout/login as different user)
+  useEffect(() => { formInitialized.current = false }, [user?.id])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const toggleAvailability = (key) => setForm(f => ({
@@ -119,12 +128,9 @@ export default function EditProfile() {
       // DB triggers also update the profile row simultaneously
       const { error: upErr } = await supabase.from('profiles').update(updates).eq('id', user.id)
       if (upErr) throw upErr
-      // Fresh fetch to sync local state
-      const { data: fresh, error: fetchErr } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-      if (!fetchErr && fresh) {
-        const { updateProfile: up } = useAuthStore.getState()
-        useAuthStore.setState({ profile: fresh })
-      }
+      // Don't force-sync store here — the Supabase Realtime subscription
+      // in authStore will update profile automatically. Forcing setState
+      // here was triggering the useEffect form-reset loop.
       flash(lang === 'bg' ? 'Профилът е запазен' : 'Profile saved')
     } catch (e) {
       flash(e.message, 'error')
