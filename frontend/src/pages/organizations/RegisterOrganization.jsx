@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
+import { validatePhone } from '@/lib/validators'
 import { useAuthStore } from '@/store/authStore'
 
 const STEPS = ['Account', 'Organization', 'Contact', 'Review']
@@ -72,6 +73,7 @@ export default function RegisterOrganization() {
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [error, setError] = useState('')
   const [uicOrgError, setUicOrgError] = useState(null)
+  const [phoneOrgError, setPhoneOrgError] = useState(null)
   const [done, setDone] = useState(false)
 
   // Admin account data (only if not logged in)
@@ -108,7 +110,9 @@ export default function RegisterOrganization() {
       if (!org.description.trim()) { setError('Description is required'); return false }
     }
     if (step === 2) {
-      if (!org.city) { setError('City is required'); return false }
+            const phoneErr = validatePhone(org.phone, lang)
+      if (phoneErr) { setError(phoneErr); return false }
+    if (!org.city) { setError('City is required'); return false }
       const uicErr = validateUIC(org.registration_number, lang)
       if (uicErr) { setError(uicErr); return false }
       if (!org.email.trim()) { setError('Contact email is required'); return false }
@@ -336,7 +340,9 @@ export default function RegisterOrganization() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
                   <input type="tel" className="input" placeholder="+359 2 123 4567"
-                    value={org.phone} onChange={e => setO('phone', e.target.value)} />
+                    value={org.phone}
+                    onChange={e => { setO('phone', e.target.value); setPhoneOrgError(validatePhone(e.target.value, lang)) }} />
+                  {phoneOrgError && <p className="text-xs text-red-500 mt-1">{phoneOrgError}</p>}
                 </div>
               </div>
               <div>
