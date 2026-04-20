@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
+import { validatePhone } from '@/lib/validators'
 import { useAuthStore } from '@/store/authStore'
 
 const STEPS = ['Account', 'Corporation', 'Contact', 'Review']
@@ -64,6 +65,7 @@ export default function RegisterCorporation() {
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [error, setError] = useState('')
   const [uicCorpError, setUicCorpError] = useState(null)
+  const [phoneCorpError, setPhoneCorpError] = useState(null)
   const [done, setDone] = useState(false)
 
   const [account, setAccount] = useState({ full_name: '', email: '', password: '', confirm: '' })
@@ -97,7 +99,9 @@ const [corp, setCorp] = useState({ name: '', industry: '', size: '', tagline: ''
     }
     if (step === 2) {
       if (!contact.city) { setError('City is required'); return false }
-      const uicErr = validateUIC(corp.registration_number, lang)
+            const phoneErr = validatePhone(contact.phone, lang)
+      if (phoneErr) { setError(phoneErr); return false }
+    const uicErr = validateUIC(corp.registration_number, lang)
       if (uicErr) { setError(uicErr); return false }
       if (!contact.email.trim()) { setError('Contact email is required'); return false }
     }
@@ -298,7 +302,9 @@ const [corp, setCorp] = useState({ name: '', industry: '', size: '', tagline: ''
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
-                  <input type="tel" className="input" placeholder="+359 2 123 4567" value={contact.phone} onChange={e => setT('phone', e.target.value)} />
+                  <input type="tel" className="input" placeholder="+359 2 123 4567" value={contact.phone}
+                    onChange={e => { setT('phone', e.target.value); setPhoneCorpError(validatePhone(e.target.value, lang)) }} />
+                  {phoneCorpError && <p className="text-xs text-red-500 mt-1">{phoneCorpError}</p>}
                 </div>
               </div>
               <div>
