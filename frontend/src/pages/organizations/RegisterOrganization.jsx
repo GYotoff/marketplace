@@ -49,13 +49,29 @@ function StepIndicator({ steps, current }) {
   )
 }
 
+
+const UIC_RE = /^(?:\d{9}|\d{13})$/
+
+const validateUIC = (val, lang) => {
+  if (!val) return null  // empty is allowed (optional field)
+  if (!UIC_RE.test(val.trim())) {
+    return lang === 'bg'
+      ? 'Невалиден ЕИК/Булстат. Трябва да съдържа 9 или 13 цифри.'
+      : 'Invalid UIC/Bulstat. Must be exactly 9 or 13 digits.'
+  }
+  return null
+}
+
 export default function RegisterOrganization() {
   const { t } = useTranslation()
   const { user } = useAuthStore()
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [error, setError] = useState('')
+  const [uicOrgError, setUicOrgError] = useState(null)
   const [done, setDone] = useState(false)
 
   // Admin account data (only if not logged in)
@@ -93,6 +109,8 @@ export default function RegisterOrganization() {
     }
     if (step === 2) {
       if (!org.city) { setError('City is required'); return false }
+      const uicErr = validateUIC(org.registration_number, lang)
+      if (uicErr) { setError(uicErr); return false }
       if (!org.email.trim()) { setError('Contact email is required'); return false }
     }
     return true
@@ -286,7 +304,9 @@ export default function RegisterOrganization() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Registration number</label>
                 <input type="text" className="input" placeholder="UIC / Булстат"
-                  value={org.registration_number} onChange={e => setO('registration_number', e.target.value)} />
+                  value={org.registration_number}
+                  onChange={e => { setO('registration_number', e.target.value); setUicOrgError(validateUIC(e.target.value, lang)) }} />
+                {uicOrgError && <p className="text-xs text-red-500 mt-1">{uicOrgError}</p>}
               </div>
             </div>
           )}
