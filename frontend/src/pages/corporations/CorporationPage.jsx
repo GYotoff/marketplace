@@ -123,7 +123,7 @@ export default function CorporationPage() {
     )
   }
 
-  const name = corp.name
+  const name = (i18n.language === 'bg' && corp.name_bg) ? corp.name_bg : corp.name
   const initials = name.split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || '?'
   const description = (i18n.language === 'bg' && corp.description_bg) ? corp.description_bg : corp.description
   const tagline = (i18n.language === 'bg' && corp.tagline_bg) ? corp.tagline_bg : corp.tagline
@@ -183,7 +183,7 @@ export default function CorporationPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  {corp.city}
+                  {i18n.language === 'bg' ? (corp.city_bg || corp.city) : corp.city}
                 </span>
               )}
               {corp.founded_year && <span>Est. {corp.founded_year}</span>}
@@ -260,8 +260,8 @@ export default function CorporationPage() {
                 enterprise:        'Enterprise (1 001–5 000 employees)',
                 global_enterprise: 'Global Enterprise (5 000+)',
               }[corp.size] || corp.size) : null} />
-              <InfoRow label="City" value={corp.city} />
-              <InfoRow label="Address" value={corp.address} />
+              <InfoRow label={i18n.language === 'bg' ? 'Град' : 'City'} value={i18n.language === 'bg' ? (corp.city_bg || corp.city) : corp.city} />
+              <InfoRow label={i18n.language === 'bg' ? 'Адрес' : 'Address'} value={i18n.language === 'bg' ? (corp.address_bg || corp.address) : corp.address} />
               <InfoRow label="Founded" value={corp.founded_year ? String(corp.founded_year) : null} />
               <InfoRow label="Email" value={corp.email} />
               <InfoRow label="Phone" value={corp.phone} />
