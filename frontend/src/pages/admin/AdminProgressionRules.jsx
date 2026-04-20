@@ -13,7 +13,7 @@ const METRICS = [
 const OPERATORS = ['>=', '>', '=']
 const EMPTY_FORM = { entity_type: 'ranking', entity_id: '', trigger_metric: 'confirmed_events', threshold: '', operator: '>=' }
 
-function RuleForm({ initial = EMPTY_FORM, rankings, achievements, onSave, onCancel, saving }) {
+function RuleForm({ initial = EMPTY_FORM, rankings, achievements, onSave, onCancel, saving, lang = 'en' }) {
   const [form, setForm] = useState(initial)
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -23,7 +23,7 @@ function RuleForm({ initial = EMPTY_FORM, rankings, achievements, onSave, onCanc
   return (
     <div className="card flex flex-col gap-4" style={{ borderColor: 'rgba(29,158,117,0.4)' }}>
       <h4 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-        {initial.id ? lang === 'bg' ? 'Редактирай правило' : 'Edit rule' : lang === 'bg' ? 'Ново правило' : 'New rule'}
+        {initial.id ? (lang === 'bg' ? 'Редактирай правило' : 'Edit rule') : (lang === 'bg' ? 'Ново правило' : 'New rule')}
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
@@ -38,7 +38,7 @@ function RuleForm({ initial = EMPTY_FORM, rankings, achievements, onSave, onCanc
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>{entityLabel}</label>
           <select className="input" value={form.entity_id}
             onChange={e => set('entity_id', e.target.value)}>
-            <option value="">— select —</option>
+            <option value="">{lang === 'bg' ? '— избери —' : '— select —'}</option>
             {entityOptions.map(e => (
               <option key={e.id} value={e.id}>{e.type || e.name}</option>
             ))}
@@ -73,12 +73,12 @@ function RuleForm({ initial = EMPTY_FORM, rankings, achievements, onSave, onCanc
         </div>
       </div>
       <div className="flex gap-2 justify-end">
-        <button type="button" onClick={onCancel} className="btn-secondary text-sm px-4">Cancel</button>
+        <button type="button" onClick={onCancel} className="btn-secondary text-sm px-4">{lang === 'bg' ? 'Отказ' : 'Cancel'}</button>
         <button type="button"
           disabled={!form.entity_id || form.threshold === '' || saving}
           onClick={() => onSave(form)}
           className="btn-primary text-sm px-4 disabled:opacity-50">
-          {saving ? lang === 'bg' ? 'Запазване…' : 'Saving…' : lang === 'bg' ? 'Запази правило' : 'Save rule'}
+          {saving ? (lang === 'bg' ? 'Запазване…' : 'Saving…') : (lang === 'bg' ? 'Запази правило' : 'Save rule')}
         </button>
       </div>
     </div>
@@ -225,7 +225,7 @@ export default function AdminProgressionRules() {
       {editing === 'new' && (
         <div className="mb-5">
           <RuleForm rankings={rankings} achievements={achievements}
-            onSave={saveRule} onCancel={() => setEditing(null)} saving={saving} />
+            onSave={saveRule} onCancel={() => setEditing(null)} saving={saving} lang={lang} />
         </div>
       )}
 
@@ -242,7 +242,7 @@ export default function AdminProgressionRules() {
               <div key={rule.id}>
                 {editing?.id === rule.id ? (
                   <RuleForm initial={editing} rankings={rankings} achievements={achievements}
-                    onSave={saveRule} onCancel={() => setEditing(null)} saving={saving} />
+                    onSave={saveRule} onCancel={() => setEditing(null)} saving={saving} lang={lang} />
                 ) : (
                   <div className="card flex items-center gap-3 flex-wrap py-3 px-4"
                     style={{ opacity: rule.is_active ? 1 : 0.5 }}>
@@ -295,7 +295,7 @@ export default function AdminProgressionRules() {
               <div key={rule.id}>
                 {editing?.id === rule.id ? (
                   <RuleForm initial={editing} rankings={rankings} achievements={achievements}
-                    onSave={saveRule} onCancel={() => setEditing(null)} saving={saving} />
+                    onSave={saveRule} onCancel={() => setEditing(null)} saving={saving} lang={lang} />
                 ) : (
                   <div className="card flex items-center gap-3 flex-wrap py-3 px-4"
                     style={{ opacity: rule.is_active ? 1 : 0.5 }}>
