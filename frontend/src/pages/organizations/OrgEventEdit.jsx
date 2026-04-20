@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { validatePhone } from '@/lib/validators'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 
 const CITIES = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven',
@@ -164,12 +166,15 @@ const TABS = ['Basic', 'Details', 'Location', 'Contact', 'Media']
 export default function OrgEventEdit() {
   const { projectId, eventId } = useParams()
   const { user } = useAuthStore()
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const navigate = useNavigate()
   const [project, setProject] = useState(null)
   const [org, setOrg] = useState(null)
   const [form, setForm] = useState(EMPTY)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [phoneEventError, setPhoneEventError] = useState(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState('Basic')
   const isNew = !eventId
@@ -226,6 +231,8 @@ export default function OrgEventEdit() {
     setError('')
     if (!form.title.trim()) { setError('Title (EN) is required'); return }
     if (!form.event_date) { setError('Start date & time is required'); return }
+    const phoneErr = validatePhone(form.contact_phone, lang)
+    if (phoneErr) { setError(phoneErr); return }
     setSaving(true)
     const isOnline = form.event_type === 'online' || form.event_type === 'hybrid'
     const payload = {
@@ -445,7 +452,9 @@ export default function OrgEventEdit() {
                 <input type="email" className="input" placeholder="contact@org.bg" value={form.contact_email} onChange={e => set('contact_email', e.target.value)} />
               </Field>
               <Field label="Contact phone">
-                <input type="tel" className="input" placeholder="+359 88 123 4567" value={form.contact_phone} onChange={e => set('contact_phone', e.target.value)} />
+                <input type="tel" className="input" placeholder="+359 88 123 4567" value={form.contact_phone}
+                  onChange={e => { set('contact_phone', e.target.value); setPhoneEventError(validatePhone(e.target.value, lang)) }} />
+                {phoneEventError && <p className="text-xs text-red-500 mt-1">{phoneEventError}</p>}
               </Field>
             </div>
           </div>
