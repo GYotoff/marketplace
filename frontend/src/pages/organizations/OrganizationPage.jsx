@@ -112,7 +112,7 @@ export default function OrganizationPage() {
     </div>
   )
 
-  const name = org.name
+  const name = (i18n.language === 'bg' && org.name_bg) ? org.name_bg : org.name
   const description = (i18n.language === 'bg' && org.description_bg) ? org.description_bg : org.description
   const tagline = (i18n.language === 'bg' && org.tagline_bg) ? org.tagline_bg : org.tagline
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
@@ -168,7 +168,7 @@ export default function OrganizationPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
-                  {org.city}
+                  {i18n.language === 'bg' ? (org.city_bg || org.city) : org.city}
                 </span>
               )}
               {org.founded_year && (
@@ -268,8 +268,8 @@ export default function OrganizationPage() {
               <h2 className="text-base font-medium text-gray-900 mb-3">Details</h2>
               <div>
                 <InfoRow label="Type" value={(i18n.language === 'bg' ? TYPE_LABEL_BG[org.type] : TYPE_LABEL[org.type]) || org.type} />
-                <InfoRow label="City" value={org.city} />
-                <InfoRow label="Address" value={org.address} />
+                <InfoRow label={i18n.language === 'bg' ? 'Град' : 'City'} value={i18n.language === 'bg' ? (org.city_bg || org.city) : org.city} />
+                <InfoRow label={i18n.language === 'bg' ? 'Адрес' : 'Address'} value={i18n.language === 'bg' ? (org.address_bg || org.address) : org.address} />
                 <InfoRow label="Founded" value={org.founded_year?.toString()} />
                 <InfoRow label="Email" value={org.email} />
                 <InfoRow label="Phone" value={org.phone} />
