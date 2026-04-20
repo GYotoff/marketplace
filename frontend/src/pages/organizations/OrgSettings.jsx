@@ -173,6 +173,7 @@ export default function OrgSettings() {
       setOrg(data)
       setForm({
         name: data.name || '',
+        name_bg: data.name_bg || '',
         type: data.type || 'ngo',
         tagline: data.tagline || '',
         tagline_bg: data.tagline_bg || '',
@@ -181,7 +182,9 @@ export default function OrgSettings() {
         founded_year: data.founded_year || '',
         registration_number: data.registration_number || '',
         city: data.city || '',
+        city_bg: data.city_bg || '',
         address: data.address || '',
+        address_bg: data.address_bg || '',
         email: data.email || '',
         phone: data.phone || '',
         website: data.website || '',
@@ -203,6 +206,7 @@ export default function OrgSettings() {
       .from('organizations')
       .update({
         name: form.name,
+        name_bg: form.name_bg || null,
         type: form.type,
         tagline: form.tagline || null,
         tagline_bg: form.tagline_bg || null,
@@ -211,7 +215,9 @@ export default function OrgSettings() {
         founded_year: form.founded_year ? parseInt(form.founded_year) : null,
         registration_number: form.registration_number || null,
         city: form.city,
+        city_bg: form.city_bg || null,
         address: form.address || null,
+        address_bg: form.address_bg || null,
         email: form.email,
         phone: form.phone || null,
         website: form.website || null,
@@ -295,12 +301,21 @@ export default function OrgSettings() {
         {/* GENERAL TAB */}
         {tab === 'general' && (
           <div className="card flex flex-col gap-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Organization name <span className="text-red-400">*</span>
-              </label>
-              <input type="text" required className="input"
-                value={form.name} onChange={e => set('name', e.target.value)} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {lang === 'bg' ? 'Име на организацията (EN)' : 'Organization name (EN)'} <span className="text-red-400">*</span>
+                </label>
+                <input type="text" required className="input"
+                  value={form.name} onChange={e => set('name', e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {lang === 'bg' ? 'Ime на организацията (BG)' : 'Organization name (BG)'}
+                </label>
+                <input type="text" className="input" placeholder="напр. Датаверт"
+                  value={form.name_bg} onChange={e => set('name_bg', e.target.value)} />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -360,25 +375,56 @@ export default function OrgSettings() {
         {/* CONTACT TAB */}
         {tab === 'contact' && (
           <div className="card flex flex-col gap-5">
-            <div className="grid grid-cols-2 gap-4">
+            {/* City bilingual */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">City</label>
-                <select className="input" value={form.city} onChange={e => set('city', e.target.value)}>
-                  <option value="">Select city</option>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (EN)' : 'City (EN)'}</label>
+                <select className="input" value={form.city}
+                  onChange={e => {
+                    const CITIES_EN = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other'];
+                    const CITIES_BG = ['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'];
+                    const idx = CITIES_EN.indexOf(e.target.value);
+                    set('city', e.target.value);
+                    if (idx >= 0) set('city_bg', CITIES_BG[idx]);
+                  }}>
+                  <option value="">{lang === 'bg' ? 'Избери' : 'Select city'}</option>
                   {BULGARIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
-                <input type="tel" className="input" placeholder="+359 2 123 4567"
-                  value={form.phone} onChange={e => set('phone', e.target.value)} />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (BG)' : 'City (BG)'}</label>
+                <select className="input" value={form.city_bg}
+                  onChange={e => {
+                    const CITIES_EN = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other'];
+                    const CITIES_BG = ['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'];
+                    const idx = CITIES_BG.indexOf(e.target.value);
+                    set('city_bg', e.target.value);
+                    if (idx >= 0) set('city', CITIES_EN[idx]);
+                  }}>
+                  <option value="">{lang === 'bg' ? 'Избери' : 'Select city'}</option>
+                  {['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+
+            {/* Address bilingual */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Адрес (EN)' : 'Address (EN)'}</label>
+                <input type="text" className="input" placeholder="e.g. 15 Vitosha Blvd"
+                  value={form.address} onChange={e => set('address', e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Адрес (BG)' : 'Address (BG)'}</label>
+                <input type="text" className="input" placeholder="напр. бул. Витоша 15"
+                  value={form.address_bg} onChange={e => set('address_bg', e.target.value)} />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
-              <input type="text" className="input" placeholder="Street address"
-                value={form.address} onChange={e => set('address', e.target.value)} />
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Телефон' : 'Phone'}</label>
+              <input type="tel" className="input" placeholder="+359 2 123 4567"
+                value={form.phone} onChange={e => set('phone', e.target.value)} />
             </div>
 
             <div>
