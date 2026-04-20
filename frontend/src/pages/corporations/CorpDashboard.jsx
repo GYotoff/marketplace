@@ -2,10 +2,13 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 
 export default function CorpDashboard() {
   const { user } = useAuthStore()
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [corp, setCorp] = useState(null)
   const [members, setMembers] = useState([])
   const [confirm, setConfirm] = useState(null)
@@ -19,7 +22,7 @@ export default function CorpDashboard() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  useEffect(() => { load() }, [user])
+  useEffect(() => { load() }, [user?.id])
 
   const load = async () => {
     if (!user) return []
@@ -149,11 +152,11 @@ export default function CorpDashboard() {
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 font-semibold text-xl shrink-0 overflow-hidden">
             {corp.logo_url
-              ? <img src={corp.logo_url} alt={corp.name} className="w-14 h-14 rounded-xl object-cover" />
+              ? <img src={corp.logo_url} alt={lang === 'bg' ? (corp.name_bg || corp.name) : corp.name} className="w-14 h-14 rounded-xl object-cover" />
               : corp.name[0]}
           </div>
           <div>
-            <h1 className="text-xl font-medium text-gray-900">{corp.name}</h1>
+            <h1 className="text-xl font-medium text-gray-900">{lang === 'bg' ? (corp.name_bg || corp.name) : corp.name}</h1>
             <p className={'text-sm font-medium capitalize ' + (statusColor[corp.status] || 'text-gray-500')}>{corp.status}</p>
             {corp.industry && <p className="text-xs text-gray-400 mt-0.5">{corp.industry}</p>}
             {corp.status === 'pending' && <p className="text-xs text-amber-600 mt-0.5">Awaiting portal admin approval</p>}
