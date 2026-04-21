@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
+import CountryCitySelector, { validateCountryCity } from '@/components/ui/CountryCitySelector'
 import { validatePhone } from '@/lib/validators'
 import { useAuthStore } from '@/store/authStore'
 
@@ -150,6 +151,7 @@ export default function OrgSettings() {
   const [form, setForm] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [ccErrors, setCcErrors]     = useState({})
   const [uicError, setUicError] = useState(null)
   const [phoneError, setPhoneError] = useState(null)
   const [tab, setTab] = useState('general')
@@ -190,6 +192,8 @@ export default function OrgSettings() {
       setForm({
         name: data.name || '',
         name_bg: data.name_bg || '',
+        country: data.country || '',
+        country_bg: data.country_bg || '',
         type: data.type || 'ngo',
         tagline: data.tagline || '',
         tagline_bg: data.tagline_bg || '',
@@ -219,6 +223,9 @@ export default function OrgSettings() {
   const handleSave = async () => {
         const phoneErr = validatePhone(form.phone, lang)
     if (phoneErr) { showToast(phoneErr, 'error'); return }
+    const ccErr = validateCountryCity({ countryEN: form.country, countryBG: form.country_bg, cityEN: form.city, cityBG: form.city_bg }, lang)
+    if (Object.keys(ccErr).length) { setCcErrors(ccErr); showToast(lang === 'bg' ? 'Моля попълнете държавата и града.' : 'Please fill in country and city.', 'error'); return }
+    setCcErrors({})
     const uicErr = validateUIC(form.registration_number, lang)
     if (uicErr) { showToast(uicErr, 'error'); return }
     setSaving(true)
@@ -234,6 +241,8 @@ export default function OrgSettings() {
         description_bg: form.description_bg || null,
         founded_year: form.founded_year ? parseInt(form.founded_year) : null,
         registration_number: form.registration_number || null,
+        country: form.country || null,
+        country_bg: form.country_bg || null,
         city: form.city,
         city_bg: form.city_bg || null,
         address: form.address || null,
@@ -397,51 +406,20 @@ export default function OrgSettings() {
         {/* CONTACT TAB */}
         {tab === 'contact' && (
           <div className="card flex flex-col gap-5">
-            {/* City bilingual */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (EN)' : 'City (EN)'}</label>
-                <select className="input" value={form.city}
-                  onChange={e => {
-                    const CITIES_EN = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other'];
-                    const CITIES_BG = ['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'];
-                    const idx = CITIES_EN.indexOf(e.target.value);
-                    set('city', e.target.value);
-                    if (idx >= 0) set('city_bg', CITIES_BG[idx]);
-                  }}>
-                  <option value="">{lang === 'bg' ? 'Избери' : 'Select city'}</option>
-                  {BULGARIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (BG)' : 'City (BG)'}</label>
-                <select className="input" value={form.city_bg}
-                  onChange={e => {
-                    const CITIES_EN = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other'];
-                    const CITIES_BG = ['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'];
-                    const idx = CITIES_BG.indexOf(e.target.value);
-                    set('city_bg', e.target.value);
-                    if (idx >= 0) set('city', CITIES_EN[idx]);
-                  }}>
-                  <option value="">{lang === 'bg' ? 'Избери' : 'Select city'}</option>
-                  {['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'].map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-            </div>
-
-            {/* Address bilingual */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Адрес (EN)' : 'Address (EN)'}</label>
-                <input type="text" className="input" placeholder="e.g. 15 Vitosha Blvd"
-                  value={form.address} onChange={e => set('address', e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Адрес (BG)' : 'Address (BG)'}</label>
-                <input type="text" className="input" placeholder="напр. бул. Витоша 15"
-                  value={form.address_bg} onChange={e => set('address_bg', e.target.value)} />
-              </div>
-            </div>
+          {/* Country + City */}
+          <CountryCitySelector
+            countryEN={form.country}
+            countryBG={form.country_bg}
+            cityEN={form.city}
+            cityBG={form.city_bg}
+            lang={lang}
+            errors={ccErrors}
+            onChange={({ countryEN, countryBG, cityEN, cityBG }) => {{
+              set('country', countryEN); set('country_bg', countryBG)
+              set('city', cityEN);       set('city_bg', cityBG)
+              setCcErrors({{}})
+            }}}
+          />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Телефон' : 'Phone'}</label>
