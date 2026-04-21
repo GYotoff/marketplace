@@ -22,9 +22,13 @@ const STATUS_LABEL = {
 }
 
 const TYPE_LABEL = {
-  ngo: 'NGO', nonprofit: 'Non-profit', company: 'Company',
-  government: 'Government org', education: 'Education',
-  investor: 'Investor', other: 'Other',
+  ngo:        { en: 'NGO',             bg: 'НПО' },
+  nonprofit:  { en: 'Non-profit',      bg: 'Нестопанска' },
+  company:    { en: 'Company',         bg: 'Компания' },
+  government: { en: 'Government org',  bg: 'Правителствена' },
+  education:  { en: 'Education',       bg: 'Образование' },
+  investor:   { en: 'Investor',        bg: 'Инвеститор' },
+  other:      { en: 'Other',           bg: 'Друго' },
 }
 
 async function safeQuery(queryFn) {
@@ -86,13 +90,13 @@ function EntityRow({ entity, kind, onToggle, loading, lang }) {
         {entity.logo_url ? <img src={entity.logo_url} className="w-full h-full object-cover rounded-xl" alt="" /> : initials}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900">{entity.name}</p>
+        <p className="text-sm font-medium text-gray-900">{lang === 'bg' ? (entity.name_bg || entity.name) : entity.name}</p>
         <p className="text-xs text-gray-400 truncate">{entity.email}</p>
-        {entity.city && <p className="text-xs text-gray-400">{entity.city}</p>}
+        {(entity.city || entity.city_bg) && <p className="text-xs text-gray-400">{lang === 'bg' ? (entity.city_bg || entity.city) : entity.city}</p>}
       </div>
       <div className="flex items-center gap-2 shrink-0 flex-wrap">
         <span className="text-xs text-gray-400">{new Date(entity.created_at).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB')}</span>
-        {entity.type && <span className="badge bg-gray-50 text-gray-500 border border-gray-100 text-xs">{TYPE_LABEL[entity.type] || entity.type}</span>}
+        {entity.type && <span className="badge bg-gray-50 text-gray-500 border border-gray-100 text-xs">{TYPE_LABEL[entity.type]?.[lang] || entity.type}</span>}
         <span className={`badge text-xs px-2 py-0.5 ${
           entity.status === 'approved' ? 'bg-brand-50 text-brand-700 border border-brand-200' :
           entity.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
