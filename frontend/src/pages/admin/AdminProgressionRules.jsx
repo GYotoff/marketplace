@@ -18,7 +18,7 @@ function RuleForm({ initial = EMPTY_FORM, rankings, achievements, onSave, onCanc
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const entityOptions = form.entity_type === 'ranking' ? rankings : achievements
-  const entityLabel   = form.entity_type === 'ranking' ? 'Ranking' : 'Achievement'
+  const entityLabel   = form.entity_type === 'ranking' ? (lang === 'bg' ? 'Ранг' : 'Ranking') : (lang === 'bg' ? 'Постижение' : 'Achievement')
 
   return (
     <div className="card flex flex-col gap-4" style={{ borderColor: 'rgba(29,158,117,0.4)' }}>
@@ -30,8 +30,8 @@ function RuleForm({ initial = EMPTY_FORM, rankings, achievements, onSave, onCanc
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>Type</label>
           <select className="input" value={form.entity_type}
             onChange={e => set('entity_type', e.target.value)}>
-            <option value="ranking">Ranking</option>
-            <option value="achievement">Achievement</option>
+            <option value="ranking">{lang === 'bg' ? 'Ранг' : 'Ranking'}</option>
+            <option value="achievement">{lang === 'bg' ? 'Постижение' : 'Achievement'}</option>
           </select>
         </div>
         <div>
@@ -203,7 +203,7 @@ export default function AdminProgressionRules() {
         </div>
         {editing !== 'new' && (
           <button type="button" onClick={() => setEditing('new')} className="btn-primary text-sm">
-            + New rule
+            {lang === 'bg' ? '+ Ново правило' : '+ New rule'}
           </button>
         )}
       </div>
