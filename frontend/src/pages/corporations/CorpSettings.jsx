@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import CountryCitySelector, { validateCountryCity } from '@/components/ui/CountryCitySelector'
 import { validatePhone } from '@/lib/validators'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
@@ -107,7 +108,7 @@ const CORP_SIZES = [
   { value: 'global_enterprise', label: 'Global Enterprise (5 000+)',         label_bg: 'Глобална корпорация (5 000+)' },
 ]
 
-const EMPTY = { name: '', name_bg: '', industry: '', size: '', tagline: '', tagline_bg: '', description: '', description_bg: '', founded_year: '', registration_number: '', city: '', city_bg: '', address: '', address_bg: '', email: '', phone: '', website: '', facebook_url: '', instagram_url: '', linkedin_url: '', logo_url: '', cover_url: '' }
+const EMPTY = { name: '', name_bg: '', industry: '', size: '', tagline: '', tagline_bg: '', description: '', description_bg: '', founded_year: '', registration_number: '', country: '', country_bg: '', city: '', city_bg: '', address: '', address_bg: '', email: '', phone: '', website: '', facebook_url: '', instagram_url: '', linkedin_url: '', logo_url: '', cover_url: '' }
 
 
 const UIC_RE = /^(?:\d{9}|\d{13})$/
@@ -130,6 +131,7 @@ export default function CorpSettings() {
   const [form, setForm] = useState(EMPTY)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [ccErrors, setCcErrors] = useState({})
   const [uicError, setUicError] = useState(null)
   const [phoneError, setPhoneError] = useState(null)
   const [tab, setTab] = useState('general')
@@ -157,7 +159,7 @@ export default function CorpSettings() {
         name: data.name || '', name_bg: data.name_bg || '', industry: data.industry || '', size: data.size || '', tagline: data.tagline || '', tagline_bg: data.tagline_bg || '',
         description: data.description || '', description_bg: data.description_bg || '',
         founded_year: data.founded_year || '', registration_number: data.registration_number || '',
-        city: data.city || '', city_bg: data.city_bg || '', address: data.address || '', address_bg: data.address_bg || '', email: data.email || '',
+        country: data.country || '', country_bg: data.country_bg || '', city: data.city || '', city_bg: data.city_bg || '', address: data.address || '', address_bg: data.address_bg || '', email: data.email || '',
         phone: data.phone || '', website: data.website || '',
         facebook_url: data.facebook_url || '', instagram_url: data.instagram_url || '', linkedin_url: data.linkedin_url || '',
         logo_url: data.logo_url || '', cover_url: data.cover_url || '',
@@ -171,6 +173,9 @@ export default function CorpSettings() {
   const save = async () => {
         const phoneErr = validatePhone(form.phone, lang)
     if (phoneErr) { flash(phoneErr, 'error'); return }
+    const ccErr = validateCountryCity({ countryEN: form.country, countryBG: form.country_bg, cityEN: form.city, cityBG: form.city_bg }, lang)
+    if (Object.keys(ccErr).length) { setCcErrors(ccErr); flash(lang === 'bg' ? 'Моля попълнете държавата и града.' : 'Please fill in country and city.', 'error'); return }
+    setCcErrors({})
     const uicErr = validateUIC(form.registration_number, lang)
     if (uicErr) { flash(uicErr, 'error'); return }
     setSaving(true)
@@ -179,7 +184,7 @@ export default function CorpSettings() {
       description: form.description, description_bg: form.description_bg || null,
       founded_year: form.founded_year ? parseInt(form.founded_year) : null,
       registration_number: form.registration_number || null,
-      city: form.city, city_bg: form.city_bg || null, address: form.address || null, address_bg: form.address_bg || null, email: form.email,
+      country: form.country || null, country_bg: form.country_bg || null, city: form.city, city_bg: form.city_bg || null, address: form.address || null, address_bg: form.address_bg || null, email: form.email,
       phone: form.phone || null, website: form.website || null,
       facebook_url: form.facebook_url || null, instagram_url: form.instagram_url || null, linkedin_url: form.linkedin_url || null,
       logo_url: form.logo_url || null, cover_url: form.cover_url || null,
@@ -285,37 +290,20 @@ export default function CorpSettings() {
         )}
         {tab === 'contact' && (
           <div className="card flex flex-col gap-5">
-            {/* City bilingual */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (EN)' : 'City (EN)'}</label>
-                <select className="input" value={form.city}
-                  onChange={e => {
-                    const EN = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other'];
-                    const BG = ['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'];
-                    set('city', e.target.value);
-                    const idx = EN.indexOf(e.target.value);
-                    if (idx >= 0) set('city_bg', BG[idx]);
-                  }}>
-                  <option value="">{lang === 'bg' ? 'Избери' : 'Select city'}</option>
-                  {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (BG)' : 'City (BG)'}</label>
-                <select className="input" value={form.city_bg}
-                  onChange={e => {
-                    const EN = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other'];
-                    const BG = ['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'];
-                    set('city_bg', e.target.value);
-                    const idx = BG.indexOf(e.target.value);
-                    if (idx >= 0) set('city', EN[idx]);
-                  }}>
-                  <option value="">{lang === 'bg' ? 'Избери' : 'Select city'}</option>
-                  {['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'].map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-            </div>
+            {/* Country + City */}
+            <CountryCitySelector
+              countryEN={form.country}
+              countryBG={form.country_bg}
+              cityEN={form.city}
+              cityBG={form.city_bg}
+              lang={lang}
+              errors={ccErrors}
+              onChange={({ countryEN, countryBG, cityEN, cityBG }) => {
+                set('country', countryEN); set('country_bg', countryBG)
+                set('city', cityEN);       set('city_bg', cityBG)
+                setCcErrors({})
+              }}
+            />
             {/* Address bilingual */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
