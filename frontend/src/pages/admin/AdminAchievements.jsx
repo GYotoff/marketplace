@@ -215,12 +215,12 @@ export default function AdminAchievements() {
         <div>
           <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Постижения' : 'Achievements'}</h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Define achievement badges that can be awarded to volunteers · {rows.length} total
+{lang === 'bg' ? `Определи значките за постижения на доброволците · ${rows.length} общо` : `Define achievement badges that can be awarded to volunteers · ${rows.length} total`}
           </p>
         </div>
         {editing !== 'new' && (
           <button type="button" onClick={() => setEditing('new')} className="btn-primary text-sm">
-            + New achievement
+            {lang === 'bg' ? '+ Ново постижение' : '+ New achievement'}
           </button>
         )}
       </div>
@@ -234,7 +234,7 @@ export default function AdminAchievements() {
       {/* New form */}
       {editing === 'new' && (
         <div className="mb-5">
-          <AchievementForm onSave={saveRow} onCancel={() => setEditing(null)} saving={saving} />
+          <AchievementForm onSave={saveRow} onCancel={() => setEditing(null)} saving={saving} lang={lang} />
         </div>
       )}
 
@@ -245,7 +245,7 @@ export default function AdminAchievements() {
           <p className="text-2xl mb-2">🏆</p>
           <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>No achievements yet</p>
           <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
-            Click "+ New achievement" to create the first one
+{lang === 'bg' ? 'Натиснете "+ Ново постижение" за да създадете първото' : 'Click "+ New achievement" to create the first one'}
           </p>
         </div>
       )}
@@ -254,7 +254,7 @@ export default function AdminAchievements() {
         {filtered.map(row => (
           <div key={row.id}>
             {editing?.id === row.id ? (
-              <AchievementForm initial={editing} onSave={saveRow} onCancel={() => setEditing(null)} saving={saving} />
+              <AchievementForm initial={editing} onSave={saveRow} onCancel={() => setEditing(null)} saving={saving} lang={lang} />
             ) : (
               <div className="card flex items-center gap-4 flex-wrap">
                 {/* Badge */}
@@ -288,13 +288,13 @@ export default function AdminAchievements() {
                 {/* Actions */}
                 <div className="flex gap-2 shrink-0">
                   <button type="button" onClick={() => setEditing(row)}
-                    className="btn-secondary text-xs py-1.5 px-3">Edit</button>
+                    className="btn-secondary text-xs py-1.5 px-3">{lang === 'bg' ? 'Редактирай' : 'Edit'}</button>
                   <button type="button" onClick={() => deleteRow(row)}
                     className="text-xs px-3 py-1.5 rounded-lg border transition-colors"
                     style={{ borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    Delete
+                    {lang === 'bg' ? 'Изтрий' : 'Delete'}
                   </button>
                 </div>
               </div>
