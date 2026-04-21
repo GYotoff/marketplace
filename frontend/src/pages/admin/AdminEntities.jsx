@@ -61,9 +61,9 @@ function VolunteerRow({ user, onToggle, loading, lang }) {
         {user.avatar_url ? <img src={user.avatar_url} className="w-full h-full object-cover" alt="" /> : initials}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900">{user.full_name || '—'}</p>
-        <p className="text-xs text-gray-400 truncate">{user.email}</p>
-        {user.city && <p className="text-xs text-gray-400">{user.city}</p>}
+        <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{user.full_name || '—'}</p>
+        <p className="text-xs truncate" style={{ color: 'var(--text-faint)' }}>{user.email}</p>
+        {user.city && <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{user.city}</p>}
       </div>
       <div className="flex items-center gap-2 shrink-0 flex-wrap">
         <span className="text-xs text-gray-400">{new Date(user.created_at).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB')}</span>
@@ -90,9 +90,9 @@ function EntityRow({ entity, kind, onToggle, loading, lang }) {
         {entity.logo_url ? <img src={entity.logo_url} className="w-full h-full object-cover rounded-xl" alt="" /> : initials}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900">{lang === 'bg' ? (entity.name_bg || entity.name) : entity.name}</p>
-        <p className="text-xs text-gray-400 truncate">{entity.email}</p>
-        {(entity.city || entity.city_bg) && <p className="text-xs text-gray-400">{lang === 'bg' ? (entity.city_bg || entity.city) : entity.city}</p>}
+        <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{lang === 'bg' ? (entity.name_bg || entity.name) : entity.name}</p>
+        <p className="text-xs truncate" style={{ color: 'var(--text-faint)' }}>{entity.email}</p>
+        {(entity.city || entity.city_bg) && <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{lang === 'bg' ? (entity.city_bg || entity.city) : entity.city}</p>}
       </div>
       <div className="flex items-center gap-2 shrink-0 flex-wrap">
         <span className="text-xs text-gray-400">{new Date(entity.created_at).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB')}</span>
@@ -264,7 +264,7 @@ export default function AdminEntities() {
   return (
     <>
       <ConfirmDialog config={confirm} onClose={() => setConfirm(null)} />
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      <div className="max-w-5xl mx-auto px-4 py-10">
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white ${toast.type === 'error' ? 'bg-red-500' : 'bg-brand-400'}`}>
           {toast.msg}
@@ -273,8 +273,8 @@ export default function AdminEntities() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-medium text-gray-900">{lang === 'bg' ? 'Управление на субекти' : 'Entity management'}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{lang === 'bg' ? 'Управлявай достъпа на всички субекти в платформата' : 'Manage access for all platform entities'}</p>
+          <h1 className="text-2xl font-medium" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Управление на субекти' : 'Entity management'}</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>{lang === 'bg' ? 'Управлявай достъпа на всички субекти в платформата' : 'Manage access for all platform entities'}</p>
         </div>
         <input type="search" placeholder={lang === 'bg' ? 'Търси...' : 'Search...'} className="input sm:w-64"
           value={search} onChange={e => setSearch(e.target.value)} />
