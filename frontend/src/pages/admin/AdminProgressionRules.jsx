@@ -184,7 +184,7 @@ export default function AdminProgressionRules() {
   const achievementRules = rules.filter(r => r.entity_type === 'achievement')
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
+    <div className="max-w-5xl mx-auto px-4 py-10">
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white
           ${toast.type === 'error' ? 'bg-red-500' : 'bg-brand-400'}`}>
@@ -196,7 +196,7 @@ export default function AdminProgressionRules() {
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Правила за прогрес' : 'Progression rules'}</h1>
+          <h1 className="text-2xl font-medium" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Правила за прогрес' : 'Progression rules'}</h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
             {lang === 'bg' ? 'Определя кога рангове и постижения се присъждат автоматично на доброволци' : 'Define when rankings and achievements are automatically awarded to volunteers'}
           </p>
