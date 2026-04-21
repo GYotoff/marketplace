@@ -11,7 +11,14 @@ const SORTS = [
 ]
 
 const SIZE_ORDER = { micro:1, small:2, medium:3, large:4, enterprise:5, global_enterprise:6 }
-const SIZE_LABEL = { micro:'Micro', small:'Small', medium:'Medium', large:'Large', enterprise:'Enterprise', global_enterprise:'Global Enterprise' }
+const SIZE_LABEL = {
+  micro:             { en: 'Micro',             bg: 'Микро' },
+  small:             { en: 'Small',             bg: 'Малка' },
+  medium:            { en: 'Medium',            bg: 'Средна' },
+  large:             { en: 'Large',             bg: 'Голяма' },
+  enterprise:        { en: 'Enterprise',        bg: 'Корпорация' },
+  global_enterprise: { en: 'Global Enterprise', bg: 'Глобална корпорация' },
+}
 
 function SortBar({ sorts, sort, setSort, lang }) {
   return (
@@ -126,7 +133,7 @@ export default function Corporations() {
               <div className="flex items-center justify-between mt-auto pt-2" style={{ borderTop: '1px solid var(--border)' }}>
                 <div className="flex gap-1.5 flex-wrap">
                   {corp.industry && <span className="badge bg-amber-50 text-amber-700 text-xs">{corp.industry}</span>}
-                  {corp.size     && <span className="badge bg-gray-50 text-gray-600 border border-gray-200 text-xs">{SIZE_LABEL[corp.size] || corp.size}</span>}
+                  {corp.size     && <span className="badge bg-gray-50 text-gray-600 border border-gray-200 text-xs">{SIZE_LABEL[corp.size]?.[lang] || corp.size}</span>}
                 </div>
                 {corp.member_count > 0 && (
                   <span className="text-xs font-medium flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
