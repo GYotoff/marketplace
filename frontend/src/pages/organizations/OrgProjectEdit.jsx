@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
+import CountryCitySelector, { validateCountryCity } from '@/components/ui/CountryCitySelector'
 import { useAuthStore } from '@/store/authStore'
 
 const CITIES    = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other']
@@ -12,7 +13,7 @@ const EMPTY = {
   goals: '', goals_bg: '', deliverables: '', deliverables_bg: '',
   manager_name: '', manager_name_bg: '', manager_email: '',
   cover_url: '',
-  city: '', city_bg: '', address: '', address_bg: '',
+  country: 'Bulgaria', country_bg: 'България', city: '', city_bg: '', address: '', address_bg: '',
   start_date: '', end_date: '',
   volunteers_needed: '', skills_required: '',
   show_in_public: false, status: 'draft',
@@ -97,6 +98,7 @@ export default function OrgProjectEdit() {
   const [form, setForm]       = useState(EMPTY)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState(false)
+  const [ccErrors, setCcErrors] = useState({})
   const [error, setError]     = useState('')
   const isNew = !id
 
@@ -121,7 +123,7 @@ export default function OrgProjectEdit() {
         deliverables: p.deliverables || '', deliverables_bg: p.deliverables_bg || '',
         manager_name: p.manager_name || '', manager_name_bg: p.manager_name_bg || '',
         manager_email: p.manager_email || '', cover_url: p.cover_url || '',
-        city: p.city || '', city_bg: p.city_bg || '',
+        country: p.country || 'Bulgaria', country_bg: p.country_bg || 'България', city: p.city || '', city_bg: p.city_bg || '',
         address: p.address || '', address_bg: p.address_bg || '',
         start_date: p.start_date || '', end_date: p.end_date || '',
         volunteers_needed: p.volunteers_needed || '',
@@ -137,6 +139,9 @@ export default function OrgProjectEdit() {
   const save = async () => {
     setError('')
     if (!form.title.trim()) { setError(lang === 'bg' ? 'Заглавието е задължително' : 'Title is required'); return }
+    const ccErr = validateCountryCity({ countryEN: form.country, countryBG: form.country_bg, cityEN: form.city, cityBG: form.city_bg }, lang)
+    if (Object.keys(ccErr).length) { setCcErrors(ccErr); setError(Object.values(ccErr)[0]); return }
+    setCcErrors({})
     setSaving(true)
     const payload = {
       title: form.title, title_bg: form.title_bg || null,
@@ -145,7 +150,7 @@ export default function OrgProjectEdit() {
       deliverables: form.deliverables || null, deliverables_bg: form.deliverables_bg || null,
       manager_name: form.manager_name || null, manager_name_bg: form.manager_name_bg || null,
       manager_email: form.manager_email || null, cover_url: form.cover_url || null,
-      city: form.city || null, city_bg: form.city_bg || null,
+      country: form.country || null, country_bg: form.country_bg || null, city: form.city || null, city_bg: form.city_bg || null,
       address: form.address || null, address_bg: form.address_bg || null,
       start_date: form.start_date || null, end_date: form.end_date || null,
       volunteers_needed: form.volunteers_needed ? parseInt(form.volunteers_needed) : 0,
@@ -307,23 +312,20 @@ export default function OrgProjectEdit() {
         <div className="card flex flex-col gap-5">
           <h2 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{L.logistics}</h2>
 
-          {/* City — two synced selects */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <F label={L.city_en}>
-              <select className="input" value={form.city}
-                onChange={e => { const idx = CITIES.indexOf(e.target.value); set('city', e.target.value); if (idx >= 0) set('city_bg', CITIES_BG[idx]) }}>
-                <option value="">{L.select_city}</option>
-                {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </F>
-            <F label={L.city_bg_l}>
-              <select className="input" value={form.city_bg}
-                onChange={e => { const idx = CITIES_BG.indexOf(e.target.value); set('city_bg', e.target.value); if (idx >= 0) set('city', CITIES[idx]) }}>
-                <option value="">{L.select_city}</option>
-                {CITIES_BG.map((c, i) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </F>
-          </div>
+          {/* Country + City */}
+          <CountryCitySelector
+            countryEN={form.country}
+            countryBG={form.country_bg}
+            cityEN={form.city}
+            cityBG={form.city_bg}
+            lang={lang}
+            errors={ccErrors}
+            onChange={({ countryEN, countryBG, cityEN, cityBG }) => {
+              set('country', countryEN); set('country_bg', countryBG)
+              set('city', cityEN);       set('city_bg', cityBG)
+              setCcErrors({})
+            }}
+          />
 
           {/* Address — bilingual free text */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
