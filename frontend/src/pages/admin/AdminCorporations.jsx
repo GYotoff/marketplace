@@ -216,8 +216,8 @@ export default function AdminCorporations() {
     <div className="max-w-5xl mx-auto px-4 py-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-medium text-gray-900">{lang === 'bg' ? 'Одобрения на корпорации' : 'Corporation approvals'}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{lang === 'bg' ? 'Преглед и одобрение на заявки за регистрация на корпорации' : 'Review and approve corporation registration requests'}</p>
+          <h1 className="text-2xl font-medium" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Одобрения на корпорации' : 'Corporation approvals'}</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>{lang === 'bg' ? 'Преглед и одобрение на заявки за регистрация на корпорации' : 'Review and approve corporation registration requests'}</p>
         </div>
         <input
           type="search"
