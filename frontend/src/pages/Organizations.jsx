@@ -3,6 +3,15 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 
+const TYPE_LABEL = {
+  ngo:        { en: 'NGO',             bg: 'НПО' },
+  nonprofit:  { en: 'Non-profit',      bg: 'Нестопанска' },
+  company:    { en: 'Company',         bg: 'Компания' },
+  government: { en: 'Government org',  bg: 'Правителствена' },
+  education:  { en: 'Education',       bg: 'Образование' },
+  investor:   { en: 'Investor',        bg: 'Инвеститор' },
+  other:      { en: 'Other',           bg: 'Друго' },
+}
 const SORTS = [
   { key: 'az',        en: 'A → Z',          bg: 'А → Я' },
   { key: 'za',        en: 'Z → A',          bg: 'Я → А' },
@@ -129,7 +138,7 @@ export default function Organizations() {
               {/* Type + counters */}
               <div className="flex items-center justify-between mt-auto pt-2" style={{ borderTop: '1px solid var(--border)' }}>
                 {org.type
-                  ? <span className="badge bg-blue-50 text-blue-700 text-xs">{org.type}</span>
+                  ? <span className="badge bg-blue-50 text-blue-700 text-xs">{TYPE_LABEL[org.type]?.[lang] || org.type}</span>
                   : <span />}
                 <div className="flex gap-2 text-xs" style={{ color: 'var(--text-faint)' }}>
                   {(org.project_count > 0) && <span>📋 {org.project_count}</span>}
