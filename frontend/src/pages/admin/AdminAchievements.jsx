@@ -202,7 +202,7 @@ export default function AdminAchievements() {
   })
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
+    <div className="max-w-5xl mx-auto px-4 py-10">
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white ${toast.type === 'error' ? 'bg-red-500' : 'bg-brand-400'}`}>
           {toast.msg}
@@ -213,7 +213,7 @@ export default function AdminAchievements() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Постижения' : 'Achievements'}</h1>
+          <h1 className="text-2xl font-medium" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Постижения' : 'Achievements'}</h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
 {lang === 'bg' ? `Определи значките за постижения на доброволците · ${rows.length} общо` : `Define achievement badges that can be awarded to volunteers · ${rows.length} total`}
           </p>
