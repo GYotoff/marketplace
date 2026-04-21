@@ -7,9 +7,20 @@ import { Link } from 'react-router-dom'
 
 
 const TYPE_LABEL = {
-  ngo: 'NGO', nonprofit: 'Non-profit', company: 'Company',
-  government: 'Government org', education: 'Education',
-  investor: 'Investor', other: 'Other',
+  ngo:        { en: 'NGO',             bg: 'НПО' },
+  nonprofit:  { en: 'Non-profit',      bg: 'Нестопанска' },
+  company:    { en: 'Company',         bg: 'Компания' },
+  government: { en: 'Government org',  bg: 'Правителствена' },
+  education:  { en: 'Education',       bg: 'Образование' },
+  investor:   { en: 'Investor',        bg: 'Инвеститор' },
+  other:      { en: 'Other',           bg: 'Друго' },
+}
+
+const STATUS_LABEL = {
+  pending:   { en: 'Pending',   bg: 'Чакащ' },
+  approved:  { en: 'Approved',  bg: 'Одобрен' },
+  declined:  { en: 'Declined',  bg: 'Отказан' },
+  suspended: { en: 'Suspended', bg: 'Спрян' },
 }
 
 const STATUS_BADGE = {
@@ -49,15 +60,15 @@ function OrgRow({ org, onAction, lang = 'en' }) {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <Link to={'/admin/organizations/' + org.id} className="font-medium text-gray-900 hover:text-brand-400 transition-colors">{org.name}</Link>
-            <span className={`badge text-xs px-2 py-0.5 capitalize ${STATUS_BADGE[org.status]}`}>
-              {org.status}
+            <Link to={'/admin/organizations/' + org.id} className="font-medium text-gray-900 hover:text-brand-400 transition-colors">{lang === 'bg' ? (org.name_bg || org.name) : org.name}</Link>
+            <span className={`badge text-xs px-2 py-0.5 ${STATUS_BADGE[org.status]}`}>
+              {STATUS_LABEL[org.status]?.[lang] || org.status}
             </span>
-            <span className="badge bg-gray-50 text-gray-500 border border-gray-200 text-xs capitalize">
-              {TYPE_LABEL[org.type] || org.type}
+            <span className="badge bg-gray-50 text-gray-500 border border-gray-200 text-xs">
+              {TYPE_LABEL[org.type]?.[lang] || org.type}
             </span>
           </div>
-          <p className="text-sm text-gray-500">{org.city} · {org.email}</p>
+          <p className="text-sm text-gray-500">{lang === 'bg' ? (org.city_bg || org.city) : org.city} · {org.email}</p>
           {org.website && (
             <a href={org.website} target="_blank" rel="noreferrer"
               className="text-xs text-brand-400 hover:underline">{org.website}</a>
