@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import CountryCitySelector, { validateCountryCity } from '@/components/ui/CountryCitySelector'
 import { validatePhone } from '@/lib/validators'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
@@ -18,7 +19,7 @@ const EMPTY = {
   requirements: '', requirements_bg: '',
   contact_person: '', contact_person_bg: '',
   contact_email: '', contact_phone: '',
-  city: '', city_bg: '', address: '', address_bg: '',
+  country: 'Bulgaria', country_bg: 'България', city: '', city_bg: '', address: '', address_bg: '',
   location_lat: '', location_lng: '',
   event_type: 'onsite', online_url: '', is_online: false,
   event_date: '', end_date: '',
@@ -174,6 +175,7 @@ export default function OrgEventEdit() {
   const [form, setForm] = useState(EMPTY)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [ccErrors, setCcErrors] = useState({})
   const [phoneEventError, setPhoneEventError] = useState(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState('Basic')
@@ -233,6 +235,9 @@ export default function OrgEventEdit() {
     if (!form.event_date) { setError('Start date & time is required'); return }
     const phoneErr = validatePhone(form.contact_phone, lang)
     if (phoneErr) { setError(phoneErr); return }
+    const ccErr = validateCountryCity({ countryEN: form.country, countryBG: form.country_bg, cityEN: form.city, cityBG: form.city_bg }, lang)
+    if (Object.keys(ccErr).length) { setCcErrors(ccErr); setError(Object.values(ccErr)[0]); return }
+    setCcErrors({})
     setSaving(true)
     const isOnline = form.event_type === 'online' || form.event_type === 'hybrid'
     const payload = {
@@ -393,37 +398,19 @@ export default function OrgEventEdit() {
         {tab === 'Location' && <>
           <div className="card flex flex-col gap-5">
             {isOnsite && <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="City (EN)">
-                  <select className="input" value={form.city} onChange={e => set('city', e.target.value)}>
-                    <option value="">Select city</option>
-                    {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </Field>
-                <Field label="City (BG)">
-                  <input type="text" className="input" placeholder="напр. София" value={form.city_bg} onChange={e => set('city_bg', e.target.value)} />
-                </Field>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Address (EN)">
-                  <input type="text" className="input" placeholder="e.g. 1 Bulgaria Blvd" value={form.address} onChange={e => set('address', e.target.value)} />
-                </Field>
-                <Field label="Address (BG)">
-                  <input type="text" className="input" placeholder="напр. бул. България 1" value={form.address_bg} onChange={e => set('address_bg', e.target.value)} />
-                </Field>
-              </div>
-            </>}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Geolocation (for map)</label>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Latitude">
-                  <input type="number" step="any" className="input" placeholder="42.6977" value={form.location_lat} onChange={e => set('location_lat', e.target.value)} />
-                </Field>
-                <Field label="Longitude">
-                  <input type="number" step="any" className="input" placeholder="23.3219" value={form.location_lng} onChange={e => set('location_lng', e.target.value)} />
-                </Field>
-              </div>
+              <CountryCitySelector
+                countryEN={form.country}
+                countryBG={form.country_bg}
+                cityEN={form.city}
+                cityBG={form.city_bg}
+                lang={lang}
+                errors={ccErrors}
+                onChange={({ countryEN, countryBG, cityEN, cityBG }) => {
+                  set('country', countryEN); set('country_bg', countryBG)
+                  set('city', cityEN);       set('city_bg', cityBG)
+                  setCcErrors({})
+                }}
+              />
               {form.location_lat && form.location_lng && (
                 <a href={`https://www.google.com/maps?q=${form.location_lat},${form.location_lng}`}
                   target="_blank" rel="noreferrer"
