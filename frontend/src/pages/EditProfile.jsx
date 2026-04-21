@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { validatePhone } from '@/lib/validators'
 import AvatarUpload from '@/components/ui/AvatarUpload'
+import CountryCitySelector, { validateCountryCity } from '@/components/ui/CountryCitySelector'
 
 const BULGARIAN_CITIES = [
   'Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven',
@@ -55,7 +56,7 @@ export default function EditProfile() {
   const [form, setForm] = useState({
     full_name: '', full_name_bg: '', phone: '',
     bio: '', bio_bg: '',
-    city: '', city_bg: '', country_bg: '',
+    city: '', city_bg: '', country: '', country_bg: '',
     birth_year: '', gender: '',
     availability: [],
     skills: '', skills_bg: '',
@@ -64,6 +65,7 @@ export default function EditProfile() {
   const [pwForm, setPwForm] = useState({ current: '', password: '', confirm: '' })
   const [saving, setSaving] = useState(false)
   const [phoneError, setPhoneError] = useState(null)
+  const [ccErrors, setCcErrors]       = useState({})
   const [pwSaving, setPwSaving] = useState(false)
   const [mediaLibrary, setMediaLibrary] = useState([])
   const mediaRef = useRef()
@@ -80,7 +82,7 @@ export default function EditProfile() {
       full_name: profile.full_name || '', full_name_bg: profile.full_name_bg || '',
       phone: profile.phone || '',
       bio: profile.bio || '', bio_bg: profile.bio_bg || '',
-      city: profile.city || '', city_bg: profile.city_bg || '', country_bg: profile.country_bg || '',
+      city: profile.city || '', city_bg: profile.city_bg || '', country: profile.country || '', country_bg: profile.country_bg || '',
       birth_year: profile.birth_year || '',
       gender: profile.gender || '',
       availability: profile.availability || [],
@@ -115,15 +117,19 @@ export default function EditProfile() {
     try {
           const phoneErr = validatePhone(form.phone, lang)
     if (phoneErr) { flash(phoneErr, 'error'); return }
+    const ccErr = validateCountryCity({ countryEN: form.country, countryBG: form.country_bg, cityEN: form.city, cityBG: form.city_bg }, lang)
+    if (Object.keys(ccErr).length) { setCcErrors(ccErr); flash(lang === 'bg' ? 'Моля попълнете държавата и града.' : 'Please fill in country and city.', 'error'); return }
+    setCcErrors({})
     const updates = {
         full_name:     form.full_name     || null,
         full_name_bg:  form.full_name_bg  || null,
         phone:         form.phone         || null,
         bio:           form.bio           || null,
         bio_bg:        form.bio_bg        || null,
-        city:          form.city          || null,
-        city_bg:       form.city_bg       || null,
-        country_bg:    form.country_bg    || null,
+        city:          form.city       || null,
+        city_bg:       form.city_bg    || null,
+        country:       form.country     || null,
+        country_bg:    form.country_bg  || null,
         birth_year:    form.birth_year    ? parseInt(form.birth_year) : null,
         gender:        form.gender        || null,
         availability:  form.availability,
@@ -277,28 +283,22 @@ export default function EditProfile() {
             {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
           </div>
 
-          {/* City */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (EN)' : 'City (EN)'}</label>
-              <select className="input" value={form.city} onChange={e => set('city', e.target.value)}>
-                <option value="">{lang === 'bg' ? 'Изберете' : 'Select city'}</option>
-                {BULGARIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Град (BG)' : 'City (BG)'}</label>
-              <input type="text" className="input" placeholder="напр. София"
-                value={form.city_bg} onChange={e => set('city_bg', e.target.value)} />
-            </div>
-          </div>
-
-          {/* Country BG */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Country (BG) — Държава (BG)</label>
-            <input type="text" className="input" placeholder="напр. България"
-              value={form.country_bg} onChange={e => set('country_bg', e.target.value)} />
-          </div>
+          {/* Country + City via shared component */}
+          <CountryCitySelector
+            countryEN={form.country}
+            countryBG={form.country_bg}
+            cityEN={form.city}
+            cityBG={form.city_bg}
+            lang={lang}
+            errors={ccErrors}
+            onChange={({ countryEN, countryBG, cityEN, cityBG }) => {
+              set('country', countryEN)
+              set('country_bg', countryBG)
+              set('city', cityEN)
+              set('city_bg', cityBG)
+              setCcErrors({})
+            }}
+          />
 
           {/* Bio */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
