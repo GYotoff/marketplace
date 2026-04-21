@@ -239,8 +239,8 @@ export default function AdminOrganizations() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-medium text-gray-900">{lang === 'bg' ? 'Одобрения на организации' : 'Organization approvals'}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-medium" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Одобрения на организации' : 'Organization approvals'}</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
             {lang === 'bg' ? 'Преглед и одобрение на заявки за регистрация на организации' : 'Review and approve organization registration requests'}
           </p>
         </div>
