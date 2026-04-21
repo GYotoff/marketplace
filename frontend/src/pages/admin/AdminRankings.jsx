@@ -105,7 +105,7 @@ function RankingForm({ initial = EMPTY, onSave, onCancel, saving, lang = 'en' })
           <input className="input" value={form.message_bg} onChange={e => set('message_bg', e.target.value)} placeholder="Поздравления!…" />
         </div>
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium mb-2" style={{ color: 'var(--text-muted)' }}>Ranking icon</label>
+          <label className="block text-xs font-medium mb-2" style={{ color: 'var(--text-muted)' }}>{lang === 'bg' ? 'Икона на ранг' : 'Ranking icon'}</label>
           <RankingIconUpload
             currentUrl={form.icon_url || ''}
             onUploaded={url => set('icon_url', url)}
@@ -198,11 +198,11 @@ export default function AdminRankings() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Рангове' : 'Rankings'}</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>Manage volunteer ranking tiers and their icons</p>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>{lang === 'bg' ? 'Управлявай ранговете на доброволците и техните икони' : 'Manage volunteer ranking tiers and their icons'}</p>
         </div>
         {editing !== 'new' && (
           <button type="button" onClick={() => setEditing('new')} className="btn-primary text-sm">
-            + New ranking
+            {lang === 'bg' ? '+ Нов ранг' : '+ New ranking'}
           </button>
         )}
       </div>
@@ -210,7 +210,7 @@ export default function AdminRankings() {
       {/* New form */}
       {editing === 'new' && (
         <div className="mb-5">
-          <RankingForm onSave={saveRow} onCancel={() => setEditing(null)} saving={saving} />
+          <RankingForm onSave={saveRow} onCancel={() => setEditing(null)} saving={saving} lang={lang} />
         </div>
       )}
 
@@ -220,7 +220,7 @@ export default function AdminRankings() {
         {rows.map(row => (
           <div key={row.id}>
             {editing?.id === row.id ? (
-              <RankingForm initial={editing} onSave={saveRow} onCancel={() => setEditing(null)} saving={saving} />
+              <RankingForm initial={editing} onSave={saveRow} onCancel={() => setEditing(null)} saving={saving} lang={lang} />
             ) : (
               <div className="card flex items-center gap-4 flex-wrap">
                 {/* Icon */}
@@ -252,7 +252,7 @@ export default function AdminRankings() {
                     style={{ borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    Delete
+                    {lang === 'bg' ? 'Изтрий' : 'Delete'}
                   </button>
                 </div>
               </div>
