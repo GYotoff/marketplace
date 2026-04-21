@@ -48,7 +48,7 @@ export default function Projects() {
   useEffect(() => {
     supabase
       .from('projects')
-      .select('id, title, title_bg, description, description_bg, goals, goals_bg, deliverables, deliverables_bg, cover_url, city, city_bg, address, address_bg, start_date, end_date, volunteers_needed, volunteers_enrolled, status, created_at, organizations(name, slug, logo_url)')
+      .select('id, title, title_bg, description, description_bg, goals, goals_bg, deliverables, deliverables_bg, cover_url, city, city_bg, address, address_bg, start_date, end_date, volunteers_needed, volunteers_enrolled, status, created_at, organizations(name, name_bg, slug, logo_url)')
       .eq('status', 'published')
       .then(({ data }) => { setProjects(data || []); setLoading(false) })
   }, [])
@@ -112,7 +112,7 @@ export default function Projects() {
               )}
               <div className="flex items-center gap-2">
                 {org?.logo_url && <img src={org.logo_url} alt={org.name} className="w-5 h-5 rounded object-cover shrink-0" />}
-                {org?.name && <p className="text-xs truncate" style={{ color: 'var(--text-faint)' }}>{org.name}</p>}
+                {org?.name && <p className="text-xs truncate" style={{ color: 'var(--text-faint)' }}>{lang === 'bg' ? (org.name_bg || org.name) : org.name}</p>}
               </div>
               <p className="font-semibold text-sm leading-tight" style={{ color: 'var(--text)' }}>{title}</p>
               {desc && <p className="text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--text-muted)' }}>{desc}</p>}
