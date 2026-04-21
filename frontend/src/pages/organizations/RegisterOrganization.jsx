@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
+import CountryCitySelector, { validateCountryCity } from '@/components/ui/CountryCitySelector'
 import { validatePhone } from '@/lib/validators'
 import { useAuthStore } from '@/store/authStore'
 
@@ -83,7 +84,8 @@ export default function RegisterOrganization() {
 
   // Organization data
   const [org, setOrg] = useState({
-    name: '', name_bg: '', type: 'ngo', description: '', description_bg: '',
+    name: '', name_bg: '', type: 'ngo',
+    country: 'Bulgaria', country_bg: 'България', description: '', description_bg: '',
     tagline: '', founded_year: '', registration_number: '',
     city: '', city_bg: '', address: '', address_bg: '', website: '',
     email: '', phone: '',
@@ -113,6 +115,8 @@ export default function RegisterOrganization() {
             const phoneErr = validatePhone(org.phone, lang)
       if (phoneErr) { setError(phoneErr); return false }
     if (!org.city) { setError('City is required'); return false }
+      const ccErr = validateCountryCity({ countryEN: org.country, countryBG: org.country_bg, cityEN: org.city, cityBG: org.city_bg }, lang)
+      if (Object.keys(ccErr).length) { setError(Object.values(ccErr)[0]); return false }
       const uicErr = validateUIC(org.registration_number, lang)
       if (uicErr) { setError(uicErr); return false }
       if (!org.email.trim()) { setError('Contact email is required'); return false }
@@ -146,12 +150,16 @@ export default function RegisterOrganization() {
         p_name: org.name,
         p_name_bg: org.name_bg || null,
         p_slug: slugify(org.name),
+        p_country: org.country || null,
+        p_country_bg: org.country_bg || null,
         p_type: org.type,
         p_description: org.description,
         p_description_bg: org.description_bg || null,
         p_tagline: org.tagline || null,
         p_founded_year: org.founded_year ? parseInt(org.founded_year) : null,
         p_registration_number: org.registration_number || null,
+        p_country: org.country || null,
+        p_country_bg: org.country_bg || null,
         p_city: org.city,
         p_city_bg: org.city_bg || null,
         p_address: org.address || null,
@@ -322,44 +330,18 @@ export default function RegisterOrganization() {
                 <h2 className="text-base font-medium text-gray-900 mb-1">Contact information</h2>
                 <p className="text-sm text-gray-500">How volunteers and partners can reach you.</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">City <span className="text-red-400">*</span></label>
-                  <select className="input" value={org.city}
-                    onChange={e => {
-                      const EN = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik','Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Online','Other'];
-                      const BG = ['София','Пловдив','Варна','Бургас','Русе','Стара Загора','Плевен','Сливен','Добрич','Шумен','Перник','Хасково','Ямбол','Пазарджик','Благоевград','Велико Търново','Враца','Габрово','Видин','Монтана','Онлайн','Друго'];
-                      setO('city', e.target.value);
-                      const idx = EN.indexOf(e.target.value);
-                      if (idx >= 0) setO('city_bg', BG[idx]);
-                    }}>
-                    <option value="">Select city</option>
-                    {BULGARIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
-                  <input type="tel" className="input" placeholder="+359 2 123 4567"
-                    value={org.phone}
-                    onChange={e => { setO('phone', e.target.value); setPhoneOrgError(validatePhone(e.target.value, lang)) }} />
-                  {phoneOrgError && <p className="text-xs text-red-500 mt-1">{phoneOrgError}</p>}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
-                <input type="text" className="input" placeholder="Street address (EN)"
-                  value={org.address} onChange={e => setO('address', e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Address (BG)</label>
-                <input type="text" className="input" placeholder="напр. бул. Витоша 15"
-                  value={org.address_bg} onChange={e => setO('address_bg', e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact email <span className="text-red-400">*</span></label>
-                <input type="email" required className="input" placeholder="contact@organization.org"
-                  value={org.email} onChange={e => setO('email', e.target.value)} />
-              </div>
+              <CountryCitySelector
+                countryEN={org.country || 'Bulgaria'}
+                countryBG={org.country_bg || 'България'}
+                cityEN={org.city}
+                cityBG={org.city_bg}
+                lang={lang}
+                errors={{}}
+                onChange={({ countryEN, countryBG, cityEN, cityBG }) => {
+                  setO('country', countryEN); setO('country_bg', countryBG)
+                  setO('city', cityEN);       setO('city_bg', cityBG)
+                }}
+              />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Website</label>
                 <input type="url" className="input" placeholder="https://yourorganization.org"
