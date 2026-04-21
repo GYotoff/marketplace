@@ -104,6 +104,33 @@ const EVT_SORTS = [
   { key: 'az',     en: 'A → Z',         bg: 'А → Я' },
 ]
 
+function SortBar({ sorts, sort, setSort, lang }) {
+  return (
+    <div className="flex items-center gap-2">
+      <label className="text-xs font-medium whitespace-nowrap" style={{ color: 'var(--text-faint)' }}>
+        {lang === 'bg' ? 'Сортирай:' : 'Sort by:'}
+      </label>
+      <select
+        value={sort}
+        onChange={e => setSort(e.target.value)}
+        className="text-xs rounded-lg border px-2.5 py-1.5 pr-7 appearance-none cursor-pointer transition-colors"
+        style={{
+          borderColor: 'var(--border-mid)',
+          background:  'var(--bg-card)',
+          color:       'var(--text)',
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 8px center',
+        }}
+      >
+        {sorts.map(s => (
+          <option key={s.key} value={s.key}>{lang === 'bg' ? s.bg : s.en}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 export default function Events() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
@@ -166,11 +193,14 @@ export default function Events() {
 
       {/* ── Upcoming ── */}
       <section className="mb-10">
-        <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-base font-semibold text-gray-800">{L.upcoming}</h2>
-          <span className="badge bg-brand-50 text-brand-700 border border-brand-100 text-xs px-2 py-0.5">
-            {filteredUpcoming.length}
-          </span>
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-semibold text-gray-800">{L.upcoming}</h2>
+            <span className="badge bg-brand-50 text-brand-700 border border-brand-100 text-xs px-2 py-0.5">
+              {filteredUpcoming.length}
+            </span>
+          </div>
+          <SortBar sorts={EVT_SORTS} sort={sort} setSort={setSort} lang={lang} />
         </div>
 
         {loading && <p className="text-gray-400 text-sm">{t('common.loading')}</p>}
@@ -187,11 +217,14 @@ export default function Events() {
 
       {/* ── Past ── */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-base font-semibold text-gray-800">{L.past}</h2>
-          <span className="badge bg-gray-100 text-gray-600 border border-gray-200 text-xs px-2 py-0.5">
-            {filteredPast.length}
-          </span>
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-semibold text-gray-800">{L.past}</h2>
+            <span className="badge bg-gray-100 text-gray-600 border border-gray-200 text-xs px-2 py-0.5">
+              {filteredPast.length}
+            </span>
+          </div>
+          <SortBar sorts={EVT_SORTS} sort={sort} setSort={setSort} lang={lang} />
         </div>
 
         {loadingPast && <p className="text-gray-400 text-sm">{t('common.loading')}</p>}
