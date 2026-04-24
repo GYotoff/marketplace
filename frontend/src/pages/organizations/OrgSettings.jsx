@@ -136,7 +136,7 @@ const validateUIC = (val, lang) => {
   if (!val) return null  // empty is allowed (optional field)
   if (!UIC_RE.test(val.trim())) {
     return lang === 'bg'
-      ? 'Невалиден ЕИК/Булстат. Трябва да съдържа 9 или 13 цифри.'
+      ? 'ÐÐµÐ²Ð°Ð»Ð¸Ð´ÐµÐ½ ÐÐÐ/ÐÑÐ»ÑÑÐ°Ñ. Ð¢ÑÑÐ±Ð²Ð° Ð´Ð° ÑÑÐ´ÑÑÐ¶Ð° 9 Ð¸Ð»Ð¸ 13 ÑÐ¸ÑÑÐ¸.'
       : 'Invalid UIC/Bulstat. Must be exactly 9 or 13 digits.'
   }
   return null
@@ -224,7 +224,7 @@ export default function OrgSettings() {
         const phoneErr = validatePhone(form.phone, lang)
     if (phoneErr) { showToast(phoneErr, 'error'); return }
     const ccErr = validateCountryCity({ countryEN: form.country, countryBG: form.country_bg, cityEN: form.city, cityBG: form.city_bg }, lang)
-    if (Object.keys(ccErr).length) { setCcErrors(ccErr); showToast(lang === 'bg' ? 'Моля попълнете държавата и града.' : 'Please fill in country and city.', 'error'); return }
+    if (Object.keys(ccErr).length) { setCcErrors(ccErr); showToast(lang === 'bg' ? 'ÐÐ¾Ð»Ñ Ð¿Ð¾Ð¿ÑÐ»Ð½ÐµÑÐµ Ð´ÑÑÐ¶Ð°Ð²Ð°ÑÐ° Ð¸ Ð³ÑÐ°Ð´Ð°.' : 'Please fill in country and city.', 'error'); return }
     setCcErrors({})
     const uicErr = validateUIC(form.registration_number, lang)
     if (uicErr) { showToast(uicErr, 'error'); return }
@@ -303,7 +303,7 @@ export default function OrgSettings() {
           </p>
         </div>
         <Link to={`/organizations/${org.slug}`} className="btn-secondary text-sm">
-          View page →
+          View page â
         </Link>
       </div>
 
@@ -333,16 +333,16 @@ export default function OrgSettings() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  {lang === 'bg' ? 'Име на организацията (EN)' : 'Organization name (EN)'} <span className="text-red-400">*</span>
+                  {lang === 'bg' ? 'ÐÐ¼Ðµ Ð½Ð° Ð¾ÑÐ³Ð°Ð½Ð¸Ð·Ð°ÑÐ¸ÑÑÐ° (EN)' : 'Organization name (EN)'} <span className="text-red-400">*</span>
                 </label>
                 <input type="text" required className="input"
                   value={form.name} onChange={e => set('name', e.target.value)} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  {lang === 'bg' ? 'Ime на организацията (BG)' : 'Organization name (BG)'}
+                  {lang === 'bg' ? 'Ime Ð½Ð° Ð¾ÑÐ³Ð°Ð½Ð¸Ð·Ð°ÑÐ¸ÑÑÐ° (BG)' : 'Organization name (BG)'}
                 </label>
-                <input type="text" className="input" placeholder="напр. Датаверт"
+                <input type="text" className="input" placeholder="Ð½Ð°Ð¿Ñ. ÐÐ°ÑÐ°Ð²ÐµÑÑ"
                   value={form.name_bg} onChange={e => set('name_bg', e.target.value)} />
               </div>
             </div>
@@ -370,7 +370,7 @@ export default function OrgSettings() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Tagline (BG)</label>
-              <input type="text" className="input" placeholder="Кратко мото на български"
+              <input type="text" className="input" placeholder="ÐÑÐ°ÑÐºÐ¾ Ð¼Ð¾ÑÐ¾ Ð½Ð° Ð±ÑÐ»Ð³Ð°ÑÑÐºÐ¸"
                 value={form.tagline_bg} onChange={e => set('tagline_bg', e.target.value)} />
             </div>
 
@@ -387,13 +387,13 @@ export default function OrgSettings() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Description (BG)</label>
               <textarea rows={4} className="input resize-none"
-                placeholder="Описание на организацията на български..."
+                placeholder="ÐÐ¿Ð¸ÑÐ°Ð½Ð¸Ðµ Ð½Ð° Ð¾ÑÐ³Ð°Ð½Ð¸Ð·Ð°ÑÐ¸ÑÑÐ° Ð½Ð° Ð±ÑÐ»Ð³Ð°ÑÑÐºÐ¸..."
                 value={form.description_bg} onChange={e => set('description_bg', e.target.value)} />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Registration number</label>
-              <input type="text" className="input" placeholder="UIC / Булстат"
+              <input type="text" className="input" placeholder="UIC / ÐÑÐ»ÑÑÐ°Ñ"
                 value={form.registration_number}
                 onChange={e => { set('registration_number', e.target.value); setUicError(validateUIC(e.target.value, lang)) }} />
               {uicError && <p className="text-xs text-red-500 mt-1">{uicError}</p>}
@@ -414,15 +414,15 @@ export default function OrgSettings() {
             cityBG={form.city_bg}
             lang={lang}
             errors={ccErrors}
-            onChange={({ countryEN, countryBG, cityEN, cityBG }) => {{
+            onChange={({ countryEN, countryBG, cityEN, cityBG }) => {
               set('country', countryEN); set('country_bg', countryBG)
               set('city', cityEN);       set('city_bg', cityBG)
-              setCcErrors({{}})
-            }}}
+              setCcErrors({})
+            }}
           />
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Телефон' : 'Phone'}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Ð¢ÐµÐ»ÐµÑÐ¾Ð½' : 'Phone'}</label>
               <input type="tel" className="input" placeholder="+359 2 123 4567"
                 value={form.phone}
                 onChange={e => { set('phone', e.target.value); setPhoneError(validatePhone(e.target.value, lang)) }} />
@@ -469,7 +469,7 @@ export default function OrgSettings() {
           <div className="card flex flex-col gap-7">
             <ImageUpload
               label="Organization logo"
-              hint="JPG, PNG, WebP or SVG · Max 2MB · Square recommended"
+              hint="JPG, PNG, WebP or SVG Â· Max 2MB Â· Square recommended"
               currentUrl={form.logo_url}
               bucket="org-logos"
               orgId={org.id}
@@ -481,7 +481,7 @@ export default function OrgSettings() {
             <div className="border-t border-gray-100 pt-6">
               <ImageUpload
                 label="Cover image"
-                hint="JPG, PNG or WebP · Max 5MB · 1200×400px recommended"
+                hint="JPG, PNG or WebP Â· Max 5MB Â· 1200Ã400px recommended"
                 currentUrl={form.cover_url}
                 bucket="org-covers"
                 orgId={org.id}
