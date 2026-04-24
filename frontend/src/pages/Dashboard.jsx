@@ -40,7 +40,17 @@ function VolunteerDashboard({ profile }) {
       .then(({ data }) => { if (data?.corporations) setCorpMembership(data) })
   }, [profile.id])
 
-  const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand-50 text-brand-700', rejected: 'bg-red-50 text-red-700', completed: 'bg-gray-100 text-gray-600' }
+  const STATUS_LABEL = {
+  pending:   { en: 'Pending',   bg: 'Чакащ' },
+  approved:  { en: 'Approved',  bg: 'Одобрен' },
+  declined:  { en: 'Declined',  bg: 'Отказан' },
+  withdrawn: { en: 'Withdrawn', bg: 'Оттеглен' },
+  confirmed: { en: 'Confirmed', bg: 'Потвърден' },
+  attended:  { en: 'Attended',  bg: 'Присъствал' },
+  cancelled: { en: 'Cancelled', bg: 'Отказан' },
+}
+
+const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand-50 text-brand-700', rejected: 'bg-red-50 text-red-700', completed: 'bg-gray-100 text-gray-600' }
   const memberBadge = {
     approved: 'bg-brand-50 text-brand-700 border border-brand-200',
     pending:  'bg-amber-50 text-amber-700 border border-amber-200',
@@ -111,7 +121,7 @@ function VolunteerDashboard({ profile }) {
           />
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wide mb-0.5" style={{ color: 'var(--text-faint)' }}>
-              {lang === 'bg' ? 'Вашият ранг' : 'Your ranking'}
+              {L.your_ranking}
             </p>
             <p className="font-semibold text-base" style={{ color: 'var(--text)' }}>
               {lang === 'bg' ? (ranking.type_bg || ranking.type) : ranking.type}
@@ -123,7 +133,7 @@ function VolunteerDashboard({ profile }) {
             )}
             {profile.ranking_date && (
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
-                {lang === 'bg' ? 'От' : 'Since'}: {new Date(profile.ranking_date).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB')}
+                {L.since}: {new Date(profile.ranking_date).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB')}
               </p>
             )}
           </div>
@@ -143,11 +153,11 @@ function VolunteerDashboard({ profile }) {
           : <div className="flex flex-col gap-2">
               {applications.map(a => (
                 <div key={a.id} className="card flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-sm">{a.projects?.title}</p>
-                    <p className="text-xs text-gray-400">{a.projects?.organizations?.name}</p>
+                  <div className="min-w-0">
+                    <Link to={'/projects/' + a.project_id} className="font-medium text-sm hover:text-brand-500 transition-colors block truncate">{a.projects?.title}</Link>
+                    <p className="text-xs text-gray-400 truncate">{a.projects?.organizations?.name}</p>
                   </div>
-                  <span className={`badge ${statusColor[a.status] || 'bg-gray-100 text-gray-600'} capitalize`}>{a.status}</span>
+                  <span className={`badge ${statusColor[a.status] || 'bg-gray-100 text-gray-600'}`}>{STATUS_LABEL[a.status]?.[lang] || a.status}</span>
                 </div>
               ))}
             </div>
@@ -161,14 +171,14 @@ function VolunteerDashboard({ profile }) {
           : <div className="flex flex-col gap-2">
               {registrations.map(r => (
                 <div key={r.reg_id} className="card flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-sm">{r.event_title}</p>
-                    <p className="text-xs text-gray-400">
+                  <div className="min-w-0">
+                    <Link to={'/events/' + r.event_id} className="font-medium text-sm hover:text-brand-500 transition-colors block truncate">{r.event_title}</Link>
+                    <p className="text-xs text-gray-400 truncate">
                       {r.org_name}{r.event_date ? ' · ' + new Date(r.event_date).toLocaleDateString() : ''}
                       {r.hours_logged > 0 ? ' · ⏱ ' + r.hours_logged + 'h' : ''}
                     </p>
                   </div>
-                  <span className={`badge ${statusColor[r.reg_status] || 'bg-gray-100 text-gray-600'} capitalize`}>{r.reg_status}</span>
+                  <span className={`badge ${statusColor[r.reg_status] || 'bg-gray-100 text-gray-600'}`}>{STATUS_LABEL[r.reg_status]?.[lang] || r.reg_status}</span>
                 </div>
               ))}
             </div>
