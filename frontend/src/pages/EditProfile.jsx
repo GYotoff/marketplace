@@ -211,7 +211,7 @@ export default function EditProfile() {
   ]
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
+    <div className="max-w-5xl mx-auto px-4 py-10">
       {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
       <div className="flex items-center gap-3 mb-6">
