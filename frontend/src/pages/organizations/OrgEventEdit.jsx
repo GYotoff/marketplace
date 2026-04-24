@@ -424,6 +424,7 @@ export default function OrgEventEdit() {
       </div>
 
         {/* ── Contact ── */}
+        </>}
         {tab === 'Contact' && <>
           <div className="card flex flex-col gap-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
