@@ -177,7 +177,6 @@ export default function OrgEventEdit() {
   const [saving, setSaving] = useState(false)
   const [ccErrors, setCcErrors] = useState({})
   const [phoneEventError, setPhoneEventError] = useState(null)
-  const [phoneEventError, setPhoneEventError] = useState(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState('Basic')
   const isNew = !eventId
