@@ -13,7 +13,6 @@ const STATUS_BADGE = {
 
 const REG_STATUS_BADGE = {
   approved:  'bg-brand-50 text-brand-700 border border-brand-200',
-  approved:  'bg-brand-50 text-brand-700 border border-brand-200',
   rejected:  'bg-red-50 text-red-600',
   confirmed: 'bg-green-50 text-green-700 border border-green-200',
 }
