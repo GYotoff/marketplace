@@ -9,7 +9,7 @@ function InfoRow({ label, value }) {
   return (
     <div className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0">
       <span className="text-sm text-gray-400 w-36 shrink-0">{label}</span>
-      <span className="text-sm text-gray-900">{value}</span>
+      <span className="text-sm text-gray-900 break-words min-w-0 flex-1">{value}</span>
     </div>
   )
 }
