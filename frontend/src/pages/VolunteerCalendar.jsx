@@ -269,8 +269,8 @@ export default function VolunteerCalendar() {
             {upcomingRegs.length === 0
               ? <p className="text-sm text-gray-400 card py-4 text-center">{L.noUpcoming}</p>
               : upcomingRegs.map(reg => (
-                <button key={reg.id} onClick={() => setDetail(reg)}
-                  className="w-full text-left card mb-2 hover:border-brand-200 hover:shadow-sm transition-all">
+              <Link key={reg.id} to={'/events/' + reg.events?.id}
+                className="block card mb-2 hover:border-brand-200 hover:shadow-sm transition-all">
                   <p className="text-sm font-medium text-gray-900 truncate">{reg.events?.title}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{reg.events?.event_date ? fmtShort(reg.events.event_date) : ''}</p>
                   {reg.events?.organizations?.name && (
@@ -284,7 +284,7 @@ export default function VolunteerCalendar() {
                   {reg.events?.is_online && (
                     <p className="text-xs text-blue-500 mt-0.5">{lang === 'bg' ? '💻 Онлайн' : '💻 Online'}</p>
                   )}
-                </button>
+              </Link>
               ))
             }
           </div>
@@ -292,13 +292,13 @@ export default function VolunteerCalendar() {
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">{L.past}</p>
               {pastRegs.slice(0, 5).map(reg => (
-                <div key={reg.id} className="card mb-2" style={{ borderLeft: '3px solid var(--border-mid)' }}>
+                <Link key={reg.id} to={'/events/' + reg.events?.id} className="block card mb-2 hover:border-brand-200 transition-colors" style={{ borderLeft: '3px solid var(--border-mid)' }}>
                   <p className="text-sm text-gray-600 truncate">{reg.events?.title}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{reg.events?.event_date ? fmtShort(reg.events.event_date) : ''}</p>
                   {(reg.events?.city || reg.events?.address) && (
                     <p className="text-xs text-gray-400 mt-0.5 truncate">📍 {[reg.events.city, reg.events.address].filter(Boolean).join(', ')}</p>
                   )}
-                </div>
+                </Link>
               ))}
             </div>
           )}
