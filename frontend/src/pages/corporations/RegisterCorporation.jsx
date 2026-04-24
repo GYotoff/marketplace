@@ -68,8 +68,6 @@ export default function RegisterCorporation() {
   const [ccErrors, setCcErrors] = useState({})
   const [uicCorpError, setUicCorpError] = useState(null)
   const [phoneCorpError, setPhoneCorpError] = useState(null)
-  const [uicCorpError, setUicCorpError] = useState(null)
-  const [phoneCorpError, setPhoneCorpError] = useState(null)
   const [done, setDone] = useState(false)
 
   const [account, setAccount] = useState({ full_name: '', email: '', password: '', confirm: '' })
@@ -83,7 +81,7 @@ export default function RegisterCorporation() {
 ]
 
 const [corp, setCorp] = useState({ name: '', industry: '', size: '', tagline: '', tagline_bg: '', description: '', description_bg: '', founded_year: '', registration_number: '', website: '' })
-  const [contact, setContact] = useState({ country: 'Bulgaria', country_bg: 'България', city: ', city_bg: '', address: '', address_bg: '', email: '', phone: '', facebook_url: '', instagram_url: '', linkedin_url: '' })
+  const [contact, setContact] = useState({ country: 'Bulgaria', country_bg: 'България', city: '', city_bg: '', address: '', address_bg: '', email: '', phone: '', facebook_url: '', instagram_url: '', linkedin_url: '' })
 
   const setA = (k, v) => setAccount(p => ({ ...p, [k]: v }))
   const setC = (k, v) => setCorp(p => ({ ...p, [k]: v }))
