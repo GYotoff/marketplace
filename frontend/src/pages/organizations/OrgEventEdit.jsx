@@ -476,6 +476,5 @@ export default function OrgEventEdit() {
           </button>
         </div>
       </div>
-    </div>
   )
 }
