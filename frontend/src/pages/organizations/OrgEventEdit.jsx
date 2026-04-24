@@ -177,6 +177,7 @@ export default function OrgEventEdit() {
   const [saving, setSaving] = useState(false)
   const [ccErrors, setCcErrors] = useState({})
   const [phoneEventError, setPhoneEventError] = useState(null)
+  const [phoneEventError, setPhoneEventError] = useState(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState('Basic')
   const isNew = !eventId
@@ -235,9 +236,6 @@ export default function OrgEventEdit() {
     if (!form.event_date) { setError('Start date & time is required'); return }
     const phoneErr = validatePhone(form.contact_phone, lang)
     if (phoneErr) { setError(phoneErr); return }
-    const ccErr = validateCountryCity({ countryEN: form.country, countryBG: form.country_bg, cityEN: form.city, cityBG: form.city_bg }, lang)
-    if (Object.keys(ccErr).length) { setCcErrors(ccErr); setError(Object.values(ccErr)[0]); return }
-    setCcErrors({})
     setSaving(true)
     const isOnline = form.event_type === 'online' || form.event_type === 'hybrid'
     const payload = {
@@ -411,6 +409,26 @@ export default function OrgEventEdit() {
                   setCcErrors({})
                 }}
               />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="Address (EN)">
+                  <input type="text" className="input" placeholder="e.g. 1 Bulgaria Blvd" value={form.address} onChange={e => set('address', e.target.value)} />
+                </Field>
+                <Field label="Address (BG)">
+                  <input type="text" className="input" placeholder="напр. бул. България 1" value={form.address_bg} onChange={e => set('address_bg', e.target.value)} />
+                </Field>
+              </div>
+            </>}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Geolocation (for map)</label>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Latitude">
+                  <input type="number" step="any" className="input" placeholder="42.6977" value={form.location_lat} onChange={e => set('location_lat', e.target.value)} />
+                </Field>
+                <Field label="Longitude">
+                  <input type="number" step="any" className="input" placeholder="23.3219" value={form.location_lng} onChange={e => set('location_lng', e.target.value)} />
+                </Field>
+              </div>
               {form.location_lat && form.location_lng && (
                 <a href={`https://www.google.com/maps?q=${form.location_lat},${form.location_lng}`}
                   target="_blank" rel="noreferrer"
@@ -419,12 +437,11 @@ export default function OrgEventEdit() {
                 </a>
               )}
               <p className="text-xs text-gray-400 mt-1">Tip: right-click a location in Google Maps and copy the coordinates.</p>
-          
+            </div>
+          </div>
         </>}
-      </div>
 
         {/* ── Contact ── */}
-        </>}
         {tab === 'Contact' && <>
           <div className="card flex flex-col gap-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -477,5 +494,6 @@ export default function OrgEventEdit() {
           </button>
         </div>
       </div>
+    </div>
   )
 }
