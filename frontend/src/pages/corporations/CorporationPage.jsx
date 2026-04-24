@@ -8,8 +8,8 @@ function InfoRow({ label, value }) {
   if (!value) return null
   return (
     <div className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0">
-      <span className="text-sm text-gray-400 w-36 shrink-0">{label}</span>
-      <span className="text-sm text-gray-900">{value}</span>
+      <span className="text-sm text-gray-400 w-28 shrink-0">{label}</span>
+      <span className="text-sm text-gray-900 min-w-0 break-all">{value}</span>
     </div>
   )
 }
@@ -229,8 +229,8 @@ export default function CorporationPage() {
       </div>
 
       {tab === 'about' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 flex flex-col gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          <div className="md:col-span-3 flex flex-col gap-6">
             {description && (
               <div className="card">
                 <h2 className="text-base font-medium text-gray-900 mb-3">About</h2>
