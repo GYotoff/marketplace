@@ -419,7 +419,8 @@ export default function OrgEventEdit() {
                 </a>
               )}
               <p className="text-xs text-gray-400 mt-1">Tip: right-click a location in Google Maps and copy the coordinates.</p>
-          </div>
+          
+        </div></div>
         </>}
 
         {/* ── Contact ── */}
