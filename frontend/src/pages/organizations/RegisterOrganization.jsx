@@ -150,8 +150,6 @@ export default function RegisterOrganization() {
         p_name: org.name,
         p_name_bg: org.name_bg || null,
         p_slug: slugify(org.name),
-        p_country: org.country || null,
-        p_country_bg: org.country_bg || null,
         p_type: org.type,
         p_description: org.description,
         p_description_bg: org.description_bg || null,
