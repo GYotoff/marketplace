@@ -48,6 +48,33 @@ function SortBar({ sorts, sort, setSort, lang }) {
   )
 }
 
+
+function FilterBar({ options, value, onChange, label, lang }) {
+  const selectStyle = {
+    borderColor: 'var(--border-mid)',
+    background:  'var(--bg-card)',
+    color:       'var(--text)',
+    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 8px center',
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <label className="text-xs font-medium whitespace-nowrap" style={{ color: 'var(--text-faint)' }}>
+        {label}:
+      </label>
+      <select value={value} onChange={e => onChange(e.target.value)}
+        className="text-xs rounded-lg border px-2.5 py-1.5 pr-7 appearance-none cursor-pointer transition-colors"
+        style={selectStyle}>
+        <option value="">{lang === 'bg' ? 'Всички' : 'All'}</option>
+        {options.map(o => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 export default function Corporations() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
@@ -73,15 +100,16 @@ export default function Corporations() {
   const sorted = useMemo(() => {
     let list = corps.filter(c => {
       const q = search.toLowerCase()
-      return c.name.toLowerCase().includes(q) ||
-             (c.city || '').toLowerCase().includes(q) ||
-             (c.industry || '').toLowerCase().includes(q)
+      if (!c.name.toLowerCase().includes(q) && !(c.city || '').toLowerCase().includes(q) && !(c.industry || '').toLowerCase().includes(q)) return false
+      if (filterSize && c.size !== filterSize) return false
+      if (filterIndustry && (c.industry || '').toLowerCase() !== filterIndustry.toLowerCase()) return false
+      return true
     })
     if (sort === 'za')   return [...list].sort((a,b) => b.name.localeCompare(a.name))
     if (sort === 'city') return [...list].sort((a,b) => (a.city||'').localeCompare(b.city||''))
     if (sort === 'size') return [...list].sort((a,b) => (SIZE_ORDER[b.size]||0) - (SIZE_ORDER[a.size]||0))
     return [...list].sort((a,b) => a.name.localeCompare(b.name))
-  }, [corps, search, sort])
+  }, [corps, search, sort, filterSize, filterIndustry])
 
   const L = {
     title:  lang === 'bg' ? 'Корпорации'  : 'Corporations',
@@ -101,6 +129,8 @@ export default function Corporations() {
       <div className="flex items-center justify-between mb-5">
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{sorted.length} {L.count}</p>
         <SortBar sorts={SORTS} sort={sort} setSort={setSort} lang={lang} />
+          <FilterBar options={Object.entries(SIZE_LABEL).map(([k,v]) => ({ value: k, label: v[lang] }))} value={filterSize} onChange={setFilterSize} label={lang==='bg'?'Размер':'Size'} lang={lang} />
+          <FilterBar options={[...new Set(corps.filter(c=>c.industry).map(c=>c.industry))].sort().map(i=>({value:i,label:i}))} value={filterIndustry} onChange={setFilterIndustry} label={lang==='bg'?'Индустрия':'Industry'} lang={lang} />
       </div>
 
       {loading && <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>}
