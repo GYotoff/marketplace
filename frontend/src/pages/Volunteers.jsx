@@ -24,6 +24,7 @@ const VOL_SORTS = [
   { key: 'za',    en: 'Z → A',          bg: 'Я → А' },
   { key: 'hours', en: 'Most hours',      bg: 'Повече часове' },
   { key: 'rank',  en: 'By rank',         bg: 'По ранг' },
+  { key: 'city',  en: 'By city',         bg: 'По град' },
 ]
 
 export default function Volunteers() {
@@ -60,6 +61,7 @@ export default function Volunteers() {
     if (sort === 'za')    return [...list].sort((a,b) => (b.full_name||'').localeCompare(a.full_name||''))
     if (sort === 'hours') return [...list].sort((a,b) => (b.confirmed_hours||0) - (a.confirmed_hours||0))
     if (sort === 'rank')  return [...list].sort((a,b) => (RANK_ORDER[b.ranking_type]||0) - (RANK_ORDER[a.ranking_type]||0))
+    if (sort === 'city')  return [...list].sort((a,b) => (a.city||'').localeCompare(b.city||''))
     return [...list].sort((a,b) => (a.full_name||'').localeCompare(b.full_name||''))
   }, [volunteers, search, sort])
 
