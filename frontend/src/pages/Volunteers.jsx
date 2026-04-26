@@ -153,6 +153,16 @@ export default function Volunteers() {
           </select>
         </div>
       </div>
+      <div className="flex items-center gap-2 flex-wrap mb-2">
+        <FilterBar
+          options={[...new Set(volunteers.filter(v=>v.city).map(v=>v.city))].sort().map(c=>({value:c,label:c}))}
+          value={filterCity} onChange={setFilterCity}
+          label={lang==='bg'?'Град':'City'} lang={lang} />
+        <FilterBar
+          options={Object.entries(AVAILABILITY_LABEL).map(([k,v])=>({value:k,label:v[lang]}))}
+          value={filterAvail} onChange={setFilterAvail}
+          label={lang==='bg'?'Достъпност':'Availability'} lang={lang} />
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {sorted.map(v => {
           const name = (lang === 'bg' ? (v.full_name_bg || v.full_name) : v.full_name) || (lang === 'bg' ? 'Доброволец' : 'Volunteer')
