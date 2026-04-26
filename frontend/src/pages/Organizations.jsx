@@ -80,6 +80,7 @@ export default function Organizations() {
   const [orgs,    setOrgs]    = useState([])
   const [search,  setSearch]  = useState('')
   const [sort,    setSort]    = useState('az')
+  const [filterType, setFilterType] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
