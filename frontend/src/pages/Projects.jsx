@@ -37,6 +37,33 @@ function SortBar({ sorts, sort, setSort, lang }) {
   )
 }
 
+
+function FilterBar({ options, value, onChange, label, lang }) {
+  const selectStyle = {
+    borderColor: 'var(--border-mid)',
+    background:  'var(--bg-card)',
+    color:       'var(--text)',
+    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 8px center',
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <label className="text-xs font-medium whitespace-nowrap" style={{ color: 'var(--text-faint)' }}>
+        {label}:
+      </label>
+      <select value={value} onChange={e => onChange(e.target.value)}
+        className="text-xs rounded-lg border px-2.5 py-1.5 pr-7 appearance-none cursor-pointer transition-colors"
+        style={selectStyle}>
+        <option value="">{lang === 'bg' ? 'Всички' : 'All'}</option>
+        {options.map(o => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 export default function Projects() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
@@ -55,6 +82,8 @@ export default function Projects() {
 
   const sorted = useMemo(() => {
     let list = projects.filter(p => {
+      if (filterCity && (p.city || '') !== filterCity) return false
+      if (filterOrg && (p.organizations?.id || '') !== filterOrg) return false
       const q = search.toLowerCase()
       return (p.title || '').toLowerCase().includes(q) ||
              (p.title_bg || '').toLowerCase().includes(q) ||
@@ -65,7 +94,7 @@ export default function Projects() {
     if (sort === 'spots')  return [...list].sort((a,b) => ((b.volunteers_needed||0)-(b.volunteers_enrolled||0)) - ((a.volunteers_needed||0)-(a.volunteers_enrolled||0)))
     if (sort === 'start')  return [...list].sort((a,b) => (a.start_date||'').localeCompare(b.start_date||''))
     return [...list].sort((a,b) => (b.created_at||'').localeCompare(a.created_at||''))
-  }, [projects, search, sort])
+  }, [projects, search, sort, filterCity, filterOrg])
 
   const L = {
     title:    lang === 'bg' ? 'Проекти'            : 'Projects',
@@ -89,6 +118,14 @@ export default function Projects() {
       <div className="flex items-center justify-between mb-5">
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{sorted.length} {L.projects}</p>
         <SortBar sorts={SORTS} sort={sort} setSort={setSort} lang={lang} />
+          <FilterBar
+            options={[...new Set(projects.filter(p=>p.city).map(p=>p.city))].sort().map(c=>({value:c,label:c}))}
+            value={filterCity} onChange={setFilterCity}
+            label={lang==='bg'?'Град':'City'} lang={lang} />
+          <FilterBar
+            options={[...new Map(projects.filter(p=>p.organizations?.id).map(p=>[p.organizations.id,{value:p.organizations.id,label:lang==='bg'?(p.organizations.name_bg||p.organizations.name):p.organizations.name}])).values()].sort((a,b)=>a.label.localeCompare(b.label))}
+            value={filterOrg} onChange={setFilterOrg}
+            label={lang==='bg'?'Организация':'Organization'} lang={lang} />
       </div>
 
       {loading && <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>}
