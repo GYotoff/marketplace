@@ -13,10 +13,11 @@ const TYPE_LABEL = {
   other:      { en: 'Other',           bg: 'Друго' },
 }
 const SORTS = [
-  { key: 'az',        en: 'A → Z',          bg: 'А → Я' },
-  { key: 'za',        en: 'Z → A',          bg: 'Я → А' },
-  { key: 'city',      en: 'By city',         bg: 'По град' },
-  { key: 'verified',  en: 'Verified first',  bg: 'Верифицирани' },
+  { key: 'az',       en: 'A → Z',         bg: 'А → Я' },
+  { key: 'za',       en: 'Z → A',         bg: 'Я → А' },
+  { key: 'city',     en: 'By city',       bg: 'По град' },
+  { key: 'type',     en: 'By type',       bg: 'По тип' },
+  { key: 'relevant', en: 'Most relevant', bg: 'Най-активни' },
 ]
 
 function SortBar({ sorts, sort, setSort, lang }) {
@@ -76,7 +77,6 @@ export default function Organizations() {
     })
     if (sort === 'za')       return [...list].sort((a,b) => b.name.localeCompare(a.name))
     if (sort === 'city')     return [...list].sort((a,b) => (a.city||'').localeCompare(b.city||''))
-    if (sort === 'verified') return [...list].sort((a,b) => (b.is_verified ? 1 : 0) - (a.is_verified ? 1 : 0))
     return [...list].sort((a,b) => a.name.localeCompare(b.name))
   }, [orgs, search, sort])
 
