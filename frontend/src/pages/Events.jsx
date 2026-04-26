@@ -106,6 +106,33 @@ const EVT_SORTS = [
   { key: 'type',   en: 'By type',       bg: 'По тип' },
 ]
 
+
+function FilterBar({ options, value, onChange, label, lang }) {
+  const selectStyle = {
+    borderColor: 'var(--border-mid)',
+    background:  'var(--bg-card)',
+    color:       'var(--text)',
+    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 8px center',
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <label className="text-xs font-medium whitespace-nowrap" style={{ color: 'var(--text-faint)' }}>
+        {label}:
+      </label>
+      <select value={value} onChange={e => onChange(e.target.value)}
+        className="text-xs rounded-lg border px-2.5 py-1.5 pr-7 appearance-none cursor-pointer transition-colors"
+        style={selectStyle}>
+        <option value="">{lang === 'bg' ? 'Всички' : 'All'}</option>
+        {options.map(o => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 function SortBar({ sorts, sort, setSort, lang }) {
   return (
     <div className="flex items-center gap-2">
@@ -143,6 +170,8 @@ export default function Events() {
   const [loadingPast,  setLoadingPast] = useState(true)
   const [search,       setSearch]      = useState('')
   const [sort,         setSort]        = useState('date')
+  const [filterCity, setFilterCity] = useState('')
+  const [filterType, setFilterType] = useState('')
 
   useEffect(() => {
     supabase.from('events')
@@ -158,6 +187,8 @@ export default function Events() {
   }, [])
 
   const filterFn = (ev) => {
+    if (filterCity && (ev.city || '') !== filterCity) return false
+    if (filterType && (ev.event_type || '') !== filterType) return false
     if (!search) return true
     const s = search.toLowerCase()
     const title = (lang === 'bg' && ev.title_bg) ? ev.title_bg : ev.title
@@ -205,6 +236,14 @@ export default function Events() {
             </span>
           </div>
           <SortBar sorts={EVT_SORTS} sort={sort} setSort={setSort} lang={lang} />
+          <FilterBar
+            options={[...new Set([...upcoming,...past].filter(e=>e.city).map(e=>e.city))].sort().map(c=>({value:c,label:c}))}
+            value={filterCity} onChange={setFilterCity}
+            label={lang==='bg'?'Град':'City'} lang={lang} />
+          <FilterBar
+            options={[...new Set([...upcoming,...past].filter(e=>e.event_type).map(e=>e.event_type))].sort().map(t=>({value:t,label:t}))}
+            value={filterType} onChange={setFilterType}
+            label={lang==='bg'?'Тип':'Type'} lang={lang} />
         </div>
 
         {loading && <p className="text-gray-400 text-sm">{t('common.loading')}</p>}
