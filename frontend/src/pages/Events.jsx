@@ -102,6 +102,8 @@ const EVT_SORTS = [
   { key: 'date',   en: 'By date',       bg: 'По дата' },
   { key: 'spots',  en: 'Most spots',    bg: 'Повече места' },
   { key: 'az',     en: 'A → Z',         bg: 'А → Я' },
+  { key: 'city',   en: 'By city',       bg: 'По град' },
+  { key: 'type',   en: 'By type',       bg: 'По тип' },
 ]
 
 function SortBar({ sorts, sort, setSort, lang }) {
@@ -167,6 +169,8 @@ export default function Events() {
   const applySortFn = (list) => {
     if (sort === 'spots') return [...list].sort((a,b) => ((b.volunteers_needed||0)-(b.volunteers_enrolled||0)) - ((a.volunteers_needed||0)-(a.volunteers_enrolled||0)))
     if (sort === 'az')    return [...list].sort((a,b) => (a.title||'').localeCompare(b.title||''))
+    if (sort === 'city')  return [...list].sort((a,b) => (a.city||'').localeCompare(b.city||''))
+    if (sort === 'type')  return [...list].sort((a,b) => (a.event_type||'').localeCompare(b.event_type||''))
     return [...list].sort((a,b) => (a.event_date||'').localeCompare(b.event_date||''))
   }
   const filteredUpcoming = applySortFn(upcoming.filter(filterFn))
