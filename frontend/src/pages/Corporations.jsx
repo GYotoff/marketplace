@@ -81,6 +81,8 @@ export default function Corporations() {
   const [corps,   setCorps]   = useState([])
   const [search,  setSearch]  = useState('')
   const [sort,    setSort]    = useState('az')
+  const [filterSize, setFilterSize] = useState('')
+  const [filterIndustry, setFilterIndustry] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -109,7 +111,7 @@ export default function Corporations() {
     if (sort === 'city') return [...list].sort((a,b) => (a.city||'').localeCompare(b.city||''))
     if (sort === 'size') return [...list].sort((a,b) => (SIZE_ORDER[b.size]||0) - (SIZE_ORDER[a.size]||0))
     return [...list].sort((a,b) => a.name.localeCompare(b.name))
-  }, [corps, search, sort, filterSize, filterIndustry])
+  }, [corps, search, sort, filterSize, filterIndustry, filterSize, filterIndustry])
 
   const L = {
     title:  lang === 'bg' ? 'Корпорации'  : 'Corporations',
