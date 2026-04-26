@@ -70,6 +70,8 @@ export default function Projects() {
   const [projects, setProjects] = useState([])
   const [search,   setSearch]   = useState('')
   const [sort,     setSort]     = useState('newest')
+  const [filterCity, setFilterCity] = useState('')
+  const [filterOrg,  setFilterOrg]  = useState('')
   const [loading,  setLoading]  = useState(true)
 
   useEffect(() => {
