@@ -27,6 +27,33 @@ const VOL_SORTS = [
   { key: 'city',  en: 'By city',         bg: 'По град' },
 ]
 
+
+function FilterBar({ options, value, onChange, label, lang }) {
+  const selectStyle = {
+    borderColor: 'var(--border-mid)',
+    background:  'var(--bg-card)',
+    color:       'var(--text)',
+    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 8px center',
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <label className="text-xs font-medium whitespace-nowrap" style={{ color: 'var(--text-faint)' }}>
+        {label}:
+      </label>
+      <select value={value} onChange={e => onChange(e.target.value)}
+        className="text-xs rounded-lg border px-2.5 py-1.5 pr-7 appearance-none cursor-pointer transition-colors"
+        style={selectStyle}>
+        <option value="">{lang === 'bg' ? 'Всички' : 'All'}</option>
+        {options.map(o => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 export default function Volunteers() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
@@ -34,6 +61,8 @@ export default function Volunteers() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [sort,    setSort]    = useState('az')
+  const [filterCity, setFilterCity] = useState('')
+  const [filterAvail, setFilterAvail] = useState('')
 
   useEffect(() => {
     supabase.rpc('get_public_volunteers')
@@ -47,6 +76,8 @@ export default function Volunteers() {
   const sorted = useMemo(() => {
     const RANK_ORDER = { Standard:0, Bronze:1, Silver:2, Gold:3, Platinum:4 }
     let list = volunteers.filter(v => {
+      if (filterCity && (v.city || '') !== filterCity) return false
+      if (filterAvail && !(v.availability || []).includes(filterAvail)) return false
     if (!search) return true
     const s = search.toLowerCase()
     return (
@@ -63,7 +94,7 @@ export default function Volunteers() {
     if (sort === 'rank')  return [...list].sort((a,b) => (RANK_ORDER[b.ranking_type]||0) - (RANK_ORDER[a.ranking_type]||0))
     if (sort === 'city')  return [...list].sort((a,b) => (a.city||'').localeCompare(b.city||''))
     return [...list].sort((a,b) => (a.full_name||'').localeCompare(b.full_name||''))
-  }, [volunteers, search, sort])
+  }, [volunteers, search, sort, filterCity, filterAvail])
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
