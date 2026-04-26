@@ -8,6 +8,7 @@ const SORTS = [
   { key: 'za',        en: 'Z → A',          bg: 'Я → А' },
   { key: 'city',      en: 'By city',         bg: 'По град' },
   { key: 'size',      en: 'By size',         bg: 'По размер' },
+  { key: 'relevant', en: 'Most relevant', bg: 'Най-активни' },
 ]
 
 const SIZE_ORDER = { micro:1, small:2, medium:3, large:4, enterprise:5, global_enterprise:6 }
