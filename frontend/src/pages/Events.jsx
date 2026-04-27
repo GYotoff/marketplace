@@ -220,22 +220,28 @@ export default function Events() {
     <div className="max-w-7xl mx-auto px-4 py-10">
 
       {/* Page header + single search */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="text-2xl font-medium">{L.title}</h1>
-        <input type="search" placeholder={L.search} className="input sm:w-64"
-          value={search} onChange={e => setSearch(e.target.value)} />
+      <div className="mb-6 flex flex-col gap-3">
+        {/* Row 1: Search */}
+        <input
+          type="search"
+          placeholder={lang==='bg'?'Търси...':'Search...'}
+          className="input"
+          value={search}
+          onChange={e=>setSearch(e.target.value)}
+        />
+        {/* Row 2: Filters left, Sort right */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
+              <FilterBar options={[...new Set([...upcoming,...past].filter(e=>e.city).map(e=>e.city))].sort().map(c=>({value:c,label:c}))} value={filterCity} onChange={setFilterCity} label={lang==='bg'?'Град':'City'} lang={lang} />
+              <FilterBar options={[...new Set([...upcoming,...past].filter(e=>e.event_type).map(e=>e.event_type))].sort().map(t=>({value:t,label:t}))} value={filterType} onChange={setFilterType} label={lang==='bg'?'Тип':'Type'} lang={lang} />
+            </div>
+            <div className="flex items-center gap-2 ml-auto">
+            </div>
+        </div>
       </div>
-
-      {/* ── Upcoming ── */}
-      <section className="mb-10">
-        <div className="flex items-center justify-between gap-4 mb-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-base font-semibold text-gray-800">{L.upcoming}</h2>
-            <span className="badge bg-brand-50 text-brand-700 border border-brand-100 text-xs px-2 py-0.5">
               {filteredUpcoming.length}
             </span>
           </div>
-          <SortBar sorts={EVT_SORTS} sort={sort} setSort={setSort} lang={lang} />
           <FilterBar
             options={[...new Set([...upcoming,...past].filter(e=>e.city).map(e=>e.city))].sort().map(c=>({value:c,label:c}))}
             value={filterCity} onChange={setFilterCity}
@@ -267,7 +273,6 @@ export default function Events() {
               {filteredPast.length}
             </span>
           </div>
-          <SortBar sorts={EVT_SORTS} sort={sort} setSort={setSort} lang={lang} />
         </div>
 
         {loadingPast && <p className="text-gray-400 text-sm">{t('common.loading')}</p>}
