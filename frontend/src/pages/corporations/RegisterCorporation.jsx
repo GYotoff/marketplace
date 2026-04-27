@@ -15,11 +15,11 @@ const INDUSTRIES = [
   'Consulting & Professional Services', 'Telecommunications', 'Other',
 ]
 
-const CITIES = [
+/*const CITIES = [
   'Sofia', 'Plovdiv', 'Varna', 'Burgas', 'Ruse', 'Stara Zagora', 'Pleven',
   'Sliven', 'Dobrich', 'Shumen', 'Pernik', 'Haskovo', 'Yambol', 'Pazardzhik',
   'Blagoevgrad', 'Veliko Tarnovo', 'Vratsa', 'Gabrovo', 'Vidin', 'Montana', 'Other',
-]
+]*/
 
 function slugify(s) {
   return s.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '') + '-' + Math.random().toString(36).slice(2, 6)
