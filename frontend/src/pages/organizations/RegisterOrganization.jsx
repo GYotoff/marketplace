@@ -8,12 +8,6 @@ import { useAuthStore } from '@/store/authStore'
 
 const STEPS = ['Account', 'Organization', 'Contact', 'Review']
 
-const BULGARIAN_CITIES = [
-  'Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven',
-  'Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik',
-  'Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Other',
-]
-
 const ORG_TYPES = [
   { value: 'ngo',        label: 'NGO (Non-governmental organization)', label_bg: 'НПО (Неправителствена организация)' },
   { value: 'nonprofit',  label: 'Non-profit organization',             label_bg: 'Организация с нестопанска цел' },
