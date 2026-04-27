@@ -253,8 +253,7 @@ export default function EditProfile() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Пълно име (EN)' : 'Full name (EN)'}</label>
-              <span className="text-red-400">{form.full_name.required}</span>
-              <input type="text" className="input" placeholder="Maria Kostadinova"
+              <input type="text" required className="input" placeholder="Maria Kostadinova"
                 value={form.full_name}
                 onChange={e => { set('full_name', e.target.value); setFullNameError(validateFullName(e.target.value, lang))}} />
                 {fullnameError && <p className="text-xs text-red-500 mt-1">{fullnameError}</p>}
