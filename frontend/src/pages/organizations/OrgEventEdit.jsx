@@ -3,12 +3,13 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import CountryCitySelector, { validateCountryCity } from '@/components/ui/CountryCitySelector'
 import { validatePhone } from '@/lib/validators'
+import { validateFullName } from '@/lib/validators'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 
-const CITIES = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven',
+/*const CITIES = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven',
   'Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik',
-  'Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Other']
+  'Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Other']*/
 
 const EMPTY = {
   title: '', title_bg: '',
@@ -177,6 +178,7 @@ export default function OrgEventEdit() {
   const [saving, setSaving] = useState(false)
   const [ccErrors, setCcErrors] = useState({})
   const [phoneEventError, setPhoneEventError] = useState(null)
+  const [personResponsibleError, setpersonResponsibleError] = useState(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState('Basic')
   const isNew = !eventId
