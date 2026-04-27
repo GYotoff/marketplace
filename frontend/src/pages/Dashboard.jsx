@@ -72,6 +72,8 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
     pending_msg:          lang === 'bg' ? 'Заявката ви за членство очаква одобрение от администратора.' : 'Your membership request is awaiting approval from the company admin.',
     approved_msg:         lang === 'bg' ? 'Вие сте одобрен корпоративен доброволец за тази компания.'  : 'You are an approved corporate volunteer for this company.',
     declined_msg:         lang === 'bg' ? 'Заявката ви за членство не беше одобрена.'                  : 'Your membership request was not approved.',
+    your_ranking:         lang === 'bg' ? 'Вашият ранг'                                                   : 'Your ranking',
+    since:                lang === 'bg' ? 'От'                                                            : 'Since',
   }
 
   return (
