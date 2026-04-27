@@ -335,6 +335,11 @@ export default function RegisterOrganization() {
                 }}
               />
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                <input type="url" className="input" placeholder="contact@yourorg.com"
+                  value={org.email} onChange={e => setO('email', e.target.value)} />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Website</label>
                 <input type="url" className="input" placeholder="https://yourorganization.org"
                   value={org.website} onChange={e => setO('website', e.target.value)} />
