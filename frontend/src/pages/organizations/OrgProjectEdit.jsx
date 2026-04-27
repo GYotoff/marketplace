@@ -298,11 +298,15 @@ export default function OrgProjectEdit() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <F label={L.mgr_name_en}>
               <input type="text" className="input" placeholder="e.g. Maria Ivanova"
-                value={form.manager_name} onChange={e => set('manager_name', e.target.value)} />
+                value={form.manager_name}
+                onChange={e => {set('manager_name', e.target.value); setManagerNameError(validateFullName(e.target.value, lang))}} />
+                {managerNameError && <p className="text-xs text-red-500 mt-1">{managerNameError}</p>}
             </F>
             <F label={L.mgr_name_bg_l}>
               <input type="text" className="input" placeholder="напр. Мария Иванова"
-                value={form.manager_name_bg} onChange={e => set('manager_name_bg', e.target.value)} />
+                value={form.manager_name_bg} 
+                onChange={e => {set('manager_name_bg', e.target.value); setManagerNameBGError(validateFullName(e.target.value, lang))}} />
+                {managerNameBGError && <p className="text-xs text-red-500 mt-1">{managerNameBGError}</p>}
             </F>
           </div>
           <F label={L.mgr_email}>
