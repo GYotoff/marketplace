@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { validatePhone } from '@/lib/validators'
+import { validateFullName } from '@/lib/validators'
 import AvatarUpload from '@/components/ui/AvatarUpload'
 import CountryCitySelector, { validateCountryCity } from '@/components/ui/CountryCitySelector'
 
@@ -65,6 +66,7 @@ export default function EditProfile() {
   const [pwForm, setPwForm] = useState({ current: '', password: '', confirm: '' })
   const [saving, setSaving] = useState(false)
   const [phoneError, setPhoneError] = useState(null)
+  const [nameError, setNameError] = useState(null)
   const [ccErrors, setCcErrors]       = useState({})
   const [pwSaving, setPwSaving] = useState(false)
   const [mediaLibrary, setMediaLibrary] = useState([])
@@ -117,6 +119,8 @@ export default function EditProfile() {
     try {
           const phoneErr = validatePhone(form.phone, lang)
     if (phoneErr) { flash(phoneErr, 'error'); return }
+      const nameErr = validateFullName(form.name, lang)
+    if (nameErr) { flash(nameErr, 'error'); return }
     const ccErr = validateCountryCity({ countryEN: form.country, countryBG: form.country_bg, cityEN: form.city, cityBG: form.city_bg }, lang)
     if (Object.keys(ccErr).length) { setCcErrors(ccErr); flash(lang === 'bg' ? 'Моля попълнете държавата и града.' : 'Please fill in country and city.', 'error'); return }
     setCcErrors({})
@@ -249,12 +253,12 @@ export default function EditProfile() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Пълно име (EN)' : 'Full name (EN)'}</label>
               <input type="text" className="input" placeholder="Maria Kostadinova"
-                value={form.full_name} onChange={e => set('full_name', e.target.value)} />
+                value={form.full_name} onChange={e => { set('full_name', e.target.value); setNameError(validateFullName(e.target.value, lang))}} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Пълно име (BG)' : 'Full name (BG)'}</label>
               <input type="text" className="input" placeholder="Мария Костадинова"
-                value={form.full_name_bg} onChange={e => set('full_name_bg', e.target.value)} />
+                value={form.full_name_bg} onChange={e => { set('full_name_bg', e.target.value); setNameError(validateFullName(e.target.value, lang))}} />
             </div>
           </div>
 
