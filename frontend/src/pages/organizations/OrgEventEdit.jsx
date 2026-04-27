@@ -178,7 +178,8 @@ export default function OrgEventEdit() {
   const [saving, setSaving] = useState(false)
   const [ccErrors, setCcErrors] = useState({})
   const [phoneEventError, setPhoneEventError] = useState(null)
-  const [personResponsibleError, setpersonResponsibleError] = useState(null)
+  const [personResponsibleError, setPersonResponsibleError] = useState(null)
+  const [personResponsibleBGError, setPersonResponsibleBGError] = useState(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState('Basic')
   const isNew = !eventId
@@ -447,10 +448,14 @@ export default function OrgEventEdit() {
           <div className="card flex flex-col gap-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Person responsible (EN)">
-                <input type="text" className="input" placeholder="Maria Kostadinova" value={form.contact_person} onChange={e => set('contact_person', e.target.value)} />
+                <input type="text" className="input" placeholder="Maria Kostadinova" value={form.contact_person}
+                  onChange={e => {set('contact_person', e.target.value); setPersonResponsibleError(validateFullName(e.target.value, lang))}} />
+                {personResponsibleError && <p className="text-xs text-red-500 mt-1">{personResponsibleError}</p>}
               </Field>
               <Field label="Person responsible (BG)">
-                <input type="text" className="input" placeholder="Мария Костадинова" value={form.contact_person_bg} onChange={e => set('contact_person_bg', e.target.value)} />
+                <input type="text" className="input" placeholder="Мария Костадинова" value={form.contact_person_bg}
+                  onChange={e => {set('contact_person_bg', e.target.value); setPersonResponsibleBGError(validateFullName(e.target.value, lang))}} />
+                {personResponsibleBGError && <p className="text-xs text-red-500 mt-1">{personResponsibleBGError}</p>}      
               </Field>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
