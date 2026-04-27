@@ -6,7 +6,6 @@ import { validatePhone } from '@/lib/validators'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 
-/*const CITIES = ['Sofia', 'Plovdiv', 'Varna', 'Burgas', 'Ruse', 'Stara Zagora', 'Pleven', 'Sliven', 'Dobrich', 'Shumen', 'Pernik', 'Haskovo', 'Yambol', 'Pazardzhik', 'Blagoevgrad', 'Veliko Tarnovo', 'Vratsa', 'Gabrovo', 'Vidin', 'Montana', 'Other']*/
 const INDUSTRIES = ['Technology', 'Finance & Banking', 'Healthcare', 'Education', 'Manufacturing', 'Retail & E-commerce', 'Energy & Environment', 'Construction & Real Estate', 'Media & Entertainment', 'Transportation & Logistics', 'Food & Beverage', 'Consulting & Professional Services', 'Telecommunications', 'Other']
 const TABS = [{ key: 'general', label: 'General' }, { key: 'contact', label: 'Contact & Social' }, { key: 'images', label: 'Logo & Cover' }]
 
