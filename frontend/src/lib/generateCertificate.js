@@ -6,9 +6,13 @@ export function generateCertificate(data) {
   const {
     volunteerName  = '',
     eventTitle     = '',
+    eventTitleBg   = '',
     eventDate      = '',
+    eventDateBg    = '',
     eventLocation  = '',
+    eventLocationBg = '',
     orgName        = '',
+    orgNameBg      = '',
     orgLogoUrl     = '',
     contactPerson  = '',
     hoursLogged    = 0,
@@ -209,7 +213,7 @@ export function generateCertificate(data) {
   <div class="header">
     <div class="org-block">
       ${logoHtml}
-      <div class="org-name">${escHtml(orgName)}</div>
+      <div class="org-name">${escHtml(orgName)}${orgNameBg && orgNameBg !== orgName ? '<br><span style="font-size:0.85em;color:#555">' + escHtml(orgNameBg) + '</span>' : ''}</div>
     </div>
   </div>
 
@@ -233,15 +237,15 @@ export function generateCertificate(data) {
   <div class="details">
     <div class="dc">
       <div class="dl">${P.event_label} / ${S.event_label}</div>
-      <div class="dv">${escHtml(eventTitle)}</div>
+      <div class="dv">${escHtml(eventTitle)}${eventTitleBg && eventTitleBg !== eventTitle ? '<br><span style="color:#555;font-size:0.85em">' + escHtml(eventTitleBg) + '</span>' : ''}</div>
     </div>
     <div class="dc">
       <div class="dl">${P.date_label} / ${S.date_label}</div>
-      <div class="dv">${escHtml(eventDate)}</div>
+      <div class="dv">${escHtml(eventDate)}${eventDateBg && eventDateBg !== eventDate ? '<br><span style="color:#555;font-size:0.85em">' + escHtml(eventDateBg) + '</span>' : ''}</div>
     </div>
     <div class="dc">
       <div class="dl">${P.location} / ${S.location}</div>
-      <div class="dv">${escHtml(eventLocation || P.online)}</div>
+      <div class="dv">${escHtml(eventLocation || P.online)}${(eventLocationBg && eventLocationBg !== eventLocation) ? '<br><span style="color:#555;font-size:0.85em">' + escHtml(eventLocationBg) + '</span>' : ''}</div>
     </div>
     ${hoursCell}
   </div>
