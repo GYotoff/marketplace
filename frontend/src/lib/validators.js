@@ -37,7 +37,7 @@ export function validateUIC(val, lang = 'en') {
 // Full name validator in both languages
 export const FNAME_RE = /^(?:[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[-'][A-Za-zÀ-ÖØ-öø-ÿ]+)*(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[-'][A-Za-zÀ-ÖØ-öø-ÿ]+)*)+|[А-Яа-яЁёЀ-џ]+(?:[-'][А-Яа-яЁёЀ-џ]+)*(?:\s+[А-Яа-яЁёЀ-џ]+(?:[-'][А-Яа-яЁёЀ-џ]+)*)+)$/
 
-export function validateFNAME(val, lang = 'en') {
+export function validateFullName(val, lang = 'en') {
   if (!val || val.trim() === '') return null
   if (!FNAME_RE.test(val.trim())) {
     return lang === 'bg'
