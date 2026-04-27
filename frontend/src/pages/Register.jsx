@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { useEffect } from 'react'
+import { validateFullName } from '@/lib/validators'
 
 const ROLES = [
   {
