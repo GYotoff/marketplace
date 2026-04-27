@@ -237,8 +237,52 @@ export default function Events() {
             </div>
             <div className="flex items-center gap-2 ml-auto">
             </div>
+              <SortBar sorts={EVT_SORTS} sort={sort} setSort={setSort} lang={lang} />
         </div>
       </div>
+
+      <section className="mb-10">
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-semibold" style={{color:'var(--text)'}}>{L.upcoming}</h2>
+            <span className="badge bg-brand-50 text-brand-600 border border-brand-100 text-xs px-2 py-0.5">
+              {filteredUpcoming.length}
+            </span>
+          </div>
+        </div>
+        {loadingUpcoming && <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>}
+        {!loadingUpcoming && filteredUpcoming.length === 0 && (
+          <p className="text-sm py-8 text-center" style={{color:'var(--text-faint)'}}>
+            {search ? (lang==='bg'?'Няма намерени предстоящи събития.':'No upcoming events match your search.') : (lang==='bg'?'Няма предстоящи събития.':'No upcoming events.')}
+          </p>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredUpcoming.map(ev => {
+            const title = (lang==='bg' && ev.title_bg) ? ev.title_bg : ev.title
+            const city  = (lang==='bg' && ev.city_bg)  ? ev.city_bg  : ev.city
+            const org   = ev.org_name || ev.organizations?.name
+            return (
+              <Link key={ev.id} to={'/events/'+ev.id}
+                className="card flex flex-col gap-3 hover:shadow-md hover:border-brand-200 transition-all">
+                {ev.invitation_image_url && (
+                  <img src={ev.invitation_image_url} alt={title}
+                    className="w-full h-36 object-cover rounded-lg" />
+                )}
+                <div className="flex flex-col gap-1.5 flex-1">
+                  <p className="font-medium text-sm leading-snug" style={{color:'var(--text)'}}>{title}</p>
+                  {org && <p className="text-xs text-brand-500 truncate">{org}</p>}
+                  {city && <p className="text-xs truncate" style={{color:'var(--text-muted)'}}>📍 {city}</p>}
+                  {ev.event_date && (
+                    <p className="text-xs mt-auto" style={{color:'var(--text-faint)'}}>
+                      📅 {new Date(ev.event_date).toLocaleDateString(lang==='bg'?'bg-BG':'en-GB',{day:'numeric',month:'short',year:'numeric'})}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      </section>
 
       <section>
         <div className="flex items-center justify-between gap-4 mb-4">
