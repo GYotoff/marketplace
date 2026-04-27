@@ -286,10 +286,14 @@ export default function VolunteerAttendance() {
                         <button
                           onClick={() => generateCertificate({
                             volunteerName: profile?.full_name || profile?.full_name_bg,
-                            eventTitle: (lang === 'bg' && reg.event_title_bg) ? reg.event_title_bg : reg.event_title,
-                            eventDate: reg.event_date ? new Date(reg.event_date).toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '',
-                            eventLocation: (lang === 'bg' ? (reg.city_bg || reg.city) : reg.city) || (reg.address || ''),
-                            orgName: reg.org_name,
+                            eventTitle:     reg.event_title    || '',
+                            eventTitleBg:   reg.event_title_bg || reg.event_title || '',
+                            eventDate:      reg.event_date ? new Date(reg.event_date).toLocaleDateString('en-GB',    { day: 'numeric', month: 'long', year: 'numeric' }) : '',
+                            eventDateBg:    reg.event_date ? new Date(reg.event_date).toLocaleDateString('bg-BG',    { day: 'numeric', month: 'long', year: 'numeric' }) : '',
+                            eventLocation:  reg.city    || reg.address    || '',
+                            eventLocationBg: reg.city_bg || reg.city || reg.address_bg || reg.address || '',
+                            orgName:    reg.org_name    || '',
+                            orgNameBg:  reg.org_name_bg || reg.org_name || '',
                             orgLogoUrl: reg.org_logo_url,
                             contactPerson: lang === 'bg' ? (reg.contact_person_bg || reg.contact_person) : reg.contact_person,
                             hoursLogged: reg.hours_logged || 0,
