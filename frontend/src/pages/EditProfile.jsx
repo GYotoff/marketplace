@@ -119,7 +119,7 @@ export default function EditProfile() {
     try {
           const phoneErr = validatePhone(form.phone, lang)
     if (phoneErr) { flash(phoneErr, 'error'); return }
-      const nameErr = validateFullName(form.name, lang)
+      const nameErr = validateFullName(form.full_name, lang)
     if (nameErr) { flash(nameErr, 'error'); return }
     const ccErr = validateCountryCity({ countryEN: form.country, countryBG: form.country_bg, cityEN: form.city, cityBG: form.city_bg }, lang)
     if (Object.keys(ccErr).length) { setCcErrors(ccErr); flash(lang === 'bg' ? 'Моля попълнете държавата и града.' : 'Please fill in country and city.', 'error'); return }
