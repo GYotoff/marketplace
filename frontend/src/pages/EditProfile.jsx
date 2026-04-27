@@ -8,12 +8,6 @@ import { validateFullName } from '@/lib/validators'
 import AvatarUpload from '@/components/ui/AvatarUpload'
 import CountryCitySelector, { validateCountryCity } from '@/components/ui/CountryCitySelector'
 
-/*const BULGARIAN_CITIES = [
-  'Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven',
-  'Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik',
-  'Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Other',
-]*/
-
 const AVAILABILITY_OPTIONS = [
   { key: 'weekdays',  en: 'Weekdays',  bg: 'Делнични дни' },
   { key: 'weekends',  en: 'Weekends',  bg: 'Уикенди' },
