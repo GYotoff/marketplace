@@ -133,12 +133,6 @@ export default function Volunteers() {
             </div>
           </div>
         </div>
-          placeholder={t('common.search')}
-          className="input sm:w-64"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-      </div>
 
       {loading && <p className="text-gray-400">{t('common.loading')}</p>}
 
@@ -153,44 +147,6 @@ export default function Volunteers() {
         </div>
       )}
 
-
-      {/* Sort bar — matches Organizations page */}
-      <div className="flex items-center justify-between mb-5">
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          {sorted.length} {lang === 'bg' ? (sorted.length === 1 ? 'доброволец' : 'доброволци') : (sorted.length === 1 ? 'volunteer' : 'volunteers')}
-        </p>
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-medium whitespace-nowrap" style={{ color: 'var(--text-faint)' }}>
-            {lang === 'bg' ? 'Сортирай:' : 'Sort by:'}
-          </label>
-          <select
-            value={sort}
-            onChange={e => setSort(e.target.value)}
-            className="text-xs rounded-lg border px-2.5 py-1.5 pr-7 appearance-none cursor-pointer transition-colors"
-            style={{
-              borderColor: 'var(--border-mid)',
-              background:  'var(--bg-card)',
-              color:       'var(--text)',
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 8px center',
-            }}>
-            {VOL_SORTS.map(s => (
-              <option key={s.key} value={s.key}>{lang === 'bg' ? s.bg : s.en}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 flex-wrap mb-2">
-        <FilterBar
-          options={[...new Set(volunteers.filter(v=>v.city).map(v=>v.city))].sort().map(c=>({value:c,label:c}))}
-          value={filterCity} onChange={setFilterCity}
-          label={lang==='bg'?'Град':'City'} lang={lang} />
-        <FilterBar
-          options={Object.entries(AVAILABILITY_LABEL).map(([k,v])=>({value:k,label:v[lang]}))}
-          value={filterAvail} onChange={setFilterAvail}
-          label={lang==='bg'?'Достъпност':'Availability'} lang={lang} />
-      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {sorted.map(v => {
           const name = (lang === 'bg' ? (v.full_name_bg || v.full_name) : v.full_name) || (lang === 'bg' ? 'Доброволец' : 'Volunteer')
