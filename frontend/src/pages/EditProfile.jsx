@@ -67,7 +67,7 @@ export default function EditProfile() {
   const [saving, setSaving] = useState(false)
   const [phoneError, setPhoneError] = useState(null)
   const [fullnameError, setFullNameError] = useState(null)
-  //const [fullnameBGError, setFullNameBGError] = useState(null)
+  const [fullnameBGError, setFullNameBGError] = useState(null)
   const [ccErrors, setCcErrors]       = useState({})
   const [pwSaving, setPwSaving] = useState(false)
   const [mediaLibrary, setMediaLibrary] = useState([])
@@ -262,8 +262,8 @@ export default function EditProfile() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Пълно име (BG)' : 'Full name (BG)'}</label>
               <input type="text" className="input" placeholder="Мария Костадинова"
                 value={form.full_name_bg}
-                onChange={e => { set('full_name_bg', e.target.value); setFullNameError(validateFullName(e.target.value, lang)) }} />
-                {fullnameError && <p className="text-xs text-red-500 mt-1">{fullnameError}</p>}
+                onChange={e => { set('full_name_bg', e.target.value); setFullNameBGError(validateFullName(e.target.value, lang)) }} />
+                {fullnameBGError && <p className="text-xs text-red-500 mt-1">{fullnameBGError}</p>}
             </div>
           </div>
 
