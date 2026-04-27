@@ -239,32 +239,7 @@ export default function Events() {
             </div>
         </div>
       </div>
-              {filteredUpcoming.length}
-            </span>
-          </div>
-          <FilterBar
-            options={[...new Set([...upcoming,...past].filter(e=>e.city).map(e=>e.city))].sort().map(c=>({value:c,label:c}))}
-            value={filterCity} onChange={setFilterCity}
-            label={lang==='bg'?'Град':'City'} lang={lang} />
-          <FilterBar
-            options={[...new Set([...upcoming,...past].filter(e=>e.event_type).map(e=>e.event_type))].sort().map(t=>({value:t,label:t}))}
-            value={filterType} onChange={setFilterType}
-            label={lang==='bg'?'Тип':'Type'} lang={lang} />
-        </div>
 
-        {loading && <p className="text-gray-400 text-sm">{t('common.loading')}</p>}
-        {!loading && filteredUpcoming.length === 0 && (
-          <p className="text-gray-400 text-sm py-6 text-center">{L.no_upcoming}</p>
-        )}
-
-        <div className="flex flex-col gap-3">
-          {filteredUpcoming.map(ev => (
-            <EventCard key={ev.id} ev={ev} lang={lang} type="upcoming" />
-          ))}
-        </div>
-      </section>
-
-      {/* ── Past ── */}
       <section>
         <div className="flex items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-2">
