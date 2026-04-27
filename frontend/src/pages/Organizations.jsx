@@ -119,21 +119,26 @@ export default function Organizations() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div>
           <h1 className="text-2xl font-medium" style={{ color: 'var(--text)' }}>{L.title}</h1>
         </div>
-        <input type="text" className="input sm:w-72" placeholder={L.search}
-          value={search} onChange={e => setSearch(e.target.value)} />
       </div>
-
-      <div className="flex items-center justify-between mb-5">
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{sorted.length} {L.count}</p>
-        <SortBar sorts={SORTS} sort={sort} setSort={setSort} lang={lang} />
-          <FilterBar
-            options={Object.entries(TYPE_LABEL).map(([k,v]) => ({ value: k, label: v[lang] }))}
-            value={filterType} onChange={setFilterType}
-            label={lang === 'bg' ? 'Тип' : 'Type'} lang={lang} />
+      <div className="mb-5 flex flex-col gap-3">
+        <input type="search" className="input" placeholder={L.search}
+          value={search} onChange={e => setSearch(e.target.value)} />
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <FilterBar
+              options={Object.entries(TYPE_LABEL).map(([k,v]) => ({ value: k, label: v[lang] }))}
+              value={filterType} onChange={setFilterType}
+              label={lang === 'bg' ? 'Тип' : 'Type'} lang={lang} />
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <SortBar sorts={SORTS} sort={sort} setSort={setSort} lang={lang} />
+          </div>
+        </div>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{sorted.length} {L.count}</p>
       </div>
 
       {loading && <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>}
