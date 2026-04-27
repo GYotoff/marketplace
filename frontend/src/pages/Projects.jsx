@@ -111,23 +111,28 @@ export default function Projects() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <h1 className="text-2xl font-medium" style={{ color: 'var(--text)' }}>{L.title}</h1>
-        <input type="text" className="input sm:w-72" placeholder={L.search}
-          value={search} onChange={e => setSearch(e.target.value)} />
       </div>
-
-      <div className="flex items-center justify-between mb-5">
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{sorted.length} {L.projects}</p>
-        <SortBar sorts={SORTS} sort={sort} setSort={setSort} lang={lang} />
-          <FilterBar
-            options={[...new Set(projects.filter(p=>p.city).map(p=>p.city))].sort().map(c=>({value:c,label:c}))}
-            value={filterCity} onChange={setFilterCity}
-            label={lang==='bg'?'Град':'City'} lang={lang} />
-          <FilterBar
-            options={[...new Map(projects.filter(p=>p.organizations?.id).map(p=>[p.organizations.id,{value:p.organizations.id,label:lang==='bg'?(p.organizations.name_bg||p.organizations.name):p.organizations.name}])).values()].sort((a,b)=>a.label.localeCompare(b.label))}
-            value={filterOrg} onChange={setFilterOrg}
-            label={lang==='bg'?'Организация':'Organization'} lang={lang} />
+      <div className="mb-5 flex flex-col gap-3">
+        <input type="search" className="input" placeholder={L.search}
+          value={search} onChange={e => setSearch(e.target.value)} />
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <FilterBar
+              options={[...new Set(projects.filter(p=>p.city).map(p=>p.city))].sort().map(c=>({value:c,label:c}))}
+              value={filterCity} onChange={setFilterCity}
+              label={lang==='bg'?'Град':'City'} lang={lang} />
+            <FilterBar
+              options={[...new Map(projects.filter(p=>p.organizations?.id).map(p=>[p.organizations.id,{value:p.organizations.id,label:lang==='bg'?(p.organizations.name_bg||p.organizations.name):p.organizations.name}])).values()].sort((a,b)=>a.label.localeCompare(b.label))}
+              value={filterOrg} onChange={setFilterOrg}
+              label={lang==='bg'?'Организация':'Organization'} lang={lang} />
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <SortBar sorts={SORTS} sort={sort} setSort={setSort} lang={lang} />
+          </div>
+        </div>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{sorted.length} {L.projects}</p>
       </div>
 
       {loading && <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>}
