@@ -61,6 +61,8 @@ export default function Register() {
   const [done, setDone] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
+  const [fullnameError, setFullNameError] = useState(null)
+  
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   useEffect(() => {
