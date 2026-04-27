@@ -19,6 +19,7 @@ export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const menuRef = useRef(null)
 
   const handleLogout = async () => {
@@ -35,7 +36,7 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  useEffect(() => { setMenuOpen(false) }, [location.pathname])
+  useEffect(() => { setMenuOpen(false); setMobileOpen(false) }, [location.pathname])
 
   const initials = profile?.full_name
     ? profile.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
@@ -83,6 +84,18 @@ export default function Navbar() {
             {navLink('/projects', lang === 'bg' ? 'Проекти' : 'Projects')}
             {navLink('/events', lang === 'bg' ? 'Събития' : 'Events')}
           </div>
+
+          {/* Mobile hamburger — shown only on < md */}
+          <button
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg border transition-colors"
+            style={{ borderColor: 'var(--border-mid)', background: 'transparent', color: 'var(--text)' }}
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu">
+            {mobileOpen
+              ? <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+              : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/></svg>
+            }
+          </button>
 
           {/* Right side */}
           <div className="flex items-center gap-2">
@@ -241,6 +254,69 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* ── Mobile menu drawer ── */}
+      {mobileOpen && (
+        <div className="md:hidden border-t" style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+          <div className="px-4 py-3 flex flex-col gap-1">
+
+            {/* Public nav links */}
+            <Link to="/about" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={e => e.currentTarget.style.background='var(--bg-subtle)'}
+              onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+              {t('nav.about')}
+            </Link>
+            <Link to="/organizations" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={e => e.currentTarget.style.background='var(--bg-subtle)'}
+              onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+              {t('nav.organizations')}
+            </Link>
+            <Link to="/corporations" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={e => e.currentTarget.style.background='var(--bg-subtle)'}
+              onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+              {t('nav.corporations')}
+            </Link>
+            <Link to="/volunteers" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={e => e.currentTarget.style.background='var(--bg-subtle)'}
+              onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+              {t('nav.volunteers')}
+            </Link>
+            <Link to="/projects" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={e => e.currentTarget.style.background='var(--bg-subtle)'}
+              onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+              {t('nav.projects')}
+            </Link>
+            <Link to="/events" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={e => e.currentTarget.style.background='var(--bg-subtle)'}
+              onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+              {t('nav.events')}
+            </Link>
+
+            {/* Auth links */}
+            <div className="mt-2 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+              {user ? (
+                <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                  style={{ color: 'var(--text)' }}
+                  onMouseEnter={e => e.currentTarget.style.background='var(--bg-subtle)'}
+                  onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                  {lang === 'bg' ? 'Табло' : 'Dashboard'}
+                </Link>
+              ) : (
+                <div className="flex flex-col gap-2 mt-1">
+                  <Link to="/login" className="btn-secondary text-sm text-center">{t('nav.login')}</Link>
+                  <Link to="/register" className="btn-primary text-sm text-center">{t('nav.register')}</Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   )
 }
