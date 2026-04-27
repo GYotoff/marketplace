@@ -66,7 +66,7 @@ export default function EditProfile() {
   const [pwForm, setPwForm] = useState({ current: '', password: '', confirm: '' })
   const [saving, setSaving] = useState(false)
   const [phoneError, setPhoneError] = useState(null)
-  const [nameError, setNameError] = useState(null)
+  const [fullnameError, setFullNameError] = useState(null)
   const [ccErrors, setCcErrors]       = useState({})
   const [pwSaving, setPwSaving] = useState(false)
   const [mediaLibrary, setMediaLibrary] = useState([])
@@ -253,12 +253,14 @@ export default function EditProfile() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Пълно име (EN)' : 'Full name (EN)'}</label>
               <input type="text" className="input" placeholder="Maria Kostadinova"
-                value={form.full_name} onChange={e => { set('full_name', e.target.value); setNameError(validateFullName(e.target.value, lang))}} />
+                value={form.full_name}
+                onChange={e => { set('full_name', e.target.value); setFullNameError(validateFullName(e.target.value, lang))}} />
+                {fullnameError && <p className="text-xs text-red-500 mt-1">{fullnameError}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang === 'bg' ? 'Пълно име (BG)' : 'Full name (BG)'}</label>
               <input type="text" className="input" placeholder="Мария Костадинова"
-                value={form.full_name_bg} onChange={e => { set('full_name_bg', e.target.value); setNameError(validateFullName(e.target.value, lang))}} />
+                value={form.full_name_bg} onChange={e => set('full_name_bg', e.target.value) } />
             </div>
           </div>
 
