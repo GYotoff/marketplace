@@ -13,7 +13,7 @@ const ORG_TYPES = [
   { value: 'investor',   label: 'Investor' },
   { value: 'other',      label: 'Other' },
 ]
-
+/* TODO: remove them after new component implementation */
 const BULGARIAN_CITIES = [
   'Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven',
   'Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik',
