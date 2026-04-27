@@ -256,7 +256,7 @@ export default function EditProfile() {
               <input type="text" className="input" placeholder="Maria Kostadinova"
                 value={form.full_name}
                 onChange={e => { set('full_name', e.target.value); setFullNameError(validateFullName(e.target.value, lang))}} />
-                {L.full_name} <span className="text-red-400">{L.required}</span>
+                <span className="text-red-400">{form.full_name.required}</span>
                 {fullnameError && <p className="text-xs text-red-500 mt-1">{fullnameError}</p>}
             </div>
             <div>
