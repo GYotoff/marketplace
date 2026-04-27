@@ -49,7 +49,7 @@ const STEPS = ['role', 'details', 'confirm']
 const STEPS_WITH_CORP = ['role', 'details', 'affiliation', 'confirm']
 
 export default function Register() {
-  const { t } = useTranslation()
+  const { t, i18n  } = useTranslation()
   const { register } = useAuthStore()
   const navigate = useNavigate()
 
