@@ -250,8 +250,8 @@ export default function Events() {
             </span>
           </div>
         </div>
-        {loadingUpcoming && <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>}
-        {!loadingUpcoming && filteredUpcoming.length === 0 && (
+        {loading && <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" /></div>}
+        {!loading && filteredUpcoming.length === 0 && (
           <p className="text-sm py-8 text-center" style={{color:'var(--text-faint)'}}>
             {search ? (lang==='bg'?'Няма намерени предстоящи събития.':'No upcoming events match your search.') : (lang==='bg'?'Няма предстоящи събития.':'No upcoming events.')}
           </p>
