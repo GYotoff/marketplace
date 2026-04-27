@@ -7,10 +7,6 @@ import { validateFullName } from '@/lib/validators'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 
-/*const CITIES = ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven',
-  'Sliven','Dobrich','Shumen','Pernik','Haskovo','Yambol','Pazardzhik',
-  'Blagoevgrad','Veliko Tarnovo','Vratsa','Gabrovo','Vidin','Montana','Other']*/
-
 const EMPTY = {
   title: '', title_bg: '',
   description: '', description_bg: '',
