@@ -98,13 +98,41 @@ export default function Volunteers() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-medium">{t('nav.volunteers')}</h1>
-
+        <div className="mb-6 flex flex-col gap-3">
+          {/* Row 1: Search */}
+          <input
+            type="search"
+            placeholder={lang==='bg'?'Търси...':'Search...'}
+            className="input"
+            value={search}
+            onChange={e=>setSearch(e.target.value)}
+          />
+          {/* Row 2: Filters left, Sort right */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            {/* Filters */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <FilterBar
+                options={[...new Set(volunteers.filter(v=>v.city).map(v=>v.city))].sort().map(c=>({value:c,label:c}))}
+                value={filterCity} onChange={setFilterCity}
+                label={lang==='bg'?'Град':'City'} lang={lang} />
+              <FilterBar
+                options={Object.entries(AVAILABILITY_LABEL).map(([k,v])=>({value:k,label:v[lang]}))}
+                value={filterAvail} onChange={setFilterAvail}
+                label={lang==='bg'?'Достъпност':'Availability'} lang={lang} />
+            </div>
+            {/* Sort */}
+            <div className="flex items-center gap-2 ml-auto">
+              <label className="text-xs font-medium whitespace-nowrap" style={{color:'var(--text-faint)'}}>
+                {lang==='bg'?'Сортирай:':'Sort by:'}
+              </label>
+              <select value={sort} onChange={e=>setSort(e.target.value)}
+                className="text-xs rounded-lg border px-2.5 py-1.5 pr-7 appearance-none cursor-pointer transition-colors"
+                style={{borderColor:'var(--border-mid)',background:'var(--bg-card)',color:'var(--text)',backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",backgroundRepeat:'no-repeat',backgroundPosition:'right 8px center'}}>
+                {VOL_SORTS.map(s=>(<option key={s.key} value={s.key}>{lang==='bg'?s.bg:s.en}</option>))}
+              </select>
+            </div>
+          </div>
         </div>
-        <input
-          type="search"
           placeholder={t('common.search')}
           className="input sm:w-64"
           value={search}
