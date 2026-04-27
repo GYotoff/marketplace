@@ -101,6 +101,8 @@ export default function OrgProjectEdit() {
   const [saving, setSaving]   = useState(false)
   const [ccErrors, setCcErrors] = useState({})
   const [error, setError]     = useState('')
+  const [managerNameError, setManagerNameError] = useState(null)
+  const [managerNameBGError, setManagerNameBGError] = useState(null)
   const isNew = !id
 
   useEffect(() => { load() }, [user?.id, id])
