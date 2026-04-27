@@ -99,6 +99,11 @@ export default function Volunteers() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="mb-6 flex flex-col gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div>
+          <h1 className="text-2xl font-medium" style={{ color: 'var(--text)' }}>{lang === 'bg' ? 'Доброволци' : 'Volunteers'}</h1>
+        </div>
+      </div>
           {/* Row 1: Search */}
           <input
             type="search"
