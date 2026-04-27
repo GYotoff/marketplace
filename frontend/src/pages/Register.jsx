@@ -220,7 +220,11 @@ export default function Register() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.full_name')}</label>
                 <input type="text" required className="input" placeholder="Maria Kostadinova"
-                  value={form.full_name} onChange={e => set('full_name', e.target.value)} />
+                  value={form.full_name} /* onChange={e => set('full_name', e.target.value)} /> */
+
+                onChange={e => { set('full_name', e.target.value); setFullNameError(validateFullName(e.target.value, lang))}} />
+                {fullnameError && <p className="text-xs text-red-500 mt-1">{fullnameError}</p>}
+                
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.email')}</label>
