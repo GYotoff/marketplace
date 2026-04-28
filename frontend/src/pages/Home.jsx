@@ -92,20 +92,6 @@ export default function Home() {
     return { day: dt.getDate(), month: dt.toLocaleString(lang==='bg'?'bg-BG':'en',{month:'short'}), year: dt.getFullYear() }
   }
 
-  const L = {
-    volunteer:      lang==='bg' ? 'Доброволец на месеца'  : 'Volunteer of the month',
-    initiative:     lang==='bg' ? 'Инициатива на месеца'  : 'Initiative of the month',
-    organization:   lang==='bg' ? 'Организация на месеца' : 'Organization of the month',
-    hours_logged:   lang==='bg' ? 'часа доброволчество'    : 'volunteer hours',
-    confirmed:      lang==='bg' ? 'потвърдени доброволци'  : 'confirmed volunteers',
-    events_org:     lang==='bg' ? 'събитие(я) този месец'  : 'event(s) this month',
-    online:         lang==='bg' ? 'Онлайн'                 : 'Online',
-    spots_left:     lang==='bg' ? 'свободни места'         : 'spots left',
-    no_data:        lang==='bg' ? 'Все още няма данни за този месец' : 'No data for this month yet',
-    see_all:        lang==='bg' ? 'Виж всички →'           : 'See all →',
-    see_events:     lang==='bg' ? 'Виж всички →'           : 'View all →',
-  }
-
   const statItems = [
     { num: stats.orgs,       label: t('stats.organizations') },
     { num: stats.corps,      label: t('stats.corporations')  },
