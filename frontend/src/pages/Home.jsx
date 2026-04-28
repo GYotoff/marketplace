@@ -270,6 +270,7 @@ export default function Home() {
               const isOnline = ev.is_online || ev.event_type === 'online'
               const spots   = Math.max(0, (ev.volunteers_needed||0) - (ev.volunteers_enrolled||0))
               const org     = (lang==='bg' && ev.organization_name_bg) ? ev.organization_name_bg : ev.organization_name
+              const logo_url  ev.organization_logo_url
               return (
                 <Link key={ev.id} to={`/events/${ev.id}`} className="card flex gap-4 hover:shadow-sm transition-all">
                   <div className="min-w-14 text-center rounded-xl py-3 shrink-0 bg-brand-50">
@@ -283,7 +284,7 @@ export default function Home() {
                       <span className="text-xs font-medium whitespace-nowrap text-brand-400 shrink-0">{spots} {L.spots_left}</span>
                     </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      {org?.logo_url && <img src={org.logo_url} alt="" className="w-3.5 h-3.5 rounded object-cover" />}
+                      {logo_url && <img src={logo_url} alt="" className="w-3.5 h-3.5 rounded object-cover" />}
                       <p className="text-xs" style={{ color:'var(--text-muted)' }}>
                         {org}{org && (isOnline||city) ? ' · ' : ''}{isOnline ? L.online : city}
                       </p>
