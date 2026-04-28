@@ -7,7 +7,7 @@ function EventCard({ ev, lang, type }) {
   const title = (lang === 'bg' && ev.title_bg) ? ev.title_bg : ev.title
   const desc  = (lang === 'bg' && ev.description_bg) ? ev.description_bg : ev.description
   const city  = (lang === 'bg' && ev.city_bg) ? ev.city_bg : ev.city
-  const orgName    = (lang==='bg') ? (ev.org_name_bg||ev.organization_name_bg) : (ev.org_name||ev.organization_name)
+  const orgName    = (lang==='bg' && ev.org_name_bg) ? ev.org_name_bg : ev.org_name
   const orgLogoUrl = (ev.org_logo_url || ev.organization_logo_url)
   const dt    = new Date(ev.event_date)
   const isOnline = ev.is_online || ev.event_type === 'online' || ev.event_type === 'hybrid'
