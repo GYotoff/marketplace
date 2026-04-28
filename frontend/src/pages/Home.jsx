@@ -114,9 +114,11 @@ export default function Home() {
     { num: stats.orgs,       label: t('stats.organizations') },
     { num: stats.volunteers, label: t('stats.volunteers')    },
     { num: stats.corps,      label: t('stats.corporations')  },
-    { num: stats.projects,   label: L.activeProjects         },
+/*    { num: stats.projects,   label: L.activeProjects         },*/
+    { num: stats.projects,   label: t('stats.projects')      },
     { num: stats.events,     label: t('stats.events')        },
-    { num: stats.hours,      label: L.hoursYear              },
+    { num: stats.hours,      label: t('stats.hours')         },
+/*    { num: stats.hours,      label: L.hoursYear              },*/
   ]
 
   return (
