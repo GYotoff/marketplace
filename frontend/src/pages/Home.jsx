@@ -285,7 +285,6 @@ export default function Home() {
                     <div className="flex items-center gap-1.5 mt-0.5">
                       {org?.logo_url && <img src={org.logo_url} alt="" className="w-3.5 h-3.5 rounded object-cover" />}
                       <p className="text-xs" style={{ color:'var(--text-muted)' }}>
-                       /* {org?.name}{org?.name && (isOnline||city) ? ' · ' : ''}{isOnline ? L.online : city}*/
                         {org}{org && (isOnline||city) ? ' · ' : ''}{isOnline ? L.online : city}
                       </p>
                     </div>
