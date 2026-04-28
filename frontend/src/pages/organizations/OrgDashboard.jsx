@@ -19,7 +19,35 @@ export default function OrgDashboard() {
   const { user, profile } = useAuthStore()
   const { i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
+
+  const L = {
+    overview:           lang === 'bg' ? 'Общ преглед'                    : 'Overview',
+    org_info:           lang === 'bg' ? 'Информация за организацията'    : 'Organization info',
+    volunteers:         lang === 'bg' ? 'Доброволци'                     : 'Volunteers',
+    total_volunteers:   lang === 'bg' ? 'Общо доброволци'                : 'Total volunteers',
+    active_projects:    lang === 'bg' ? 'Активни проекти'                : 'Active projects',
+    upcoming_events:    lang === 'bg' ? 'Предстоящи събития'             : 'Upcoming events',
+    past_events:        lang === 'bg' ? 'Минали събития'                 : 'Past events',
+    all_events:         lang === 'bg' ? 'Всички събития'                 : 'All events',
+    all_projects:       lang === 'bg' ? 'Всички проекти'                 : 'All projects',
+    no_events:          lang === 'bg' ? 'Няма предстоящи събития'        : 'No upcoming events',
+    no_projects:        lang === 'bg' ? 'Няма активни проекти'           : 'No active projects',
+    members:            lang === 'bg' ? 'Членове'                        : 'Members',
+    status:             lang === 'bg' ? 'Статус'                         : 'Status',
+    founded:            lang === 'bg' ? 'Основана'                       : 'Founded',
+    website:            lang === 'bg' ? 'Уебсайт'                        : 'Website',
+    type:               lang === 'bg' ? 'Тип'                            : 'Type',
+    city:               lang === 'bg' ? 'Град'                           : 'City',
+    pending:            lang === 'bg' ? 'Чакащ'                          : 'Pending',
+    approved:           lang === 'bg' ? 'Одобрен'                        : 'Approved',
+    registered:         lang === 'bg' ? 'Регистрирани'                   : 'Registered',
+    spots:              lang === 'bg' ? 'Места'                          : 'Spots',
+    hours:              lang === 'bg' ? 'Часове'                         : 'Hours',
+    manage:             lang === 'bg' ? 'Управление'                     : 'Manage',
+    view:               lang === 'bg' ? 'Виж'                            : 'View',
+  }
   const [org, setOrg] = useState(null)
+  const [totalVolunteers, setTotalVolunteers] = useState(0)
   const [members, setMembers] = useState([])
   const [requests, setRequests] = useState([])
   const [projectCount, setProjectCount] = useState(0)
@@ -58,6 +86,16 @@ export default function OrgDashboard() {
     ])
 
     setOrg(orgRes.data)
+
+      // Count unique volunteers across all org events
+      supabase
+        .from('event_registrations')
+        .select('profile_id', { count: 'exact', head: false })
+        .in('status', ['approved','confirmed'])
+        .in('event_id',
+          (await supabase.from('events').select('id').eq('organization_id', orgId)).data?.map(e=>e.id) || []
+        )
+        .then(({count}) => setTotalVolunteers(count || 0))
     setMembers(membersRes.data || [])
     setRequests(requestsRes.data || [])
     setProjectCount((projectsRes.data || []).length)
