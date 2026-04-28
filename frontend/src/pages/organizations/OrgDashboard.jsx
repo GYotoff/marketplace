@@ -51,6 +51,9 @@ export default function OrgDashboard() {
   const [members, setMembers] = useState([])
   const [requests, setRequests] = useState([])
   const [projectCount, setProjectCount] = useState(0)
+  const [eventsCount, setEventsCount] = useState(0)
+  const [recentEvents, setRecentEvents] = useState([])
+  const [recentProjects, setRecentProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState('overview')
   const [actionLoading, setActionLoading] = useState(null)
@@ -73,7 +76,7 @@ export default function OrgDashboard() {
 
     if (!memberRow) { setLoading(false); return }
 
-    const [orgRes, membersRes, requestsRes, projectsRes] = await Promise.all([
+    const [orgRes, membersRes, requestsRes, projectsRes, eventsRes] = await Promise.all([
       supabase.from('organizations').select('*').eq('id', memberRow.organization_id).single(),
       supabase.from('organization_members')
         .select('*, profiles!organization_members_profile_id_fkey(full_name, email, avatar_url)')
@@ -82,23 +85,24 @@ export default function OrgDashboard() {
         .select('*, profiles!organization_members_profile_id_fkey(full_name, email, avatar_url)')
         .eq('organization_id', memberRow.organization_id)
         .eq('status', 'pending'),
-      supabase.from('projects').select('id').eq('organization_id', memberRow.organization_id),
+      supabase.from('projects').select('id,title,title_bg,status').eq('organization_id',memberRow.organization_id).order('created_at',{ascending:false}).limit(5),
+      supabase.from('events').select('id,title,title_bg,event_date,status').eq('organization_id',memberRow.organization_id).order('event_date',{ascending:false}).limit(5),
     ])
 
     setOrg(orgRes.data)
 
       // Count unique volunteers across all org events
-      supabase
-        .from('event_registrations')
-        .select('profile_id', { count: 'exact', head: false })
-        .in('status', ['approved','confirmed'])
-        .in('event_id',
-          (await supabase.from('events').select('id').eq('organization_id', orgId)).data?.map(e=>e.id) || []
-        )
-        .then(({count}) => setTotalVolunteers(count || 0))
+      const {data:evIds}=await supabase.from('events').select('id').eq('organization_id',memberRow.organization_id)
+      if(evIds?.length){
+        const {count}=await supabase.from('event_registrations').select('profile_id',{count:'exact',head:true}).in('status',['approved','confirmed']).in('event_id',evIds.map(e=>e.id))
+        setTotalVolunteers(count||0)
+      }
     setMembers(membersRes.data || [])
     setRequests(requestsRes.data || [])
-    setProjectCount((projectsRes.data || []).length)
+    setProjectCount((projectsRes.data||[]).length)
+    setEventsCount((eventsRes?.data||[]).length)
+    setRecentEvents(eventsRes?.data||[])
+    setRecentProjects(projectsRes.data||[])
     setLoading(false)
   }
 
@@ -172,9 +176,9 @@ export default function OrgDashboard() {
           </div>
           <div>
             <h1 className="text-xl font-medium text-gray-900">{lang === 'bg' ? (org.name_bg || org.name) : org.name}</h1>
-            <p className={`text-sm font-medium capitalize ${statusColor[org.status]}`}>{org.status}</p>
+            <p className={`text-sm font-medium ${statusColor[org.status]}`}>{lang==='bg'?{pending:'Чакащ',approved:'Одобрен',declined:'Отказан',suspended:'Спрян'}[org.status]||org.status:org.status}</p>
             {org.status === 'pending' && (
-              <p className="text-xs text-amber-600 mt-0.5">Awaiting portal admin approval before going live</p>
+              <p className="text-xs text-amber-600 mt-0.5">{lang==='bg'?'Чака одобрение от администратора.':'Awaiting portal admin approval before going live'}</p>
             )}
           </div>
         </div>
@@ -210,13 +214,46 @@ export default function OrgDashboard() {
             { label: lang === 'bg' ? 'Членове' : 'Members', value: members.length },
             { label: lang === 'bg' ? 'Заявки' : 'Pending requests', value: requests.length },
             { label: lang === 'bg' ? 'Проекти' : 'Projects', value: projectCount },
-            { label: lang === 'bg' ? 'Събития' : 'Events', value: 0 },
+            { label: lang === 'bg' ? 'Събития' : 'Events', value: eventsCount },
           ].map(s => (
             <div key={s.label} className="card text-center py-5">
               <p className="text-2xl font-medium text-brand-400">{s.value}</p>
               <p className="text-xs text-gray-500 mt-1">{s.label}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* 1.3 Recent events with links */}
+      {tab === 'overview' && recentEvents.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-sm font-semibold mb-3" style={{color:'var(--text)'}}>{lang==='bg'?'Скорошни събития':'Recent events'}</h2>
+          <div className="flex flex-col gap-2">
+            {recentEvents.map(ev => (
+              <div key={ev.id} className="card flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate" style={{color:'var(--text)'}}>{lang==='bg'?(ev.title_bg||ev.title):ev.title}</p>
+                  {ev.event_date&&<p className="text-xs mt-0.5" style={{color:'var(--text-muted)'}}>{new Date(ev.event_date).toLocaleDateString(lang==='bg'?'bg-BG':'en-GB',{day:'numeric',month:'short',year:'numeric'})}</p>}
+                </div>
+                <Link to={'/org/event/'+ev.id+'/edit'} className="btn-secondary text-xs shrink-0">{lang==='bg'?'Управление':'Manage'}</Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 1.3 Recent projects with links */}
+      {tab === 'overview' && recentProjects.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-sm font-semibold mb-3" style={{color:'var(--text)'}}>{lang==='bg'?'Скорошни проекти':'Recent projects'}</h2>
+          <div className="flex flex-col gap-2">
+            {recentProjects.map(proj => (
+              <Link key={proj.id} to={'/org/projects/'+proj.id} className="card flex items-center justify-between gap-3 hover:border-brand-200 transition-colors">
+                <p className="text-sm font-medium truncate" style={{color:'var(--text)'}}>{lang==='bg'?(proj.title_bg||proj.title):proj.title}</p>
+                <span className="text-xs badge shrink-0">{lang==='bg'?(proj.status==='active'?'Активен':proj.status==='completed'?'Завършен':proj.status):proj.status}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
 
@@ -235,12 +272,12 @@ export default function OrgDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900">
-                    {m.profiles?.full_name || 'Unknown'} {isMe && <span className="text-xs text-gray-400">{lang === 'bg' ? '(вие)' : '(you)'}</span>}
+                    {m.profiles?.full_name||(lang==='bg'?'Непознат':'Unknown')} {isMe && <span className="text-xs text-gray-400">{lang === 'bg' ? '(вие)' : '(you)'}</span>}
                   </p>
                   <p className="text-xs text-gray-400 truncate">{m.profiles?.email}</p>
                 </div>
                 <span className={`badge text-xs px-2 py-0.5 capitalize shrink-0 ${ROLE_BADGE[m.role]}`}>
-                  {m.role.replace('_', ' ')}
+                  {lang==='bg'?(m.role==='admin'?'Администратор':m.role==='content_creator'?'Редактор':m.role):m.role.replace('_',' ')}
                 </span>
                 {!isMe && (
                   <div className="flex gap-2 shrink-0">
@@ -250,16 +287,14 @@ export default function OrgDashboard() {
                       onChange={e => handleChangeMemberRole(m.id, e.target.value)}
                       disabled={actionLoading === m.id}
                     >
-                      <option value="admin">Admin</option>
+                      <option value="admin">{lang==='bg'?'Администратор':'Admin'}</option>
                       <option value="content_creator">{lang === 'bg' ? 'Редактор' : 'Content creator'}</option>
                     </select>
                     <button
                       onClick={() => handleRevokeMember(m.id, m.profile_id)}
                       disabled={actionLoading === m.id}
                       className="text-xs text-red-500 hover:text-red-700 border border-red-200 hover:bg-red-50 rounded-lg px-2.5 py-1.5"
-                    >
-                      Remove
-                    </button>
+                    >{lang==='bg'?'Премахни':'Remove'}</button>
                   </div>
                 )}
               </div>
