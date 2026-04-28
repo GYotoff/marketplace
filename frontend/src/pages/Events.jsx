@@ -174,12 +174,14 @@ export default function Events() {
   const [filterType, setFilterType] = useState('')
 
   useEffect(() => {
-    supabase.from('events')
+   /* supabase.from('events')
       .select('id,title,title_bg,description,description_bg,city,city_bg,event_date,volunteers_needed,volunteers_enrolled,is_online,event_type,organizations(name,name_bg,slug,logo_url)')
       .eq('status', 'published')
       .eq('show_in_public', true)
       .gte('event_date', new Date().toISOString())
-      .order('event_date')
+      .order('event_date')*/
+    
+      supabase.rpc('get_upcoming_public_events', { p_limit: 50 })
       .then(({ data }) => { setUpcoming(data || []); setLoading(false) })
 
     supabase.rpc('get_past_public_events', { p_limit: 50 })
