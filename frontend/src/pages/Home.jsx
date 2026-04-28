@@ -75,7 +75,7 @@ export default function Home() {
    /* supabase.from('events')
       .select('id,title,title_bg,description,description_bg,city,city_bg,event_date,volunteers_needed,volunteers_enrolled,is_online,event_type,organizations(name,logo_url)')
       .eq('status','published').gte('event_date', now.toISOString()).order('event_date').limit(5)*/
-      supabase.rpc('get_upcoming_public_events',  5)
+      supabase.rpc('get_upcoming_public_events', { p_limit: 50 })
       .then(({ data }) => data && setEvents(data))
 
     supabase.rpc('get_home_stats').then(({ data }) => {
