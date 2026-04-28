@@ -21,7 +21,9 @@
     "organizations": "Organizations",
     "volunteers": "Volunteers",
     "corporations": "Corporate partners",
-    "events": "Events"
+    "events": "Events",
+    "projects": "Projects",
+    "hours": "Hours"
   },
   "spotlight": {
     "title": "Monthly spotlight",
