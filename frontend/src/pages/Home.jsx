@@ -155,7 +155,7 @@ export default function Home() {
 
             {/* Volunteer of the month — custom card with ranking + achievements */}
             <div className="card flex flex-col gap-3" style={{ borderTop:'3px solid #1D9E75' }}>
-              <span className="badge self-start text-xs" style={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}>{L.volunteer}</span>
+              <span className="badge self-start text-xs" style={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}>{t('home.volunteer')}</span>
               {spotVol ? (
                 <>
                   <div className="relative w-14 h-14 shrink-0">
@@ -185,7 +185,7 @@ export default function Home() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs font-semibold text-brand-400">⏱ {spotVol.hours} {L.hours_logged}</p>
+                  <p className="text-xs font-semibold text-brand-400">⏱ {spotVol.hours} {t('home.hours_logged')}</p>
                   {spotVol.achievements?.length > 0 && (
                     <div className="flex flex-wrap gap-1 pt-1" style={{ borderTop:'1px solid var(--border)' }}>
                       {spotVol.achievements.slice(0,6).map((a,i) => (
@@ -204,31 +204,31 @@ export default function Home() {
                     </div>
                   )}
                 </>
-              ) : <p className="text-sm" style={{ color:'var(--text-faint)' }}>{L.no_data}</p>}
+              ) : <p className="text-sm" style={{ color:'var(--text-faint)' }}>{t('home.no_data')}</p>}
             </div>
 
             {/* Initiative of the month */}
             <SpotlightCard
               accent="#378ADD"
-              badge={L.initiative}
+              badge={t('home.initiative')}
               badgeStyle={{ background:'rgba(55,138,221,0.12)', color:'#378ADD' }}
               avatar={spotInit ? { src:spotInit.org_logo_url, initials:(spotInit.title||'?').slice(0,2).toUpperCase() } : { initials:'?' }}
-              title={spotInit ? (lang==='bg'?(spotInit.title_bg||spotInit.title):spotInit.title) : L.no_data}
-              sub={spotInit ? (spotInit.is_online ? L.online : (lang==='bg'?(spotInit.city_bg||spotInit.city):spotInit.city)) : null}
+              title={spotInit ? (lang==='bg'?(spotInit.title_bg||spotInit.title):spotInit.title) : t('home.no_data')}
+              sub={spotInit ? (spotInit.is_online ? t('home.online') : (lang==='bg'?(spotInit.city_bg||spotInit.city):spotInit.city)) : null}
               detail={spotInit?.org_name||null}
-              stat={spotInit ? `👥 ${spotInit.confirmed_count} ${L.confirmed}` : null}
+              stat={spotInit ? `👥 ${spotInit.confirmed_count} ${t('home.confirmed')}` : null}
               link={spotInit ? `/events/${spotInit.id}` : null}
             />
 
             {/* Organization of the month */}
             <SpotlightCard
               accent="#1D9E75"
-              badge={L.organization}
+              badge={t('home.organization')}
               badgeStyle={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}
               avatar={spotOrg ? { src:spotOrg.logo_url, initials:(spotOrg.name||'?').slice(0,2).toUpperCase() } : { initials:'?' }}
-              title={spotOrg?.name||L.no_data}
+              title={spotOrg?.name||t('home.no_data')}
               sub={spotOrg?.city||null}
-              stat={spotOrg ? `📅 ${spotOrg.event_count} ${L.events_org}` : null}
+              stat={spotOrg ? `📅 ${spotOrg.event_count} ${t('home.events_org')}` : null}
               link={spotOrg ? `/organizations/${spotOrg.slug}` : null}
             />
           </div>
@@ -256,7 +256,7 @@ export default function Home() {
       {/* ══ Upcoming events ══════════════════════════════════════════════════ */}
       <section className="py-10">
         <div className={MAX_W}>
-          <SectionHeader title={t('events.title')} linkTo="/events" linkLabel={L.see_events} />
+          <SectionHeader title={t('events.title')} linkTo="/events" linkLabel={t('home.see_events')} />
           <div className="flex flex-col gap-3">
             {events.length === 0 && <p className="text-sm" style={{ color:'var(--text-faint)' }}>{t('events.no_events')}</p>}
             {events.map(ev => {
@@ -278,12 +278,12 @@ export default function Home() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <p className="font-semibold text-sm leading-tight" style={{ color:'var(--text)' }}>{title}</p>
-                      <span className="text-xs font-medium whitespace-nowrap text-brand-400 shrink-0">{spots} {L.spots_left}</span>
+                      <span className="text-xs font-medium whitespace-nowrap text-brand-400 shrink-0">{spots} {t('home.spots_left')}</span>
                     </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       {logo_url && <img src={logo_url} alt="" className="w-3.5 h-3.5 rounded object-cover" />}
                       <p className="text-xs" style={{ color:'var(--text-muted)' }}>
-                        {org}{org && (isOnline||city) ? ' · ' : ''}{isOnline ? L.online : city}
+                        {org}{org && (isOnline||city) ? ' · ' : ''}{isOnline ? t('home.online') : city}
                       </p>
                     </div>
                     {desc && <p className="text-xs mt-1 line-clamp-1" style={{ color:'var(--text-faint)' }}>{desc}</p>}
