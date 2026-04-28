@@ -18,10 +18,10 @@
     "cta_register": "Register your organization"
   },
   "stats": {
-    "organizations": "Active organizations",
-    "volunteers": "Volunteers enrolled",
+    "organizations": "Organizations",
+    "volunteers": "Volunteers",
     "corporations": "Corporate partners",
-    "events": "Events this year"
+    "events": "Events"
   },
   "spotlight": {
     "title": "Monthly spotlight",
