@@ -270,7 +270,7 @@ export default function Home() {
               const isOnline = ev.is_online || ev.event_type === 'online'
               const spots   = Math.max(0, (ev.volunteers_needed||0) - (ev.volunteers_enrolled||0))
               const org     = (lang==='bg' && ev.organization_name_bg) ? ev.organization_name_bg : ev.organization_name
-              const logo_url  ev.organization_logo_url
+              const logo_url  = ev.organization_logo_url
               return (
                 <Link key={ev.id} to={`/events/${ev.id}`} className="card flex gap-4 hover:shadow-sm transition-all">
                   <div className="min-w-14 text-center rounded-xl py-3 shrink-0 bg-brand-50">
