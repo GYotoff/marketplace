@@ -21,7 +21,9 @@
     "organizations": "Организации",
     "volunteers": "Доброволци",
     "corporations": "Корпоративни партньори",
-    "events": "Събития"
+    "events": "Събития",
+    "projects": "Проекти",
+    "hours": "Часове"
   },
   "spotlight": {
     "title": "Месечни отличия",
