@@ -75,7 +75,7 @@ export default function Home() {
    /* supabase.from('events')
       .select('id,title,title_bg,description,description_bg,city,city_bg,event_date,volunteers_needed,volunteers_enrolled,is_online,event_type,organizations(name,logo_url)')
       .eq('status','published').gte('event_date', now.toISOString()).order('event_date').limit(5)*/
-      supabase.rpc('get_upcoming_public_events', { p_limit: 50 })
+      supabase.rpc('get_upcoming_public_events', { p_limit: 5 })
       .then(({ data }) => data && setEvents(data))
 
     supabase.rpc('get_home_stats').then(({ data }) => {
@@ -269,7 +269,7 @@ export default function Home() {
               const city    = (lang==='bg' && ev.city_bg)        ? ev.city_bg        : ev.city
               const isOnline = ev.is_online || ev.event_type === 'online'
               const spots   = Math.max(0, (ev.volunteers_needed||0) - (ev.volunteers_enrolled||0))
-              const org     = ev.organizations
+              const org     = (lang==='bg' && ev.organization_name_bg) ?ev.organization_name_bg : ev.organization_name
               return (
                 <Link key={ev.id} to={`/events/${ev.id}`} className="card flex gap-4 hover:shadow-sm transition-all">
                   <div className="min-w-14 text-center rounded-xl py-3 shrink-0 bg-brand-50">
