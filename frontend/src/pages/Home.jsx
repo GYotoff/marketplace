@@ -95,8 +95,6 @@ export default function Home() {
   }
 
   const L = {
-    activeProjects: lang==='bg' ? 'Проекти тази година' : 'Projects this year',
-    hoursYear:      lang==='bg' ? 'Часове тази година'  : 'Hours this year',
     volunteer:      lang==='bg' ? 'Доброволец на месеца'  : 'Volunteer of the month',
     initiative:     lang==='bg' ? 'Инициатива на месеца'  : 'Initiative of the month',
     organization:   lang==='bg' ? 'Организация на месеца' : 'Organization of the month',
