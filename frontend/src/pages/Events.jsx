@@ -7,8 +7,8 @@ function EventCard({ ev, lang, type }) {
   const title = (lang === 'bg' && ev.title_bg) ? ev.title_bg : ev.title
   const desc  = (lang === 'bg' && ev.description_bg) ? ev.description_bg : ev.description
   const city  = (lang === 'bg' && ev.city_bg) ? ev.city_bg : ev.city
-  const orgName    = lang==='bg' ? (ev.org_name_bg||ev.org_name||ev.organizations?.name_bg||ev.organizations?.name) : (ev.org_name||ev.organizations?.name)
-  const orgLogoUrl = ev.org_logo_url || ev.organizations?.logo_url
+  const orgName    = lang==='bg' ? (ev.org_name_bg||ev.org_name||ev.organization_name_bg||ev.organization_name) : (ev.org_name||ev.organization_name)
+  const orgLogoUrl = ev.org_logo_url || ev.organization_logo_url
   const dt    = new Date(ev.event_date)
   const isOnline = ev.is_online || ev.event_type === 'online' || ev.event_type === 'hybrid'
 
@@ -174,7 +174,7 @@ export default function Events() {
   const [filterType, setFilterType] = useState('')
 
   useEffect(() => {
-      supabase.rpc('get_upcoming_public_events', { p_limit: 50 })
+      supabase.rpc('get_upcoming_public_events', { p_limit: 200 })
       .then(({ data }) => { setUpcoming(data || []); setLoading(false) })
 
     supabase.rpc('get_past_public_events', { p_limit: 50 })
@@ -188,7 +188,7 @@ export default function Events() {
     const s = search.toLowerCase()
     const title = (lang === 'bg' && ev.title_bg) ? ev.title_bg : ev.title
     const city  = (lang === 'bg' && ev.city_bg)  ? ev.city_bg  : ev.city
-    const org   = ev.org_name || ev.organizations?.name || ''
+    const org   = ev.org_name || ev.organization_name || ''
     return title?.toLowerCase().includes(s) || city?.toLowerCase().includes(s) || org.toLowerCase().includes(s)
   }
 
@@ -255,7 +255,7 @@ export default function Events() {
           {filteredUpcoming.map(ev => {
             const title = (lang==='bg' && ev.title_bg) ? ev.title_bg : ev.title
             const city  = (lang==='bg' && ev.city_bg)  ? ev.city_bg  : ev.city
-            const org   = ev.org_name || ev.organizations?.name
+            const org   = ev.org_name || ev.organization_name
             return (
               <Link key={ev.id} to={'/events/'+ev.id}
                 className="card flex flex-col gap-3 hover:shadow-md hover:border-brand-200 transition-all">
