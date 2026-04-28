@@ -86,7 +86,7 @@ export default function OrgDashboard() {
         .eq('organization_id', memberRow.organization_id)
         .eq('request_status', 'pending'),
       supabase.from('projects').select('id,title,title_bg,status').eq('organization_id',memberRow.organization_id).order('created_at',{ascending:false}).limit(5),
-      supabase.from('events').select('id,title,title_bg,event_date,status').eq('organization_id',memberRow.organization_id).order('event_date',{ascending:false}).limit(5),
+      supabase.from('events').select('id,title,title_bg,event_date,status,project_id').eq('organization_id',memberRow.organization_id).order('event_date',{ascending:false}).limit(5),
     ])
 
     setOrg(orgRes.data)
@@ -235,7 +235,7 @@ export default function OrgDashboard() {
                   <p className="text-sm font-medium truncate" style={{color:'var(--text)'}}>{lang==='bg'?(ev.title_bg||ev.title):ev.title}</p>
                   {ev.event_date&&<p className="text-xs mt-0.5" style={{color:'var(--text-muted)'}}>{new Date(ev.event_date).toLocaleDateString(lang==='bg'?'bg-BG':'en-GB',{day:'numeric',month:'short',year:'numeric'})}</p>}
                 </div>
-                <Link to={'/org/event/'+ev.id+'/edit'} className="btn-secondary text-xs shrink-0">{lang==='bg'?'Управление':'Manage'}</Link>
+                <Link to={'/org/projects/'+(ev.project_id||'')+'/events/'+ev.id+'/edit'} className="btn-secondary text-xs shrink-0">{lang==='bg'?'Управление':'Manage'}</Link>
               </div>
             ))}
           </div>
@@ -248,7 +248,7 @@ export default function OrgDashboard() {
           <h2 className="text-sm font-semibold mb-3" style={{color:'var(--text)'}}>{lang==='bg'?'Скорошни проекти':'Recent projects'}</h2>
           <div className="flex flex-col gap-2">
             {recentProjects.map(proj => (
-              <Link key={proj.id} to={'/org/projects/'+proj.id} className="card flex items-center justify-between gap-3 hover:border-brand-200 transition-colors">
+              <Link key={proj.id} to={'/org/projects/'+proj.id+'/edit'} className="card flex items-center justify-between gap-3 hover:border-brand-200 transition-colors">
                 <p className="text-sm font-medium truncate" style={{color:'var(--text)'}}>{lang==='bg'?(proj.title_bg||proj.title):proj.title}</p>
                 <span className="text-xs badge shrink-0">{lang==='bg'?(proj.status==='active'?'Активен':proj.status==='completed'?'Завършен':proj.status):proj.status}</span>
               </Link>
