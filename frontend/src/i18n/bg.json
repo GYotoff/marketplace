@@ -18,10 +18,10 @@
     "cta_register": "Регистрирай организация"
   },
   "stats": {
-    "organizations": "Активни организации",
-    "volunteers": "Записани доброволци",
+    "organizations": "Организации",
+    "volunteers": "Доброволци",
     "corporations": "Корпоративни партньори",
-    "events": "Събития тази година"
+    "events": "Събития"
   },
   "spotlight": {
     "title": "Месечни отличия",
