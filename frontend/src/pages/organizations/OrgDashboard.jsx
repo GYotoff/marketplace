@@ -81,10 +81,10 @@ export default function OrgDashboard() {
       supabase.from('organization_members')
         .select('*, profiles!organization_members_profile_id_fkey(full_name, email, avatar_url)')
         .eq('organization_id', memberRow.organization_id),
-      supabase.from('org_creator_requests')
+      supabase.from('organization_members')
         .select('*, profiles!organization_members_profile_id_fkey(full_name, email, avatar_url)')
         .eq('organization_id', memberRow.organization_id)
-        .eq('status', 'pending'),
+        .eq('request_status', 'pending'),
       supabase.from('projects').select('id,title,title_bg,status').eq('organization_id',memberRow.organization_id).order('created_at',{ascending:false}).limit(5),
       supabase.from('events').select('id,title,title_bg,event_date,status').eq('organization_id',memberRow.organization_id).order('event_date',{ascending:false}).limit(5),
     ])
@@ -110,8 +110,8 @@ export default function OrgDashboard() {
     setActionLoading(requestId)
     const status = action === 'approve' ? 'approved' : 'declined'
 
-    await supabase.from('org_creator_requests')
-      .update({ status, reviewed_by: user.id, reviewed_at: new Date().toISOString() })
+    await supabase.from('organization_members')
+      .update({ request_status: status })
       .eq('id', requestId)
 
     if (action === 'approve') {
