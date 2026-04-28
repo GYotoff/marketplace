@@ -255,7 +255,7 @@ export default function Events() {
           {filteredUpcoming.map(ev => {
             const title = (lang==='bg' && ev.title_bg) ? ev.title_bg : ev.title
             const city  = (lang==='bg' && ev.city_bg)  ? ev.city_bg  : ev.city
-            const org   = ev.org_name || ev.organization_name
+            const org   = (lang==='bg' && ev.organization_name_bg)  ? ev.organization_name_bg : ev.organization_name
             return (
               <Link key={ev.id} to={'/events/'+ev.id}
                 className="card flex flex-col gap-3 hover:shadow-md hover:border-brand-200 transition-all">
