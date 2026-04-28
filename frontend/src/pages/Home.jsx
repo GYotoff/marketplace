@@ -286,7 +286,7 @@ export default function Home() {
                       {org?.logo_url && <img src={org.logo_url} alt="" className="w-3.5 h-3.5 rounded object-cover" />}
                       <p className="text-xs" style={{ color:'var(--text-muted)' }}>
                        /* {org?.name}{org?.name && (isOnline||city) ? ' · ' : ''}{isOnline ? L.online : city}*/
-                        {org?}{org? && (isOnline||city) ? ' · ' : ''}{isOnline ? L.online : city}
+                        {org}{org && (isOnline||city) ? ' · ' : ''}{isOnline ? L.online : city}
                       </p>
                     </div>
                     {desc && <p className="text-xs mt-1 line-clamp-1" style={{ color:'var(--text-faint)' }}>{desc}</p>}
