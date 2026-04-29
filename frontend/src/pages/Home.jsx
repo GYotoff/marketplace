@@ -106,9 +106,8 @@ export default function Home() {
 
       {/* ══ Hero ══════════════════════════════════════════════════════════════ */}
       
-      /*    <img src="/logo.png" alt="Dataverte" className="h-9 w-9 object-contain rounded-lg" />
-      <section className="py-6 px-4" style={{ background:'var(--bg)', backgroundImage:'var(--hero-gradient)' }}>
-        */
+    
+      
         
       <section className="py-6 px-4" style={{ background:'var(--bg)', backgroundImage:"/background.png"  }}>
         <div className="max-w-5xl mx-auto text-center">
