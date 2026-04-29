@@ -86,11 +86,7 @@ export default function Corporations() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    /*supabase.from('corporations')
-      .select('id, name, name_bg, slug, description, description_bg, tagline, tagline_bg, logo_url, city, city_bg, website, industry, size, is_verified, status, corporation_members(count)')
-      .eq('is_active', true).eq('status', 'approved') */
-    
-    supabase.rpc('get_corporation_data', { p_limit: 50 })
+    supabase.rpc('get_corporation_data', { p_limit: 150 })
       .then(({ data }) => {
         const normalized = (data || [])
         setCorps(normalized)
