@@ -117,11 +117,7 @@ function ImageUpload({ label, hint, currentUrl, bucket, orgId, field, onUploaded
   )
 }
 
-const TABS = [
-  { key: 'general', label: 'General' },
-  { key: 'contact', label: 'Contact & Social' },
-  { key: 'images', label: 'Logo & Cover' },
-]
+// TABS moved inside component
 
 
 const UIC_RE = /^(?:\d{9}|\d{13})$/
@@ -140,6 +136,11 @@ export default function OrgSettings() {
   const { user } = useAuthStore()
   const { i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
+  const TABS = [
+    { key: 'general', label: lang==='bg'?'Общи':'General' },
+    { key: 'contact', label: lang==='bg'?'Контакт':'Contact & Social' },
+    { key: 'images',  label: lang==='bg'?'Лого и корица':'Logo & Cover' },
+  ]
   const navigate = useNavigate()
   const [org, setOrg] = useState(null)
   const [form, setForm] = useState({})
@@ -314,7 +315,7 @@ export default function OrgSettings() {
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
               tab === t.key ? 'border-brand-400 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}>
-            {lang==='bg'?({General:'Общи','Contact & Social':'Контакт','Logo & Cover':'Лого и корица'}[t.label]||t.label):t.label}
+            {t.label}
           </button>
         ))}
       </div>
