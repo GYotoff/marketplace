@@ -118,9 +118,9 @@ function ImageUpload({ label, hint, currentUrl, bucket, orgId, field, onUploaded
 }
 
 const TABS = [
-  { key: 'general', label: 'General' },
-  { key: 'contact', label: 'Contact & Social' },
-  { key: 'images', label: 'Logo & Cover' },
+  { key: 'general', label: lang==='bg'?'Общи':'General' },
+  { key: 'contact', label: lang==='bg'?'Контакт':'Contact & Social' },
+  { key: 'images', label: lang==='bg'?'Лого и корица':'Logo & Cover' },
 ]
 
 
@@ -286,18 +286,18 @@ export default function OrgSettings() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-medium text-gray-900">Organization settings</h1>
+          <h1 className="text-xl font-medium text-gray-900">{lang==='bg'?'Настройки на организацията':'Organization settings'}</h1>
           <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-2">
-            {org.name}
+            {lang==='bg'?(org.name_bg||org.name):org.name}
             <span className={`badge text-xs px-2 py-0.5 capitalize ${
               org.status === 'approved' ? 'bg-brand-50 text-brand-700'
               : org.status === 'pending' ? 'bg-amber-50 text-amber-700'
               : 'bg-red-50 text-red-700'
-            }`}>{org.status}</span>
+            }`}>{lang==='bg'?({pending:'Чакащ',approved:'Одобрен',declined:'Отказан',suspended:'Спрян'}[org.status]||org.status):org.status}</span>
           </p>
         </div>
         <Link to={`/organizations/${org.slug}`} className="btn-secondary text-sm">
-          View page â
+          {lang==='bg'?'Виж страницата':'View page'}
         </Link>
       </div>
 
@@ -501,7 +501,7 @@ function SaveButton({ saving, onSave }) {
       <button type="button" onClick={onSave} disabled={saving}
         className="btn-primary flex items-center gap-2">
         {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-        {saving ? 'Saving...' : 'Save changes'}
+        {saving ? (lang==='bg'?'Запазване...':'Saving...') : (lang==='bg'?'Запази промените':'Save changes')}
       </button>
     </div>
   )
