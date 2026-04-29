@@ -105,7 +105,7 @@ export default function Home() {
     <div>
 
       {/* ══ Hero ══════════════════════════════════════════════════════════════ */}
-      <section className="py-6 px-4" style={{ background:'var(--bg)', backgroundImage:'url("/background.png")' }}>
+      <section className="py-6 px-4" style={{ background:'var(--bg)', backgroundImage:'url($"/Background.png")' }}>
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-3 sm:whitespace-nowrap" style={{ color:'var(--text)' }}>
             {(() => {
