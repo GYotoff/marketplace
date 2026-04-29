@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useTranslation } from 'react-i18next'
 
 const STATUS_BADGE = {
   draft:     'bg-gray-100 text-gray-600',
@@ -20,6 +21,8 @@ const REG_STATUS_BADGE = {
 export default function OrgProjectEvents() {
   const { projectId } = useParams()
   const { user } = useAuthStore()
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [project, setProject] = useState(null)
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
