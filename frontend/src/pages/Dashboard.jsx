@@ -194,6 +194,7 @@ function OrgDashboard({ profile }) {
   const [org, setOrg] = useState(null)
   const [projects, setProjects] = useState([])
   const [events, setEvents] = useState([])
+  const [totalOrgVolunteers, setTotalOrgVolunteers] = useState(0)
 
   useEffect(() => {
     supabase.from('organization_members').select('organizations(*)').eq('profile_id', profile.id).limit(1).single()
@@ -204,7 +205,16 @@ function OrgDashboard({ profile }) {
           supabase.from('projects').select('*').eq('organization_id', orgId).order('created_at', { ascending: false })
             .then(({ data: p }) => setProjects(p || []))
           supabase.from('events').select('*').eq('organization_id', orgId).order('event_date')
-            .then(({ data: e }) => setEvents(e || []))
+            .then(({ data: e }) => {
+        setEvents(e || [])
+        if (e?.length) {
+          supabase.from('event_registrations')
+            .select('profile_id', { count: 'exact', head: true })
+            .in('status', ['approved','confirmed'])
+            .in('event_id', e.map(ev => ev.id))
+            .then(({count}) => setTotalOrgVolunteers(count || 0))
+        }
+      })
         }
       })
   }, [profile.id])
@@ -226,17 +236,16 @@ function OrgDashboard({ profile }) {
               <h2 className="font-medium">{org.name}</h2>
               <p className="text-sm text-gray-400">{org.city} · {org.type}</p>
             </div>
-            <Link to={`/organizations/${org.slug}`} className="btn-secondary ml-auto text-xs px-3 py-1.5">View page</Link>
+            <Link to={`/organizations/${org.slug}`} className="btn-secondary ml-auto text-xs px-3 py-1.5">{lang==='bg'?'Виж страницата':'View page'}</Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatCard label="Projects" value={projects.length} />
-            <StatCard label="Events" value={events.length} />
-            <StatCard label="Total volunteers" value={projects.reduce((s, p) => s + (p.volunteers_enrolled || 0), 0)} />
+            <StatCard label={lang==='bg'?'Проекти':'Projects'} value={projects.length} />
+            <StatCard label={lang==='bg'?'Събития':'Events'} value={events.length} />
+            <StatCard label={lang==='bg'?'Общо доброволци':'Total volunteers'} value={totalOrgVolunteers} />
           </div>
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-medium">Projects</h2>
-              <Link to="/projects/new" className="btn-primary text-xs px-3 py-1.5">+ New project</Link>
+              <h2 className="text-base font-medium">{lang==='bg'?'Проекти':'Projects'}</h2>
             </div>
             {projects.length === 0
               ? <div className="card text-center text-sm text-gray-400 py-8">No projects yet.</div>
@@ -244,10 +253,10 @@ function OrgDashboard({ profile }) {
                   {projects.map(p => (
                     <div key={p.id} className="card flex items-center justify-between gap-3">
                       <div>
-                        <p className="font-medium text-sm">{p.title}</p>
-                        <p className="text-xs text-gray-400">{p.volunteers_enrolled}/{p.volunteers_needed} volunteers</p>
+                        <Link to={'/org/projects/'+p.id} className="font-medium text-sm hover:text-brand-500 transition-colors block">{lang==='bg'?(p.title_bg||p.title):p.title}</Link>
+                        <p className="text-xs text-gray-400">{p.volunteers_enrolled}/{p.volunteers_needed} {lang==='bg'?'доброволци':'volunteers'}</p>
                       </div>
-                      <span className={`badge ${statusColor[p.status] || 'bg-gray-100'} capitalize`}>{p.status}</span>
+                      <span className={`badge ${statusColor[p.status] || 'bg-gray-100'} capitalize`}>{lang==='bg'?({active:'Активен',completed:'Завършен',draft:'Чернова',cancelled:'Отменен',archived:'Архивиран'}[p.status]||p.status):p.status}</span>
                     </div>
                   ))}
                 </div>
@@ -255,19 +264,18 @@ function OrgDashboard({ profile }) {
           </div>
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-medium">Events</h2>
-              <Link to="/events/new" className="btn-primary text-xs px-3 py-1.5">+ New event</Link>
+              <h2 className="text-base font-medium">{lang==='bg'?'Събития':'Events'}</h2>
             </div>
             {events.length === 0
-              ? <div className="card text-center text-sm text-gray-400 py-8">No events yet.</div>
+              ? <div className="card text-center text-sm text-gray-400 py-8">{lang==='bg'?'Няма все още събития.':'No events yet.'}</div>
               : <div className="flex flex-col gap-2">
                   {events.slice(0, 5).map(e => (
                     <div key={e.id} className="card flex items-center justify-between gap-3">
                       <div>
-                        <p className="font-medium text-sm">{e.title}</p>
-                        <p className="text-xs text-gray-400">{new Date(e.event_date).toLocaleDateString()}</p>
+                        <Link to={'/org/event/'+e.id+'/edit'} className="font-medium text-sm hover:text-brand-500 transition-colors block">{lang==='bg'?(e.title_bg||e.title):e.title}</Link>
+                        <p className="text-xs text-gray-400">{new Date(e.event_date).toLocaleDateString(lang==='bg'?'bg-BG':'en-GB',{day:'numeric',month:'short',year:'numeric'})}</p>
                       </div>
-                      <span className={`badge ${statusColor[e.status] || 'bg-gray-100'} capitalize`}>{e.status}</span>
+                      <span className={`badge ${statusColor[e.status] || 'bg-gray-100'} capitalize`}>{lang==='bg'?({published:'Публикувано',draft:'Чернова',cancelled:'Отменено',completed:'Завършено'}[e.status]||e.status):e.status}</span>
                     </div>
                   ))}
                 </div>
