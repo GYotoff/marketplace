@@ -153,14 +153,14 @@ export default function OrgProjects() {
           <p className="text-sm text-gray-500 mt-0.5">{org.name}</p>
         </div>
         {canCreate
-          ? <Link to="/org/projects/new" className="btn-primary">{lang === 'bg' ? '+ Нов проект' : '+ New project'}</Link>
+          ? <Link to="/org/projects/new" className="btn-primary">{lang === 'bg' ? '+ Нов проект' : '{lang==='bg'?'+ Нов проект':'+ New project'}'}</Link>
           : <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Organization must be approved to create projects</span>
         }
       </div>
 
       {projects.length === 0 ? (
         <div className="card text-center py-16">
-          <p className="text-gray-400 text-sm mb-4">No projects yet.</p>
+          <p className="text-gray-400 text-sm mb-4">lang==='bg'?'Няма проекти.':'No projects yet.'</p>
           {canCreate && <Link to="/org/projects/new" className="btn-primary">{lang === 'bg' ? 'Създайте първия си проект' : 'Create your first project'}</Link>}
         </div>
       ) : (
@@ -170,7 +170,7 @@ export default function OrgProjects() {
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h3 className="font-medium text-gray-900">{p.title}</h3>
+                    <h3 className="font-medium text-gray-900">{lang==='bg'?(p.title_bg||p.title):p.title}</h3>
                     <span className={'badge text-xs px-2 py-0.5 ' + (STATUS_BADGE[p.status] || 'bg-gray-100 text-gray-600')}>
                       {(lang === 'bg' ? STATUS_LABEL_BG : STATUS_LABEL_EN)[p.status] || p.status}
                     </span>
