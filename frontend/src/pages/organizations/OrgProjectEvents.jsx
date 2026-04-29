@@ -178,11 +178,11 @@ export default function OrgProjectEvents() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <Link to="/org/projects" className="text-xs text-gray-400 hover:text-gray-600 mb-1 block">← All projects</Link>
-          <h1 className="text-xl font-medium text-gray-900">Events</h1>
+          <h1 className="text-xl font-medium text-gray-900">{lang==='bg'?'Събития':'Events'}</h1>
           <p className="text-sm text-gray-500 mt-0.5">{project.title}</p>
         </div>
         {canAddEvent
-          ? <Link to={'/org/projects/' + projectId + '/events/new'} className="btn-primary">+ New event</Link>
+          ? <Link to={'/org/projects/' + projectId + '/events/new'} className="btn-primary">{lang==='bg'?'+ Ново събитие':'+ New event'}</Link>
           : <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Publish project first to add events</span>
         }
       </div>
@@ -224,7 +224,7 @@ export default function OrgProjectEvents() {
                       </p>
                     )}
                     <p className="text-xs text-gray-400 mt-0.5">
-                      {ev.volunteers_enrolled || 0} / {ev.volunteers_needed || 0} volunteers
+                      {ev.volunteers_lang==='bg'?'записани':'enrolled' || 0} / {ev.volunteers_needed || 0} volunteers
                     </p>
                   </div>
 
@@ -237,10 +237,10 @@ export default function OrgProjectEvents() {
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                       </svg>
-                      {ev.volunteers_enrolled || 0} registered
+                      {ev.volunteers_lang==='bg'?'записани':'enrolled' || 0} registered
                     </button>
 
-                    <Link to={'/org/projects/' + projectId + '/events/' + ev.id + '/edit'} className="btn-secondary text-xs py-1.5">Edit</Link>
+                    <Link to={'/org/projects/' + projectId + '/events/' + ev.id + '/edit'} className="btn-secondary text-xs py-1.5">{lang==='bg'?'Редактиране':'Edit'}</Link>
 
                     {ev.status === 'draft' && (
                       <button onClick={() => setStatus(ev, 'published')} className="btn-primary text-xs py-1.5">Publish</button>
@@ -257,7 +257,7 @@ export default function OrgProjectEvents() {
                       <button onClick={() => setStatus(ev, 'completed')} className="text-xs border border-gray-200 text-gray-500 hover:bg-gray-50 rounded-lg px-2.5 py-1.5">Complete</button>
                     )}
                     {ev.status === 'draft' && (
-                      <button onClick={() => deleteEvent(ev)} className="text-xs border border-red-200 text-red-500 hover:bg-red-50 rounded-lg px-2.5 py-1.5">Delete</button>
+                      <button onClick={() => deleteEvent(ev)} className="text-xs border border-red-200 text-red-500 hover:bg-red-50 rounded-lg px-2.5 py-1.5">{lang==='bg'?'Изтриване':'Delete'}</button>
                     )}
                   </div>
                 </div>
