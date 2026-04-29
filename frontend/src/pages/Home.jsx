@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
-import bgImage from 'Background.png'
 
 function StatCard({ num, label, border }) {
   return (
@@ -106,7 +105,7 @@ export default function Home() {
     <div>
 
       {/* ══ Hero ══════════════════════════════════════════════════════════════ */}
-      <section className="py-6 px-4" style={{ background:'var(--bg)', backgroundImage:'url(${bgImage})' }}>
+      <section className="py-6 px-4" style={{ background:'var(--bg)', backgroundImage:'var(--hero-gradient)' }}>
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-3 sm:whitespace-nowrap" style={{ color:'var(--text)' }}>
             {(() => {
