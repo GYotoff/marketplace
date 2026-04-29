@@ -93,8 +93,7 @@ export default function Corporations() {
     supabase.rpc('get_corporation_data', { p_limit: 50 })
       .then(({ data }) => {
         const normalized = (data || []).map(c => ({
-          ...c,
-          member_count: c.corporation_members ?? 0,
+          ...c
         }))
         setCorps(normalized)
         setLoading(false)
