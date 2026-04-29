@@ -118,9 +118,9 @@ function ImageUpload({ label, hint, currentUrl, bucket, orgId, field, onUploaded
 }
 
 const TABS = [
-  { key: 'general', label: lang==='bg'?'Общи':'General' },
-  { key: 'contact', label: lang==='bg'?'Контакт':'Contact & Social' },
-  { key: 'images', label: lang==='bg'?'Лого и корица':'Logo & Cover' },
+  { key: 'general', label: 'General' },
+  { key: 'contact', label: 'Contact & Social' },
+  { key: 'images', label: 'Logo & Cover' },
 ]
 
 
@@ -314,7 +314,7 @@ export default function OrgSettings() {
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
               tab === t.key ? 'border-brand-400 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}>
-            {t.label}
+            {lang==='bg'?({General:'Общи','Contact & Social':'Контакт','Logo & Cover':'Лого и корица'}[t.label]||t.label):t.label}
           </button>
         ))}
       </div>
