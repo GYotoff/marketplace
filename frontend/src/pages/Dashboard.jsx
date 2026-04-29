@@ -191,6 +191,8 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
 }
 
 function OrgDashboard({ profile }) {
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [org, setOrg] = useState(null)
   const [projects, setProjects] = useState([])
   const [events, setEvents] = useState([])
@@ -288,6 +290,8 @@ function OrgDashboard({ profile }) {
 }
 
 function CorpDashboard({ profile }) {
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [corp, setCorp] = useState(null)
   const [pendingCount, setPendingCount] = useState(0)
   const [memberCount, setMemberCount] = useState(0)
