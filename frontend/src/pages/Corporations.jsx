@@ -94,7 +94,7 @@ export default function Corporations() {
       .then(({ data }) => {
         const normalized = (data || []).map(c => ({
           ...c,
-          member_count: c.corporation_members?.[0]?.count ?? 0,
+          member_count: c.corporation_members ?? 0,
         }))
         setCorps(normalized)
         setLoading(false)
