@@ -343,13 +343,13 @@ export default function OrgSettings() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang==='bg'?'Тип':'Type'}</label>
                 <select className="input" value={form.type} onChange={e => set('type', e.target.value)}>
                   {ORG_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Founded year</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang==='bg'?'Година на основаване':'Founded year'}</label>
                 <input type="number" className="input" placeholder="e.g. 2015"
                   min="1900" max={new Date().getFullYear()}
                   value={form.founded_year} onChange={e => set('founded_year', e.target.value)} />
@@ -357,13 +357,13 @@ export default function OrgSettings() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Tagline (EN)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang==='bg'?'Мото (EN)':'Tagline (EN)'}</label>
               <input type="text" className="input" placeholder="Short mission statement in English"
                 value={form.tagline} onChange={e => set('tagline', e.target.value)} />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Tagline (BG)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang==='bg'?'Мото (BG)':'Tagline (BG)'}</label>
               <input type="text" className="input" placeholder="ÐÑÐ°ÑÐºÐ¾ Ð¼Ð¾ÑÐ¾ Ð½Ð° Ð±ÑÐ»Ð³Ð°ÑÑÐºÐ¸"
                 value={form.tagline_bg} onChange={e => set('tagline_bg', e.target.value)} />
             </div>
@@ -379,14 +379,14 @@ export default function OrgSettings() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Description (BG)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang==='bg'?'Описание (BG)':'Description (BG)'}</label>
               <textarea rows={4} className="input resize-none"
                 placeholder="ÐÐ¿Ð¸ÑÐ°Ð½Ð¸Ðµ Ð½Ð° Ð¾ÑÐ³Ð°Ð½Ð¸Ð·Ð°ÑÐ¸ÑÑÐ° Ð½Ð° Ð±ÑÐ»Ð³Ð°ÑÑÐºÐ¸..."
                 value={form.description_bg} onChange={e => set('description_bg', e.target.value)} />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Registration number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang==='bg'?'Рег. номер':'Registration number'}</label>
               <input type="text" className="input" placeholder="UIC / ÐÑÐ»ÑÑÐ°Ñ"
                 value={form.registration_number}
                 onChange={e => { set('registration_number', e.target.value); setUicError(validateUIC(e.target.value, lang)) }} />
@@ -432,7 +432,7 @@ export default function OrgSettings() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Website</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{lang==='bg'?'Уебсайт':'Website'}</label>
               <input type="url" className="input" placeholder="https://yourorganization.org"
                 value={form.website} onChange={e => set('website', e.target.value)} />
             </div>
