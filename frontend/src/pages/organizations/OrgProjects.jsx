@@ -153,7 +153,7 @@ export default function OrgProjects() {
           <p className="text-sm text-gray-500 mt-0.5">{org.name}</p>
         </div>
         {canCreate
-          ? <Link to="/org/projects/new" className="btn-primary">{lang === 'bg' ? '+ Нов проект' : '{lang==='bg'?'+ Нов проект':'+ New project'}'}</Link>
+          ? <Link to="/org/projects/new" className="btn-primary">{lang==='bg'?'+ Нов проект':'+ New project'}</Link>
           : <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Organization must be approved to create projects</span>
         }
       </div>
