@@ -394,7 +394,7 @@ export default function OrgSettings() {
               {uicError && <p className="text-xs text-red-500 mt-1">{uicError}</p>}
             </div>
 
-            <SaveButton saving={saving} onSave={handleSave} />
+            <SaveButton saving={saving} onSave={handleSave} lang={lang} />
           </div>
         )}
 
@@ -455,7 +455,7 @@ export default function OrgSettings() {
               </div>
             </div>
 
-            <SaveButton saving={saving} onSave={handleSave} />
+            <SaveButton saving={saving} onSave={handleSave} lang={lang} />
           </div>
         )}
 
@@ -487,7 +487,7 @@ export default function OrgSettings() {
             </div>
 
             <div className="border-t border-gray-100 pt-4">
-              <SaveButton saving={saving} onSave={handleSave} />
+              <SaveButton saving={saving} onSave={handleSave} lang={lang} />
             </div>
           </div>
         )}
@@ -496,7 +496,7 @@ export default function OrgSettings() {
   )
 }
 
-function SaveButton({ saving, onSave }) {
+function SaveButton({ saving, onSave, lang }) {
   return (
     <div className="flex justify-end pt-3 border-t border-gray-100">
       <button type="button" onClick={onSave} disabled={saving}
