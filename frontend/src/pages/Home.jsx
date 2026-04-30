@@ -110,7 +110,7 @@ export default function Home() {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-3 sm:whitespace-nowrap" style={{ color:'var(--text)' }}>
             {(() => {
               const title = t('hero.title')
-              const highlight = lang==='bg' ? 'Доброволствай.' : 'Volunteer.'
+              const highlight = t('hero.highlight')
               const idx = title.indexOf(highlight)
               if (idx===-1) return <span>{title}</span>
               return <><span>{title.slice(0,idx)}</span><span className="text-brand-400">{highlight}</span><span>{title.slice(idx+highlight.length)}</span></>
