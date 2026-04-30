@@ -75,7 +75,6 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
     your_ranking:         lang === 'bg' ? 'Вашият ранг'                                                   : 'Your ranking',
     since:                lang === 'bg' ? 'От'                                                            : 'Since',
   }
-
   const _now = new Date()
   const _upcomingRegs = registrations.filter(r => r.event_status !== 'completed' && r.event_date && new Date(r.event_date) >= _now)
   const _pastRegs = registrations.filter(r => r.event_status === 'completed' || (r.event_date && new Date(r.event_date) < _now))
