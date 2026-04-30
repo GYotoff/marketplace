@@ -168,7 +168,7 @@ export default function Volunteers() {
               {/* Header: avatar + name + location + ranking */}
               <div className="flex items-center gap-3">
                 <div className="relative shrink-0" style={{ width: 52, height: 52 }}>
-                  <div className="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 font-semibold text-lg overflow-hidden">
+                  <div className="w-14 h-14 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 font-semibold text-lg overflow-hidden">
                     {v.avatar_url
                       ? <img src={v.avatar_url} alt={name} className="w-full h-full object-cover" />
                       : initials}
