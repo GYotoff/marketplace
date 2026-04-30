@@ -170,7 +170,6 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
       </div>
 
       <div>
-        <>
             <h2 className="text-base font-medium mb-3">{L.my_registrations}</h2>
             {_upcomingRegs.length === 0 && _pastRegs.length === 0
               ? <div className="card text-center text-sm text-gray-400 py-8">{L.no_registrations}<Link to="/events" className="text-brand-400">{L.browse_events}</Link></div>
@@ -207,7 +206,6 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
                     </div>
                   </>}
                 </div>}
-        </>
 		</div>
     
   )
