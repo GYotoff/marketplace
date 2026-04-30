@@ -265,7 +265,7 @@ export default function Volunteers() {
 
               {/* Achievements — icon badges only */}
               {achievements.length > 0 && (
-                <div className="flex gap-1.5 flex-wrap border border-gray-200 content-around">
+                <div className="flex gap-1.5 flex-wrap border-t border-gray-200 content-around"><div></div>
                   {achievements.slice(0, 6).map((a, i) => (
                     <span key={i} title={lang === 'bg' ? (a.name_bg || a.name) : a.name}
                       className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0"
