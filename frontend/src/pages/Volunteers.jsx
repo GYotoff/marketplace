@@ -265,13 +265,13 @@ export default function Volunteers() {
 
               {/* Achievements — icon badges only */}
               {achievements.length > 0 && (
-                <div className="flex gap-1.5 flex-wrap border-t border-gray-200">
+                <div className="flex gap-1.5 flex-wrap border-t border-gray-200 justify-items-center">
                   {achievements.slice(0, 6).map((a, i) => (
                     <span key={i} title={lang === 'bg' ? (a.name_bg || a.name) : a.name}
                       className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0"
                       style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-mid)' }}>
                       {a.badge_url
-                        ? <img src={a.badge_url} alt="" className="w-full h-full object-contain p-0.5 justify-items-center"/>
+                        ? <img src={a.badge_url} alt="" className="w-full h-full object-contain p-0.5"/>
                         : <span className="text-xs">🎖️</span>}
                     </span>
                   ))}
