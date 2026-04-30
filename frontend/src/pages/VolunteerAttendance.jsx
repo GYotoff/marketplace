@@ -18,7 +18,7 @@ export default function VolunteerAttendance() {
   const { user, profile } = useAuthStore()
   const { i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
-  const now = new Date()
+  const todayStr = new Date().toISOString().slice(0,10)
 
   const [regs, setRegs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -93,8 +93,8 @@ export default function VolunteerAttendance() {
   })
 
   // Past = event already happened OR event status is completed
-  const past     = regs.filter(r => r.event_status === 'completed' || (r.event_date && new Date(r.event_date) < now))
-  const upcoming = regs.filter(r => r.event_status !== 'completed' && r.event_date && new Date(r.event_date) >= now)
+  const past = regs.filter(r => r.event_status === 'completed' || (r.event_date && r.event_date < todayStr))
+  const upcoming = regs.filter(r => r.event_status !== 'completed' && r.event_date && r.event_date >= todayStr)
 
   const L = {
     title:    lang === 'bg' ? 'Участие в събития' : 'Event Participation',
