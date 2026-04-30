@@ -35,7 +35,8 @@
     "title": "Connect. Volunteer. Make an impact.",
     "subtitle": "A marketplace where NGOs and non-profits share projects and organize events — powered by volunteers from companies and individuals who want to give back.",
     "cta_explore": "Explore projects",
-    "cta_register": "Register your organization"
+    "cta_register": "Register your organization",
+	"highlight": "Volunteer."
   },
   "stats": {
     "organizations": "Organizations",
