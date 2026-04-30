@@ -149,7 +149,7 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
         <StatCard label={L.project_applications} value={applications.length} />
         <StatCard label={L.event_registrations}  value={registrations.length} />
         <StatCard label={L.hours_logged}          value={registrations.reduce((s, r) => s + (r.hours_logged || 0), 0)} />
-      </div>
+			</div>
 
       <div>
         <h2 className="text-base font-medium mb-3">{L.my_applications}</h2>
@@ -207,8 +207,9 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
                     </div>
                   </>}
                 </div>}
-        </>}
-    </div>
+        </>
+		</div>
+    
   )
 }
 
