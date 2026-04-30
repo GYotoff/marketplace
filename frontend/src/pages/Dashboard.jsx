@@ -213,7 +213,7 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
 }
 
 function OrgDashboard({ profile }) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [org, setOrg] = useState(null)
   const [projects, setProjects] = useState([])
