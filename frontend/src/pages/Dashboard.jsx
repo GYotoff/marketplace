@@ -210,8 +210,6 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
                 </div>}
           </>
         })()}
-      </div>
-      </div>
     </div>
   )
 }
