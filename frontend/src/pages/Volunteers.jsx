@@ -234,7 +234,7 @@ export default function Volunteers() {
                   ))}
                 </div>
               )}
-
+<hr>
               {/* Availability */}
               {v.availability?.length > 0 && (
                 <div className="flex flex-wrap gap-1">
