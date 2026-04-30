@@ -74,11 +74,11 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
     declined_msg:         lang === 'bg' ? 'Заявката ви за членство не беше одобрена.'                  : 'Your membership request was not approved.',
     your_ranking:         lang === 'bg' ? 'Вашият ранг'                                                   : 'Your ranking',
     since:                lang === 'bg' ? 'От'                                                            : 'Since',
-    my_past_events:       lang === 'bg' ? 'Минали събития'                       : 'Past events',
   }
-  const _now = new Date()
-  const _upcomingRegs = registrations.filter(r => r.event_status !== 'completed' && r.event_date && new Date(r.event_date) >= _now)
-  const _pastRegs = registrations.filter(r => r.event_status === 'completed' || (r.event_date && new Date(r.event_date) < _now))
+
+  const _now=new Date()
+  const _upReg=registrations.filter(r=>r.event_status!=='completed'&&r.event_date&&new Date(r.event_date)>=_now)
+  const _pastReg=registrations.filter(r=>r.event_status==='completed'||(r.event_date&&new Date(r.event_date)<_now))
   return (
     <div className="flex flex-col gap-6">
 
@@ -149,7 +149,7 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
         <StatCard label={L.project_applications} value={applications.length} />
         <StatCard label={L.event_registrations}  value={registrations.length} />
         <StatCard label={L.hours_logged}          value={registrations.reduce((s, r) => s + (r.hours_logged || 0), 0)} />
-			</div>
+      </div>
 
       <div>
         <h2 className="text-base font-medium mb-3">{L.my_applications}</h2>
@@ -170,49 +170,49 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
       </div>
 
       <div>
-            <h2 className="text-base font-medium mb-3">{L.my_registrations}</h2>
-            {_upcomingRegs.length === 0 && _pastRegs.length === 0
-              ? <div className="card text-center text-sm text-gray-400 py-8">{L.no_registrations}<Link to="/events" className="text-brand-400">{L.browse_events}</Link></div>
-              : <div className="flex flex-col gap-3">
-                  {_upcomingRegs.length > 0 && <div className="flex flex-col gap-2">
-                    {_upcomingRegs.map(r => (
+        <h2 className="text-base font-medium mb-3">{L.my_registrations}</h2>
+        {_upReg.length===0&&_pastReg.length===0
+          ?<div className="card text-center text-sm text-gray-400 py-8">{L.no_registrations}<Link to="/events" className="text-brand-400">{L.browse_events}</Link></div>
+          :<div className="flex flex-col gap-3">
+            {_upReg.length>0&&<div className="flex flex-col gap-2">
+              {_upReg.map(r=>(
                 <div key={r.reg_id} className="card flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <Link to={'/events/' + r.event_id} className="font-medium text-sm hover:text-brand-500 transition-colors block truncate">{r.event_title}</Link>
+                    <Link to={'/events/'+r.event_id} className="font-medium text-sm hover:text-brand-500 transition-colors block truncate">{r.event_title}</Link>
                     <p className="text-xs text-gray-400 truncate">
-                      {r.org_name}{r.event_date ? ' · ' + new Date(r.event_date).toLocaleDateString() : ''}
-                      {r.hours_logged > 0 ? ' · ⏱ ' + r.hours_logged + 'h' : ''}
+                      {r.org_name}{r.event_date?' · '+new Date(r.event_date).toLocaleDateString():''}
+                      {r.hours_logged>0?' · ⏱ '+r.hours_logged+'h':''}
                     </p>
                   </div>
-                  <span className={`badge ${statusColor[r.reg_status] || 'bg-gray-100 text-gray-600'}`}>{STATUS_LABEL[r.reg_status]?.[lang] || r.reg_status}</span>
+                  <span className={`badge ${statusColor[r.reg_status]||'bg-gray-100 text-gray-600'}`}>{STATUS_LABEL[r.reg_status]?.[lang]||r.reg_status}</span>
                 </div>
-                    ))}
-                  </div>}
-                  {_pastRegs.length > 0 && <>
-                    <h3 className="text-xs font-medium uppercase tracking-wide mt-2" style={{color:'var(--text-faint)'}}>{L.my_past_events}</h3>
-                    <div className="flex flex-col gap-2">
-                      {_pastRegs.map(r => (
-                        <div key={r.reg_id} className="card flex items-center justify-between gap-3 opacity-80">
-                          <div className="min-w-0">
-                            <Link to={'/events/' + r.event_id} className="font-medium text-sm hover:text-brand-500 transition-colors block truncate">{r.event_title}</Link>
-                            <p className="text-xs text-gray-400 truncate">
-                              {r.org_name}{r.event_date ? ' · ' + new Date(r.event_date).toLocaleDateString() : ''}
-                              {r.hours_logged > 0 ? ' · ⏱ ' + r.hours_logged + 'h' : ''}
-                            </p>
-                          </div>
-                          <span className={`badge ${statusColor[r.reg_status] || 'bg-gray-100 text-gray-600'}`}>{STATUS_LABEL[r.reg_status]?.[lang] || r.reg_status}</span>
-                        </div>
-                      ))}
+              ))}
+            </div>}
+            {_pastReg.length>0&&<>
+              <h3 className="text-xs font-medium uppercase tracking-wide mt-2" style={{color:'var(--text-faint)'}}>{L.my_past_events}</h3>
+              <div className="flex flex-col gap-2">
+                {_pastReg.map(r=>(
+                  <div key={r.reg_id} className="card flex items-center justify-between gap-3 opacity-80">
+                    <div className="min-w-0">
+                      <Link to={'/events/'+r.event_id} className="font-medium text-sm hover:text-brand-500 transition-colors block truncate">{r.event_title}</Link>
+                      <p className="text-xs text-gray-400 truncate">
+                        {r.org_name}{r.event_date?' · '+new Date(r.event_date).toLocaleDateString():''}
+                        {r.hours_logged>0?' · ⏱ '+r.hours_logged+'h':''}
+                      </p>
                     </div>
-                  </>}
-                </div>}
-		</div>
-    
+                    <span className={`badge ${statusColor[r.reg_status]||'bg-gray-100 text-gray-600'}`}>{STATUS_LABEL[r.reg_status]?.[lang]||r.reg_status}</span>
+                  </div>
+                ))}
+              </div>
+            </>}
+          </div>}
+      </div>
+    </div>
   )
 }
 
 function OrgDashboard({ profile }) {
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
   const [org, setOrg] = useState(null)
   const [projects, setProjects] = useState([])
