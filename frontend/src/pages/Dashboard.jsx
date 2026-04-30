@@ -76,6 +76,9 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
     since:                lang === 'bg' ? 'От'                                                            : 'Since',
   }
 
+  const _now = new Date()
+  const _upcomingRegs = registrations.filter(r => r.event_status !== 'completed' && r.event_date && new Date(r.event_date) >= _now)
+  const _pastRegs = registrations.filter(r => r.event_status === 'completed' || (r.event_date && new Date(r.event_date) < _now))
   return (
     <div className="flex flex-col gap-6">
 
@@ -167,17 +170,13 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
       </div>
 
       <div>
-        {(() => {
-          const now = new Date()
-          const upcomingRegs = registrations.filter(r => r.event_status !== 'completed' && r.event_date && new Date(r.event_date) >= now)
-          const pastRegs     = registrations.filter(r => r.event_status === 'completed' || (r.event_date && new Date(r.event_date) < now))
-          return <>
+        <>
             <h2 className="text-base font-medium mb-3">{L.my_registrations}</h2>
-            {upcomingRegs.length === 0 && pastRegs.length === 0
+            {_upcomingRegs.length === 0 && _pastRegs.length === 0
               ? <div className="card text-center text-sm text-gray-400 py-8">{L.no_registrations}<Link to="/events" className="text-brand-400">{L.browse_events}</Link></div>
               : <div className="flex flex-col gap-3">
-                  {upcomingRegs.length > 0 && <div className="flex flex-col gap-2">
-                    {upcomingRegs.map(r => (
+                  {_upcomingRegs.length > 0 && <div className="flex flex-col gap-2">
+                    {_upcomingRegs.map(r => (
                 <div key={r.reg_id} className="card flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <Link to={'/events/' + r.event_id} className="font-medium text-sm hover:text-brand-500 transition-colors block truncate">{r.event_title}</Link>
@@ -190,10 +189,10 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
                 </div>
                     ))}
                   </div>}
-                  {pastRegs.length > 0 && <>
+                  {_pastRegs.length > 0 && <>
                     <h3 className="text-xs font-medium uppercase tracking-wide mt-2" style={{color:'var(--text-faint)'}}>{L.my_past_events}</h3>
                     <div className="flex flex-col gap-2">
-                      {pastRegs.map(r => (
+                      {_pastRegs.map(r => (
                         <div key={r.reg_id} className="card flex items-center justify-between gap-3 opacity-80">
                           <div className="min-w-0">
                             <Link to={'/events/' + r.event_id} className="font-medium text-sm hover:text-brand-500 transition-colors block truncate">{r.event_title}</Link>
@@ -208,8 +207,7 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
                     </div>
                   </>}
                 </div>}
-          </>
-        })()}
+        </>}
     </div>
   )
 }
