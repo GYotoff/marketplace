@@ -182,7 +182,7 @@ export default function Volunteers() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-gray-900 truncate text-sm">{name}</h3>
+                  <h3 className="text-gray-900 truncate font-semibold text-sm">{name}</h3>
                   {(city || country) && (
                     <p className="text-xs text-gray-400 truncate">{[city, country].filter(Boolean).join(', ')}</p>
                   )}
