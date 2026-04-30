@@ -74,6 +74,7 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
     declined_msg:         lang === 'bg' ? 'Заявката ви за членство не беше одобрена.'                  : 'Your membership request was not approved.',
     your_ranking:         lang === 'bg' ? 'Вашият ранг'                                                   : 'Your ranking',
     since:                lang === 'bg' ? 'От'                                                            : 'Since',
+    my_past_events:       lang === 'bg' ? 'Минали събития'                       : 'Past events',
   }
   const _now = new Date()
   const _upcomingRegs = registrations.filter(r => r.event_status !== 'completed' && r.event_date && new Date(r.event_date) >= _now)
