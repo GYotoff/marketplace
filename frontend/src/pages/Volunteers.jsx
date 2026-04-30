@@ -246,7 +246,7 @@ export default function Volunteers() {
                 </div>
               )}
 
-              {/* Badges */}
+              {/* Badges */}{/*
               {badges.length > 0 && (
                 <div className="flex gap-1.5 flex-wrap">
                   {badges.slice(0, 5).map((b, i) => (
@@ -261,11 +261,12 @@ export default function Volunteers() {
                     </span>
                   )}
                 </div>
-              )}
+              )}*/}
 
               {/* Achievements — icon badges only */}
               {achievements.length > 0 && (
-                <div className="flex gap-1.5 flex-wrap border-t border-gray-200 justify-items-center">
+                <div className="flex gap-1.5 flex-wrap border-t border-gray-200">
+                <div className="flex gap-1 flex-wrap">
                   {achievements.slice(0, 6).map((a, i) => (
                     <span key={i} title={lang === 'bg' ? (a.name_bg || a.name) : a.name}
                       className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0"
