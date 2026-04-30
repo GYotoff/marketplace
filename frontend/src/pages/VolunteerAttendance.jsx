@@ -93,8 +93,8 @@ export default function VolunteerAttendance() {
   })
 
   // Past = event already happened OR event status is completed
-  const past = regs.filter(r => r.event_status === 'completed' || (r.event_date && r.event_date < todayStr))
-  const upcoming = regs.filter(r => r.event_status !== 'completed' && r.event_date && r.event_date >= todayStr)
+  const past=regs.filter(r=>r.event_status==='completed'||(r.event_date&&r.event_date<todayStr))
+  const upcoming=regs.filter(r=>r.event_status!=='completed'&&r.event_date&&r.event_date>=todayStr)
 
   const L = {
     title:    lang === 'bg' ? 'Участие в събития' : 'Event Participation',
