@@ -271,7 +271,7 @@ export default function Volunteers() {
                       className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0"
                       style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-mid)' }}>
                       {a.badge_url
-                        ? <img src={a.badge_url} alt="" className="w-full h-full object-contain p-0.5" />
+                        ? <img src={a.badge_url} alt="" className="w-full h-full object-contain p-0.5 justify-items-center"/>
                         : <span className="text-xs">🎖️</span>}
                     </span>
                   ))}
