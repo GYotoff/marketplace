@@ -41,7 +41,7 @@ export default function VolunteerAttendance() {
     setRegs(rows)
 
     // Load existing feedback for confirmed registrations
-    const confirmedRegIds = rows.filter(r => r.reg_status === 'confirmed').map(r => r.reg_id)
+    const confirmedRegIds = rows.filter(r => r.reg_status === 'confirmed' || r.reg_status === 'approved').map(r => r.reg_id)
     if (confirmedRegIds.length > 0) {
       const { data: fbs } = await supabase
         .from('event_feedback')
@@ -226,7 +226,7 @@ export default function VolunteerAttendance() {
                       ⏳ {L.pending_confirm}
                     </p>
                   )}
-                  {reg.reg_status === 'confirmed' && (() => {
+                  {(reg.reg_status === 'confirmed' || reg.reg_status === 'approved') && (() => {
                     const fb = feedbackMap[reg.reg_id]
                     const s = fbState[reg.reg_id] || { rating: fb?.rating || 0, text: fb?.feedback_text || '', saving: false, open: false }
                     const setS = (patch) => setFbState(prev => ({ ...prev, [reg.reg_id]: { ...(prev[reg.reg_id] || s), ...patch } }))
