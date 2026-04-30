@@ -234,8 +234,6 @@ export default function Volunteers() {
                   ))}
                 </div>
               )}
-
-              <div><hr></div>
               
               {/* Availability */}
               {v.availability?.length > 0 && (
