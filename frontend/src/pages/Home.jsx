@@ -145,7 +145,7 @@ export default function Home() {
               {spotVol ? (
                 <>
                   <div className="relative w-14 h-14 shrink-0">
-                    <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center font-semibold text-lg"
+                    <div className="w-14 h-14 rounded-xl overflow-hidden flex items-center justify-center font-semibold text-lg"
                       style={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}>
                       {spotVol.avatar_url
                         ? <img src={spotVol.avatar_url} alt="" className="w-full h-full object-cover" />
