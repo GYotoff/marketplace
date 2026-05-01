@@ -20,9 +20,10 @@ export default function VolunteerCalendar() {
   const { i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
 
-  const todayStr = new Date().toISOString().slice(0,10)
-  const [year, setYear] = useState(todayStr.getFullYear())
-  const [month, setMonth] = useState(todayStr.getMonth()) // 0-based
+  const todayDate=new Date()
+  const todayStr=todayDate.toISOString().slice(0,10)
+  const [year, setYear] = useState(todayDate.getFullYear())
+  const [month, setMonth] = useState(todayDate.getMonth()) // 0-based
   const [registrations, setRegistrations] = useState([])
   const [selected, setSelected] = useState(null) // selected day date string YYYY-MM-DD
   const [detail, setDetail] = useState(null) // event clicked for full details
@@ -129,7 +130,7 @@ export default function VolunteerCalendar() {
   for (let i = 0; i < startDow; i++) cells.push(null)
   for (let d = 1; d <= daysInMonth; d++) cells.push(d)
 
-  const todayKey = `${todayStr.getFullYear()}-${String(todayStr.getMonth()+1).padStart(2,'0')}-${String(todayStr.getDate()).padStart(2,'0')}`
+  const todayKey = `${todayDate.getFullYear()}-${String(todayDate.getMonth()+1).padStart(2,'0')}-${String(todayDate.getDate()).padStart(2,'0')}`
 
   const dayKey = (d) => `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
 
