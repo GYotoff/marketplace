@@ -15,8 +15,8 @@ function StatCard({ num, label, border }) {
 function SpotlightCard({ accent, badge, badgeStyle, avatar, title, sub, detail, stat, link }) {
   const inner = (
     <div className="card flex flex-col gap-3 h-full hover:shadow-sm transition-all" style={{ borderTop: `3px solid ${accent}` }}>
-      <span className="badge self-start text-xs" style={badgeStyle}>{badge}</span>
-      <div className="w-11 h-11 rounded-full overflow-hidden flex items-center justify-center shrink-0 font-semibold text-base"
+      <span className="badge self-start text-sm" style={badgeStyle}>{badge}</span>
+      <div className="w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center shrink-0 font-semibold text-base"
         style={{ background: `${accent}20`, color: accent }}>
         {avatar?.src
           ? <img src={avatar.src} alt="" className="w-full h-full object-cover" />
