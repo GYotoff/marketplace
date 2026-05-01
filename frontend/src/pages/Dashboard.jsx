@@ -77,8 +77,8 @@ const statusColor = { pending: 'bg-amber-50 text-amber-700', approved: 'bg-brand
   }
 
   const _todayStr=new Date().toISOString().slice(0,10)
-  const _upReg=registrations.filter(r=>r.event_status!=='completed'&&r.event_date&&r.event_date>=_todayStr)
-  const _pastReg=registrations.filter(r=>r.event_status==='completed'||(r.event_date&&r.event_date<_todayStr))
+  const _upReg=registrations.filter(r=>r.event_status!=='completed'&&r.event_date&&String(r.event_date).slice(0,10)>=_todayStr)
+  const _pastReg=registrations.filter(r=>r.event_status==='completed'||(r.event_date&&String(r.event_date).slice(0,10)<_todayStr))
   return (
     <div className="flex flex-col gap-6">
 
