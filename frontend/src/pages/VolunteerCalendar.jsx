@@ -20,9 +20,9 @@ export default function VolunteerCalendar() {
   const { i18n } = useTranslation()
   const lang = i18n.language === 'bg' ? 'bg' : 'en'
 
-  const today = new Date()
-  const [year, setYear] = useState(today.getFullYear())
-  const [month, setMonth] = useState(today.getMonth()) // 0-based
+  const todayStr = new Date().toISOString().slice(0,10)
+  const [year, setYear] = useState(todayStr.getFullYear())
+  const [month, setMonth] = useState(todayStr.getMonth()) // 0-based
   const [registrations, setRegistrations] = useState([])
   const [selected, setSelected] = useState(null) // selected day date string YYYY-MM-DD
   const [detail, setDetail] = useState(null) // event clicked for full details
@@ -58,6 +58,7 @@ export default function VolunteerCalendar() {
         address: r.address,
         is_online: r.is_online,
         online_url: r.online_url,
+        event_status: r.event_status,
         organizations: r.org_name ? { name: r.org_name, slug: r.org_slug } : null,
         projects: r.project_title ? { title: r.project_title } : null,
       }
@@ -128,7 +129,7 @@ export default function VolunteerCalendar() {
   for (let i = 0; i < startDow; i++) cells.push(null)
   for (let d = 1; d <= daysInMonth; d++) cells.push(d)
 
-  const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+  const todayKey = `${todayStr.getFullYear()}-${String(todayStr.getMonth()+1).padStart(2,'0')}-${String(todayStr.getDate()).padStart(2,'0')}`
 
   const dayKey = (d) => `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
 
@@ -136,12 +137,12 @@ export default function VolunteerCalendar() {
   const nextMonth = () => { if (month === 11) { setMonth(0); setYear(y => y+1) } else setMonth(m => m+1); setSelected(null) }
 
   const upcomingRegs = registrations
-    .filter(r => r.events?.event_status !== 'completed' && r.events?.event_date && r.events.event_date.slice(0,10) >= today)
-    .sort((a, b) => new Date(a.events.event_date) - new Date(b.events.event_date))
+    .filter(r => r.events?.event_status !== 'completed' && r.events?.event_date && r.events.event_date.slice(0,10) >= todayStr)
+    .sort((a,b)=>a.events.event_date<b.events.event_date?-1:1)
 
   const pastRegs = registrations
-    .filter(r => r.events?.event_status === 'completed' || (r.events?.event_date && r.events.event_date.slice(0,10) < today))
-    .sort((a, b) => new Date(b.events.event_date) - new Date(a.events.event_date))
+    .filter(r => r.events?.event_status === 'completed' || (r.events?.event_date && r.events.event_date.slice(0,10) < todayStr))
+    .sort((a,b)=>b.events.event_date<a.events.event_date?-1:1)
 
   const selectedRegs = selected ? (eventsByDay[selected] || []) : []
 
@@ -226,7 +227,7 @@ export default function VolunteerCalendar() {
                     {evs.length > 0 && (
                       <span className={'mt-0.5 flex gap-0.5 flex-wrap justify-center'}>
                         {evs.slice(0, 3).map((ev, j) => {
-                            const isPastEv = ev.events?.event_status === 'completed' || (ev.events?.event_date && new Date(ev.events.event_date) < today)
+                            const isPastEv = ev.events?.event_status === 'completed' || (ev.events?.event_date && new Date(ev.events.event_date) < todayStr)
                             return <span key={j} className={'inline-block w-1.5 h-1.5 rounded-full ' + (isSelected ? 'bg-white' : isPastEv ? 'bg-gray-300' : 'bg-brand-400')} />
                           })}
                       </span>
@@ -362,7 +363,7 @@ export default function VolunteerCalendar() {
             </div>
 
             {detail.events?.event_date && (() => {
-              const isPast = detail.events?.event_status === 'completed' || new Date(detail.events.event_date) <= today
+              const isPast = detail.events?.event_status === 'completed' || new Date(detail.events.event_date) <= todayStr
               if (!isPast) return (
                 <button
                   onClick={() => unregister(detail)}
