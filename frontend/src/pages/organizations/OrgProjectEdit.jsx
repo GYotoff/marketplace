@@ -155,14 +155,16 @@ export default function OrgProjectEdit() {
       start_date: form.start_date || null, end_date: form.end_date || null,
       volunteers_needed: form.volunteers_needed ? parseInt(form.volunteers_needed) : 0,
       skills_required: form.skills_required ? form.skills_required.split(',').map(s => s.trim()).filter(Boolean) : null,
-      show_in_public: form.show_in_public, updated_at: new Date().toISOString(),
+      show_in_public: form.show_in_public,
+      status: form.status || 'draft',
+      updated_at: new Date().toISOString(),
     }
     let err
     if (isNew) {
       const { error: e } = await supabase.from('projects').insert({ ...payload, status: 'draft', organization_id: org.id, created_by: user.id })
       err = e
     } else {
-      const { error: e } = await supabase.from('projects').update(payload).eq('id', id)
+      const { error: e } = await supabase.from('projects').update(payload).eq('id', id).select()
       err = e
     }
     setSaving(false)
