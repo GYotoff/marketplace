@@ -273,6 +273,11 @@
       "see_all":        "See all →",
       "see_events":     "View all →"
   },
+  "volunteer": {
+    "join": "Join Dataverte",
+    "wantto": "Want to volunteer?",
+    "create": "Create an account to apply for projects and register for events."
+  },
   "organizations_count": "{{count}} organizations",
   "corporations_count": "{{count}} corporations"
 }
