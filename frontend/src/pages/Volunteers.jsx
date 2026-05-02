@@ -199,7 +199,7 @@ export default function Volunteers() {
                 <Link to={`/corporations/${v.corp_slug}`}
                   className="flex items-center gap-2 text-xs text-brand-600 hover:text-brand-700 bg-brand-50 rounded-lg px-2.5 py-1.5">
                   {v.corp_logo_url && <img src={v.corp_logo_url} alt="" className="w-4 h-4 rounded object-cover" />}
-                  <span className="font-medium truncate">{v.corp_name}</span>
+                  <span className="font-medium truncate">{lang === 'bg' ? v.corp_name_bg : v.corp_name}</span>
                 </Link>
               )}
 
