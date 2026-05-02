@@ -16,7 +16,7 @@ function SpotlightCard({ accent, badge, badgeStyle, avatar, title, sub, detail, 
   const inner = (
     <div className="card flex flex-col gap-3 h-full hover:shadow-sm transition-all" style={{ borderTop: `3px solid ${accent}` }}>
       <span className="badge self-start text-xs" style={badgeStyle}>{badge}</span>
-      <div className="w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center shrink-0 font-semibold text-base"
+      <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0 font-semibold text-base"
         style={{ background: `${accent}20`, color: accent }}>
         {avatar?.src
           ? <img src={avatar.src} alt="" className="w-full h-full object-cover" />
@@ -144,8 +144,8 @@ export default function Home() {
               <span className="badge self-start text-xs" style={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}>{t('home.volunteer')}</span>
               {spotVol ? (
                 <>
-                  <div className="relative w-14 h-14 shrink-0">
-                    <div className="w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center font-semibold text-lg"
+                  <div className="relative w-12 h-12 shrink-0">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-semibold text-lg"
                       style={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}>
                       {spotVol.avatar_url
                         ? <img src={spotVol.avatar_url} alt="" className="w-full h-full object-cover" />
