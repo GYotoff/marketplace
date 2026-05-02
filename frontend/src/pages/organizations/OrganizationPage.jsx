@@ -344,9 +344,11 @@ export default function OrganizationPage() {
                   <Link key={ev.id} to={`/events/${ev.id}`}
                     className="card flex gap-4 hover:border-gray-200 hover:shadow-sm transition-all">
                    
+				   
+				    
 					
 					{/* Date box */}
-					  <div className={'min-w-14 text-center rounded-xl py-3 shrink-0'}>
+					  <div className={'min-w-14 text-center rounded-xl py-3 shrink-0 bg-brand-50'}>
 						<p className={'text-2xl font-semibold leading-none text-brand-400'}>
 						  {dt.getDate()}
 						</p>
