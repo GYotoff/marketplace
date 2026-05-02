@@ -144,7 +144,7 @@ export default function Home() {
               <span className="badge self-start text-xs" style={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}>{t('home.volunteer')}</span>
               {spotVol ? (
                 <>
-                  <div className="relative w-12 h-12 shrink-0">
+                  <div className="relative w-13 h-13 shrink-0">
                     <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-semibold text-lg"
                       style={{ background:'rgba(29,158,117,0.12)', color:'#1D9E75' }}>
                       {spotVol.avatar_url
