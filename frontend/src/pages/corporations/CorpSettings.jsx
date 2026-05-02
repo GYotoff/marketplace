@@ -188,7 +188,7 @@ export default function CorpSettings() {
       facebook_url: form.facebook_url || null, instagram_url: form.instagram_url || null, linkedin_url: form.linkedin_url || null,
       logo_url: form.logo_url || null, cover_url: form.cover_url || null,
       updated_at: new Date().toISOString(),
-    }).eq('id', corp.id)
+    }).eq('id', corp.id).select()
     if (error) flash(error.message, 'error')
     else { flash('Changes saved successfully'); load() }
     setSaving(false)
