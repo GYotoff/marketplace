@@ -151,7 +151,12 @@
     "declined": "Отказано",
     "suspended": "Спряно",
     "active": "Активно",
-    "inactive": "Неактивно"
+    "inactive": "Неактивно",
+	"activeprojects": "Активни проекти",
+    "activeevnents": "Активни събития",
+	"teammembers": "Членове",
+	"followus": "Последвайте ни",
+	"details": "Детайли"
   },
   "org_types": {
     "ngo": "НПО",

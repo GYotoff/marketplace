@@ -151,7 +151,12 @@
     "declined": "Declined",
     "suspended": "Suspended",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+	"activeprojects": "Active projects",
+    "activeevnents": "Active events",
+	"teammembers": "Team members",
+	"followus": "Follow us",
+	"details": "Details"
   },
   "org_types": {
     "ngo": "NGO",
