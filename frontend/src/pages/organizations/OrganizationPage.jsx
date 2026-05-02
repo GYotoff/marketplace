@@ -318,8 +318,8 @@ export default function OrganizationPage() {
                     <h3 className="font-medium text-gray-900 text-sm">{title}</h3>
                     {desc && <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{desc}</p>}
                     <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
-                      {p.city && <span className="text-xs text-gray-400">{i18n.language === 'bg'? p.city_bg, p.city}</span>}
-                      <span className="text-xs text-brand-400 font-medium">{spots} {i18n.language === 'bg'? "свободни места", "spots left"}</span>
+                      {p.city && <span className="text-xs text-gray-400">{i18n.language === 'bg'? p.city_bg : p.city}</span>}
+                      <span className="text-xs text-brand-400 font-medium">{spots} {i18n.language === 'bg'? "свободни места" : "spots left"}</span>
                     </div>
                   </Link>
                 )
