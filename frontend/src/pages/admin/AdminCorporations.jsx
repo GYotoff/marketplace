@@ -59,6 +59,9 @@ function CorpRow({ corp, onAction, lang = 'en' }) {
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
               <span className="font-medium text-gray-900">{lang === 'bg' ? (corp.name_bg || corp.name) : corp.name}</span>
+              {corp.is_verified && (
+                <span className="badge text-xs px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-200">✓ {lang === 'bg' ? 'Верифицирана' : 'Verified'}</span>
+              )}
               <span className={'badge text-xs px-2 py-0.5 ' + (STATUS_BADGE[corp.status] || 'bg-gray-100 text-gray-600')}>
                 {STATUS_LABEL[corp.status]?.[lang] || corp.status}
               </span>
@@ -94,6 +97,17 @@ function CorpRow({ corp, onAction, lang = 'en' }) {
           <div className="flex gap-2 shrink-0 flex-wrap">
             {corp.status === 'pending' && (
               <button onClick={() => setOpen(!open)} className="btn-primary text-xs py-1.5">
+            <button
+              onClick={() => onVerify(corp.id, !corp.is_verified)}
+              disabled={loading}
+              className={corp.is_verified
+                ? 'text-xs border border-blue-200 text-blue-600 hover:bg-blue-50 rounded-lg px-3 py-1.5'
+                : 'text-xs border border-brand-200 text-brand-600 hover:bg-brand-50 rounded-lg px-3 py-1.5'}
+            >
+              {corp.is_verified
+                ? (lang === 'bg' ? '✓ Верифицирана' : '✓ Verified')
+                : (lang === 'bg' ? 'Верифицирай' : 'Verify')}
+            </button>
                 {open ? (lang === 'bg' ? 'Отказ' : 'Cancel') : (lang === 'bg' ? 'Преглед' : 'Review')}
               </button>
             )}
@@ -195,6 +209,15 @@ export default function AdminCorporations() {
     }).eq('id', id)
     fetchCorps()
     fetchCounts()
+  }
+
+  const handleVerify = async (id, isVerified) => {
+    await supabase.from('corporations').update({
+      is_verified: isVerified,
+      reviewed_by: user?.id,
+      reviewed_at: new Date().toISOString(),
+    }).eq('id', id)
+    fetchCorps()
   }
 
   const filtered = corps.filter(c =>
