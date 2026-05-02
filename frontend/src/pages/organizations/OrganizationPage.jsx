@@ -356,7 +356,7 @@ export default function OrganizationPage() {
 						  {dt.getDate()}
 						</p>
 						<p className={'text-xs uppercase mt-0.5 text-brand-600'}>
-						  {dt.toLocaleString(lang === 'bg' ? 'bg-BG' : 'en', { month: 'short' })}
+						  {dt.toLocaleString(i18n.language === 'bg' ? 'bg-BG' : 'en', { month: 'short' })}
 						</p>
 						<p className={'text-xs mt-0.5 text-brand-500'}>
 						  {dt.getFullYear()}
