@@ -151,6 +151,7 @@ export default function Corporations() {
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-sm truncate" style={{ color: 'var(--text)' }}>{lang === 'bg' ? (corp.name_bg || corp.name) : corp.name}</p>
+                  {corp.is_verified && <span title="Verified" className="text-brand-400 text-xs">✓</span>}
                   {(corp.city || corp.city_bg) && <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{lang === 'bg' ? (corp.city_bg || corp.city) : corp.city}</p>}
                   {corp.website && (
                     <a href={corp.website} target="_blank" rel="noreferrer"
