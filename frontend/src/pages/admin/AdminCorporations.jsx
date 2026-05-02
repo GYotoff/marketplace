@@ -28,7 +28,7 @@ const SIZE_LABEL = {
   global_enterprise: { en: 'Global Enterprise', bg: 'Глобална корпорация' },
 }
 
-function CorpRow({ corp, onAction, lang = 'en' }) {
+function CorpRow({ corp, onAction, onVerify, lang = 'en' }) {
   const [note, setNote] = useState('')
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
