@@ -48,6 +48,7 @@ import AdminOrganizations from '@/pages/admin/AdminOrganizations'
 import AdminOrgDetail from '@/pages/admin/AdminOrgDetail'
 import AdminEntities from '@/pages/admin/AdminEntities'
 import AdminCorporations from '@/pages/admin/AdminCorporations'
+import AdminCorpDetail from '@/pages/admin/AdminCorpDetail'
 import AdminRankings from '@/pages/admin/AdminRankings'
 import AdminAchievements from '@/pages/admin/AdminAchievements'
 import AdminProgressionRules from '@/pages/admin/AdminProgressionRules'
@@ -206,6 +207,11 @@ export default function App() {
         <Route path="/admin/progression-rules" element={
           <ProtectedRoute allowedRoles={['super_admin']}>
             <AdminProgressionRules />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/corporations/:id" element={
+          <ProtectedRoute allowedRoles={['super_admin']}>
+            <AdminCorpDetail />
           </ProtectedRoute>
         } />
         <Route path="/admin/corporations" element={
