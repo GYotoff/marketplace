@@ -226,7 +226,7 @@ export default function VolunteerAttendance() {
                       ⏳ {L.pending_confirm}
                     </p>
                   )}
-                  {(reg.reg_status === 'confirmed' || reg.reg_status === 'approved') && (() => {
+                  {reg.reg_status === 'confirmed' && (() => {
                     const fb = feedbackMap[reg.reg_id]
                     const s = fbState[reg.reg_id] || { rating: fb?.rating || 0, text: fb?.feedback_text || '', saving: false, open: false }
                     const setS = (patch) => setFbState(prev => ({ ...prev, [reg.reg_id]: { ...(prev[reg.reg_id] || s), ...patch } }))
