@@ -333,7 +333,7 @@ export default function OrganizationPage() {
       {tab === 'events' && (
         <div>
           {events.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 text-sm">No upcoming events.</div>
+            <div className="text-center py-12 text-gray-400 text-sm">{i18n.language === 'bg' ? "Няма предстоящи събития." : "No upcoming events."}</div>
           ) : (
             <div className="flex flex-col gap-4">
               {events.map(ev => {
@@ -343,12 +343,27 @@ export default function OrganizationPage() {
                 return (
                   <Link key={ev.id} to={`/events/${ev.id}`}
                     className="card flex gap-4 hover:border-gray-200 hover:shadow-sm transition-all">
-                    <div className="min-w-14 text-center bg-brand-50 rounded-xl py-3 shrink-0">
+                    /*<div className="min-w-14 text-center bg-brand-50 rounded-xl py-3 shrink-0">
                       <p className="text-2xl font-semibold text-brand-400 leading-none">{dt.getDate()}</p>
                       <p className="text-xs text-brand-600 uppercase mt-0.5">
                         {dt.toLocaleString('en', { month: 'short' })}
                       </p>
-                    </div>
+                    </div>*/
+					
+					{/* Date box */}
+					  <div className={'min-w-14 text-center rounded-xl py-3 shrink-0'}>
+						<p className={'text-2xl font-semibold leading-none text-brand-400'}>
+						  {dt.getDate()}
+						</p>
+						<p className={'text-xs uppercase mt-0.5 text-brand-600'}>
+						  {dt.toLocaleString(lang === 'bg' ? 'bg-BG' : 'en', { month: 'short' })}
+						</p>
+						<p className={'text-xs mt-0.5 text-brand-500'}>
+						  {dt.getFullYear()}
+						</p>
+					  </div>
+					
+					
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 text-sm">{title}</h3>
                       <p className="text-xs text-gray-500 mt-0.5">
@@ -357,7 +372,7 @@ export default function OrganizationPage() {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="text-xs text-brand-400 font-medium">{spots} spots</span>
+                      <span className="text-xs text-brand-400 font-medium">{spots} {i18n.language === 'bg'? "свободни места" : "spots left"}</span>
                     </div>
                   </Link>
                 )
