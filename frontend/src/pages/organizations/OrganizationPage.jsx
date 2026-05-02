@@ -279,10 +279,10 @@ export default function OrganizationPage() {
 
             {!user && (
               <div className="card bg-brand-50 border-brand-100 text-center">
-                <p className="text-sm text-brand-700 mb-3 font-medium">{t(volunteer.wantto)}</p>
-                <p className="text-xs text-brand-600 mb-3 leading-relaxed">{t(volunteer.create)}</p>
+                <p className="text-sm text-brand-700 mb-3 font-medium">{t('volunteer.wantto')}</p>
+                <p className="text-xs text-brand-600 mb-3 leading-relaxed">{t('volunteer.create')}</p>
                 <Link to="/register" className="btn-primary w-full text-center text-sm">
-				{t(volunteer.join)}
+				{t('volunteer.join')}
                 </Link>
               </div>
             )}
