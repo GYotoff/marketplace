@@ -78,7 +78,7 @@ export default function OrganizationPage() {
     // Fetch upcoming events
     const { data: eventsData } = await supabase
       .from('events')
-      .select('id, title, title_bg, description, description_bg, city, event_date, volunteers_needed, volunteers_enrolled, is_online, status')
+      .select('id, title, title_bg, description, description_bg, city, city_bg, event_date, volunteers_needed, volunteers_enrolled, is_online, status')
       .eq('organization_id', orgData.id)
       .eq('status', 'published')
       .gte('event_date', new Date().toISOString())
@@ -338,15 +338,13 @@ export default function OrganizationPage() {
             <div className="flex flex-col gap-4">
               {events.map(ev => {
                 const title = (i18n.language === 'bg' && ev.title_bg) ? ev.title_bg : ev.title
+				const ev_city = (i18n.language === 'bg' && ev.city_bg) ? ev.city_bg : ev.city
                 const dt = new Date(ev.event_date)
                 const spots = Math.max(0, (ev.volunteers_needed || 0) - (ev.volunteers_enrolled || 0))
                 return (
                   <Link key={ev.id} to={`/events/${ev.id}`}
                     className="card flex gap-4 hover:border-gray-200 hover:shadow-sm transition-all">
                    
-				   
-				    
-					
 					{/* Date box */}
 					  <div className={'min-w-14 text-center rounded-xl py-3 shrink-0 bg-brand-50'}>
 						<p className={'text-2xl font-semibold leading-none text-brand-400'}>
@@ -364,7 +362,7 @@ export default function OrganizationPage() {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 text-sm">{title}</h3>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        {ev.is_online ? 'Online' : ev.city}
+                        {ev.is_online ? 'Online' : ev_city}
                         {' · '}{dt.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
