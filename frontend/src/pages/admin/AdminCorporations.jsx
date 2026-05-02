@@ -58,7 +58,7 @@ function CorpRow({ corp, onAction, onVerify, lang = 'en' }) {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="font-medium text-gray-900">{lang === 'bg' ? (corp.name_bg || corp.name) : corp.name}</span>
+              <Link to={'/admin/corporations/' + corp.id} className="font-medium text-gray-900 hover:text-brand-400 transition-colors">{lang === 'bg' ? (corp.name_bg || corp.name) : corp.name}</Link>
               {corp.is_verified && (
                 <span className="badge text-xs px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-200">✓ {lang === 'bg' ? 'Верифицирана' : 'Verified'}</span>
               )}
