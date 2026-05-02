@@ -67,7 +67,7 @@ export default function OrganizationPage() {
     // Fetch published projects
     const { data: projectsData } = await supabase
       .from('projects')
-      .select('id, title, title_bg, description, description_bg, city, start_date, end_date, volunteers_needed, volunteers_enrolled, status, cover_url, categories(name, name_bg, color)')
+      .select('id, title, title_bg, description, description_bg, city, city_bg, start_date, end_date, volunteers_needed, volunteers_enrolled, status, cover_url, categories(name, name_bg, color)')
       .eq('organization_id', orgData.id)
       .eq('status', 'published')
       .order('created_at', { ascending: false })
@@ -183,7 +183,7 @@ export default function OrganizationPage() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                {members} {i18n.language === 'bg' ? "членове" : "member"} {members !== 1 ? 's' : ''}
+                {members} {i18n.language === 'bg' ? "членове" : "member"}{members !== 1 ? 's' : ''}
               </span>
             </div>
           </div>
@@ -294,7 +294,7 @@ export default function OrganizationPage() {
       {tab === 'projects' && (
         <div>
           {projects.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 text-sm">No published projects yet.</div>
+            <div className="text-center py-12 text-gray-400 text-sm">{i18n.language === 'bg' ? "Няма публикувани проекти." : "No published projects yet."}</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {projects.map(p => {
@@ -318,8 +318,8 @@ export default function OrganizationPage() {
                     <h3 className="font-medium text-gray-900 text-sm">{title}</h3>
                     {desc && <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{desc}</p>}
                     <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
-                      {p.city && <span className="text-xs text-gray-400">{p.city}</span>}
-                      <span className="text-xs text-brand-400 font-medium">{spots} spots left</span>
+                      {p.city && <span className="text-xs text-gray-400">{i18n.language === 'bg'? p.city_bg, p.city}</span>}
+                      <span className="text-xs text-brand-400 font-medium">{spots} {i18n.language === 'bg'? "свободни места", "spots left"}</span>
                     </div>
                   </Link>
                 )
