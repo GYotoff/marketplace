@@ -276,7 +276,7 @@ function OrgDashboard({ profile }) {
                   {projects.map(p => (
                     <div key={p.id} className="card flex items-center justify-between gap-3">
                       <div>
-                        <Link to={'/org/projects/'+p.id} className="font-medium text-sm hover:text-brand-500 transition-colors block">{lang==='bg'?(p.title_bg||p.title):p.title}</Link>
+                        <Link to={'/org/projects/'+p.id+'/edit'} className="font-medium text-sm hover:text-brand-500 transition-colors block">{lang==='bg'?(p.title_bg||p.title):p.title}</Link>
                         <p className="text-xs text-gray-400">{p.volunteers_enrolled}/{p.volunteers_needed} {lang==='bg'?'доброволци':'volunteers'}</p>
                       </div>
                       <span className={`badge ${statusColor[p.status] || 'bg-gray-100'} capitalize`}>{lang==='bg'?({active:'Активен',completed:'Завършен',draft:'Чернова',cancelled:'Отменен',archived:'Архивиран'}[p.status]||p.status):p.status}</span>
@@ -295,7 +295,7 @@ function OrgDashboard({ profile }) {
                   {events.slice(0, 5).map(e => (
                     <div key={e.id} className="card flex items-center justify-between gap-3">
                       <div>
-                        <Link to={'/org/event/'+e.id+'/edit'} className="font-medium text-sm hover:text-brand-500 transition-colors block">{lang==='bg'?(e.title_bg||e.title):e.title}</Link>
+                        <Link to={e.project_id ? '/org/projects/'+e.project_id+'/events/'+e.id+'/edit' : '/org/projects'} className="font-medium text-sm hover:text-brand-500 transition-colors block">{lang==='bg'?(e.title_bg||e.title):e.title}</Link>
                         <p className="text-xs text-gray-400">{new Date(e.event_date).toLocaleDateString(lang==='bg'?'bg-BG':'en-GB',{day:'numeric',month:'short',year:'numeric'})}</p>
                       </div>
                       <span className={`badge ${statusColor[e.status] || 'bg-gray-100'} capitalize`}>{lang==='bg'?({published:'Публикувано',draft:'Чернова',cancelled:'Отменено',completed:'Завършено'}[e.status]||e.status):e.status}</span>
