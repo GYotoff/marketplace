@@ -119,8 +119,8 @@ export default function OrganizationPage() {
 
   const TABS = [
     { key: 'about', label: (i18n.language === 'bg') ? "За нас" : "About" },
-    { key: 'projects', label: `Projects (${projects.length})` },
-    { key: 'events', label: `Events (${events.length})` },
+    { key: 'projects', label: (i18n.language === 'bg') ? `Проекти (${projects.length})` : `Projects (${projects.length})` },
+    { key: 'events', label: (i18n.language === 'bg') ? `Събития (${projects.length})` : `Events (${events.length})` },
   ]
 
   return (
