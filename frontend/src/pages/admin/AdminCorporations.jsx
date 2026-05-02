@@ -289,7 +289,7 @@ export default function AdminCorporations() {
       ) : (
         <div className="flex flex-col gap-4">
           {filtered.map(corp => (
-            <CorpRow lang={lang} key={corp.id} corp={corp} onAction={handleAction} />
+            <CorpRow lang={lang} key={corp.id} corp={corp} onAction={handleAction} onVerify={handleVerify} />
           ))}
         </div>
       )}
