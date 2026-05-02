@@ -207,6 +207,7 @@ export default function OrgEventEdit() {
           requirements: ev.requirements || '', requirements_bg: ev.requirements_bg || '',
           contact_person: ev.contact_person || '', contact_person_bg: ev.contact_person_bg || '',
           contact_email: ev.contact_email || '', contact_phone: ev.contact_phone || '',
+          country: ev.country || 'Bulgaria', country_bg: ev.country_bg || 'България',
           city: ev.city || '', city_bg: ev.city_bg || '',
           address: ev.address || '', address_bg: ev.address_bg || '',
           location_lat: ev.location_lat != null ? String(parseFloat(ev.location_lat)) : '',
@@ -245,6 +246,7 @@ export default function OrgEventEdit() {
       requirements: form.requirements || null, requirements_bg: form.requirements_bg || null,
       contact_person: form.contact_person || null, contact_person_bg: form.contact_person_bg || null,
       contact_email: form.contact_email || null, contact_phone: form.contact_phone || null,
+      country: form.country || null, country_bg: form.country_bg || null,
       city: form.city || null, city_bg: form.city_bg || null,
       address: form.address || null, address_bg: form.address_bg || null,
       location_lat: form.location_lat !== '' ? parseFloat(form.location_lat) : null,
@@ -258,6 +260,7 @@ export default function OrgEventEdit() {
       invitation_image_url: form.invitation_image_url || null,
       gallery_images: Array.isArray(form.gallery_images) ? form.gallery_images : [],
       show_in_public: form.show_in_public,
+      status: form.status || 'draft',
       updated_at: new Date().toISOString(),
     }
     let err
@@ -269,7 +272,7 @@ export default function OrgEventEdit() {
         console.log('insert result:', { error, data })
         err = error
       } else {
-        const { error, data, status, statusText } = await supabase.from('events').update(payload).eq('id', eventId)
+        const { error, data, status, statusText } = await supabase.from('events').update(payload).eq('id', eventId).select()
         console.log('update result:', { error, data, status, statusText })
         err = error
       }
