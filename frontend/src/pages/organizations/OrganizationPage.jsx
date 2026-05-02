@@ -343,12 +343,7 @@ export default function OrganizationPage() {
                 return (
                   <Link key={ev.id} to={`/events/${ev.id}`}
                     className="card flex gap-4 hover:border-gray-200 hover:shadow-sm transition-all">
-                    /*<div className="min-w-14 text-center bg-brand-50 rounded-xl py-3 shrink-0">
-                      <p className="text-2xl font-semibold text-brand-400 leading-none">{dt.getDate()}</p>
-                      <p className="text-xs text-brand-600 uppercase mt-0.5">
-                        {dt.toLocaleString('en', { month: 'short' })}
-                      </p>
-                    </div>*/
+                   
 					
 					{/* Date box */}
 					  <div className={'min-w-14 text-center rounded-xl py-3 shrink-0'}>
