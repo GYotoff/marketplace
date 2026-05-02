@@ -118,8 +118,8 @@ export default function OrganizationPage() {
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
   const TABS = [
-    { key: 'about', label: 'About' },
-    { key: 'projects', label: `Projects (${projects.length})` },
+    { key: 'about', label: {t('nav.about')} },
+    { key: 'projects', label: `{t('dashboard.projects')} (${projects.length})` },
     { key: 'events', label: `Events (${events.length})` },
   ]
 
