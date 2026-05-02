@@ -118,7 +118,7 @@ export default function OrganizationPage() {
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
   const TABS = [
-    { key: 'about', label: {t('nav.about')} },
+    { key: 'about', label: (i18n.language === 'bg') ? "За нас" : "About" },
     { key: 'projects', label: `Projects (${projects.length})` },
     { key: 'events', label: `Events (${events.length})` },
   ]
