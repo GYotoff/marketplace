@@ -253,6 +253,7 @@ export default function OrgSettings() {
         updated_at: new Date().toISOString(),
       })
       .eq('id', org.id)
+      .select()
 
     if (error) showToast(error.message, 'error')
     else { showToast('Changes saved successfully'); fetchOrg() }
